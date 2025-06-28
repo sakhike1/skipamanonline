@@ -1,6 +1,7 @@
 import React, { Suspense, lazy } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { CartProvider } from './context/CartContext';
+import { HeaderProvider } from './context/HeaderContext';
 import Layout from './components/layout/Layout';
 import LoadingScreen from './components/ui/LoadingScreen';
 
@@ -22,21 +23,23 @@ const PageLoader = () => (
 function App() {
   return (
     <CartProvider>
-      <LoadingScreen />
-      <Router>
-        <Layout>
-          <Suspense fallback={<PageLoader />}>
-            <Routes>
-              <Route path="/" element={<HomePage />} />
-              <Route path="/shop" element={<ShopPage />} />
-              <Route path="/product/:id" element={<ProductPage />} />
-              <Route path="/checkout" element={<CheckoutPage />} />
-              <Route path="/about" element={<About />} />
-              <Route path="/new-arrivals" element={<NewArrivalsPage />} />
-            </Routes>
-          </Suspense>
-        </Layout>
-      </Router>
+      <HeaderProvider>
+        <LoadingScreen />
+        <Router>
+          <Layout>
+            <Suspense fallback={<PageLoader />}>
+              <Routes>
+                <Route path="/" element={<HomePage />} />
+                <Route path="/shop" element={<ShopPage />} />
+                <Route path="/product/:id" element={<ProductPage />} />
+                <Route path="/checkout" element={<CheckoutPage />} />
+                <Route path="/about" element={<About />} />
+                <Route path="/new-arrivals" element={<NewArrivalsPage />} />
+              </Routes>
+            </Suspense>
+          </Layout>
+        </Router>
+      </HeaderProvider>
     </CartProvider>
   );
 }

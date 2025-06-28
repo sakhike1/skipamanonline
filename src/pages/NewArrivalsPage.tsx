@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { products, getFeaturedProducts } from '../data/products';
 import { Filter, X, ArrowRight, ShoppingBag, Tag, Sparkles } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface ProductCardProps {
   product: {
@@ -131,6 +131,7 @@ const NewArrivalsPage: React.FC = () => {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [currentPage, setCurrentPage] = useState(1);
   const [colorIndex, setColorIndex] = useState(0);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const productsPerPage = 12;
   
   // Gold glitz color palette
@@ -145,12 +146,27 @@ const NewArrivalsPage: React.FC = () => {
     '#FFDAB9', // Peach
   ];
 
+  // Hero images array
+  const heroImages = [
+    '/images/4.jpg',
+    '/images/5.jpg'
+  ];
+
   useEffect(() => {
     const interval = setInterval(() => {
       setColorIndex((prev) => (prev + 1) % colors.length);
     }, 2000);
 
     return () => clearInterval(interval);
+  }, []);
+
+  // Image rotation effect
+  useEffect(() => {
+    const imageInterval = setInterval(() => {
+      setCurrentImageIndex((prev) => (prev + 1) % heroImages.length);
+    }, 5000);
+
+    return () => clearInterval(imageInterval);
   }, []);
 
   const newArrivals = getFeaturedProducts();
@@ -203,25 +219,27 @@ const NewArrivalsPage: React.FC = () => {
       <div className="bg-black text-white pt-28 md:pt-32 px-6 md:px-20 pb-20">
         <div className="md:flex md:items-center md:justify-between gap-12">
           <div className="md:w-1/2 flex justify-center md:justify-start">
-            <div className="w-full max-w-[900px] h-[500px] overflow-hidden rounded">
-              <div 
-                className="absolute inset-0 w-full h-[1000px] opacity-20"
-                style={{
-                  backgroundImage: 'url(../assets/image4.jpg)',
-                  backgroundSize: 'cover',
-                  backgroundPosition: 'center',
-                  backgroundRepeat: 'no-repeat'
-                }}
-              />
-              <img 
-                src="https://images.pexels.com/photos/6311475/pexels-photo-6311475.jpeg" 
-                alt="Sport Collection" 
-                className="w-full h-[1000px] object-cover rounded transition-transform duration-500 filter grayscale hover:grayscale-0"
-                loading="lazy"
-              />
+            <div className="w-full max-w-[900px] h-[500px] overflow-hidden rounded relative">
+              {/* Red-Black Gradient Overlay */}
+              <div className="absolute inset-0 bg-gradient-to-br from-red-900 via-red-800 to-black opacity-60 z-10"></div>
+              
+              {/* Rotating Images */}
+              <AnimatePresence mode="wait">
+                <motion.img 
+                  key={currentImageIndex}
+                  src={heroImages[currentImageIndex]}
+                  alt="Sport Collection" 
+                  className="w-full h-[1000px] object-cover rounded absolute inset-0"
+                  initial={{ opacity: 0, scale: 1.1 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.9 }}
+                  transition={{ duration: 1, ease: "easeInOut" }}
+                  loading="lazy"
+                />
+              </AnimatePresence>
             </div>
           </div>
-          <div className="md:w-1/2 flex flex-col justify-center items-start">
+          <div className="md:w-1/2 flex flex-col justify-center items-start relative z-20">
             <motion.h1 
               className="text-7xl font-extrabold uppercase tracking-widest leading-none"
               animate={{

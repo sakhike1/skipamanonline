@@ -42,9 +42,9 @@ const cartReducer = (state: Cart, action: CartAction): Cart => {
       );
       
       if (existingItemIndex !== -1) {
-        // Update existing item quantity
+        // Replace existing item quantity instead of adding to it
         const updatedItems = [...state.items];
-        updatedItems[existingItemIndex].quantity += quantity;
+        updatedItems[existingItemIndex].quantity = quantity;
         
         return {
           ...state,

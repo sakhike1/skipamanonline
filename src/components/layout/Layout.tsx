@@ -51,8 +51,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   });
 
   return (
-    <div className="flex flex-col min-h-screen">
-      <Header isDarkSlide={isDarkSlide || isDarkSection} />
+    <div className="flex flex-col min-h-screen bg-gradient-to-br from-red-900/5 via-black/10 to-red-800/5">
+      <Header />
       <main className="flex-grow">
         {childrenWithProps}
       </main>

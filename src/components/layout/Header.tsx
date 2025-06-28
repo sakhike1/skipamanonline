@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { ShoppingBag, Search, Menu, X, Loader2, TrendingUp, Sparkles } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useCart } from '../../context/CartContext';
+import { useHeader } from '../../context/HeaderContext';
 import CartPreview from '../cart/CartPreview';
 import { motion, AnimatePresence } from 'framer-motion';
 import { debounce } from 'lodash';
@@ -15,12 +16,12 @@ interface NavItem {
 
 const Header: React.FC = () => {
   const { cart } = useCart();
+  const { isHeaderDark } = useHeader();
   const location = useLocation();
   const navigate = useNavigate();
   const [isScrolled, setIsScrolled] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [showCartPreview, setShowCartPreview] = useState(false);
-  const [isHeaderDark, setIsHeaderDark] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [showSearchDropdown, setShowSearchDropdown] = useState(false);
   const [isSearchFocused, setIsSearchFocused] = useState(false);
@@ -30,28 +31,32 @@ const Header: React.FC = () => {
   const searchInputRef = useRef<HTMLInputElement>(null);
   const searchContainerRef = useRef<HTMLDivElement>(null);
   const inactivityTimerRef = useRef<NodeJS.Timeout>();
+  const isShopPage = location.pathname === '/shop';
+  const isAboutPage = location.pathname === '/about';
   
   // Optimized scroll handler with debounce
   const handleScroll = useCallback(
     debounce(() => {
       setIsScrolled(window.scrollY > 20);
       
-      // Check what section is currently in view to determine header color scheme
-      const sections = document.querySelectorAll('section, div.bg-black, div.bg-white');
-      if (sections.length) {
-        for (const section of sections) {
-          const rect = section.getBoundingClientRect();
-          if (rect.top <= 80 && rect.bottom >= 80) {
-            const bgColor = window.getComputedStyle(section).backgroundColor;
-            const isDark = bgColor.includes('0, 0, 0') || bgColor.includes('rgb(0,') || 
-                          section.classList.contains('bg-black') || section.classList.contains('bg-neutral-900');
-            setIsHeaderDark(isDark);
-            break;
+      // Only check section colors if we're not in ProductDetail (which controls its own header)
+      if (!location.pathname.includes('/product/')) {
+        const sections = document.querySelectorAll('section, div.bg-black, div.bg-white');
+        if (sections.length) {
+          for (const section of sections) {
+            const rect = section.getBoundingClientRect();
+            if (rect.top <= 80 && rect.bottom >= 80) {
+              const bgColor = window.getComputedStyle(section).backgroundColor;
+              const isDark = bgColor.includes('0, 0, 0') || bgColor.includes('rgb(0,') || 
+                            section.classList.contains('bg-black') || section.classList.contains('bg-neutral-900');
+              // Note: Header background is now controlled by context, not scroll position
+              break;
+            }
           }
         }
       }
     }, 100),
-    []
+    [location.pathname]
   );
   
   useEffect(() => {
@@ -103,14 +108,17 @@ const Header: React.FC = () => {
   
   // Determine text and icon colors based on scroll state and background
   const getTextColor = useCallback(() => {
-    if (location.pathname === '/shop' || location.pathname === '/about' || location.pathname === '/checkout') {
+    if (location.pathname.includes('/product/') || isShopPage || isAboutPage) {
+      return 'text-white';
+    }
+    if (location.pathname === '/checkout') {
       return 'text-black';
     }
     if (isScrolled) {
       return 'text-gray-800';
     }
     return 'text-white';
-  }, [isScrolled, location.pathname]);
+  }, [isScrolled, location.pathname, isShopPage, isAboutPage]);
 
   const getHoverBgColor = useCallback(() => {
     if (isScrolled) return 'hover:bg-gray-100';
@@ -237,7 +245,13 @@ const Header: React.FC = () => {
   return (
     <header 
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        isScrolled ? 'bg-white/95 backdrop-blur-sm shadow-md py-2' : 'py-4 backdrop-blur-[2px] bg-gradient-to-b from-black/30 to-transparent'
+        isAboutPage
+          ? 'bg-gradient-to-r from-red-900/95 via-black/90 to-black/95 backdrop-blur-sm shadow-md py-2'
+          : isHeaderDark || isShopPage
+            ? 'bg-black/95 backdrop-blur-sm shadow-md py-2'
+            : isScrolled
+              ? 'bg-white/95 backdrop-blur-sm shadow-md py-2'
+              : 'py-4 backdrop-blur-[2px] bg-gradient-to-b from-black/30 to-transparent'
       }`}
       role="banner"
     >

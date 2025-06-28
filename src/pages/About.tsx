@@ -2,20 +2,26 @@ import React from 'react';
 import { ArrowRight, Info, Shirt, MapPin, Users, Leaf, Camera, Star, ChevronDown } from 'lucide-react';
 import { motion } from 'framer-motion';
 
-export default function TshirtStoreAboutUs() {
+export default function TshirtStoreAboutUsV2() {
   return (
+    // Full width dark gradient background with subtle red overlay
     <motion.main 
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
-      className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-36 pb-24 min-h-screen bg-white"
+      className="w-full px-4 sm:px-6 lg:px-8 pt-24 pb-24 min-h-screen bg-slate-900 text-slate-100 relative"
     > 
+      {/* Subtle red gradient overlay */}
+      <div className="absolute inset-0 bg-gradient-to-br from-red-900/5 via-transparent to-red-800/5 pointer-events-none"></div>
+      
+      {/* Content container */}
+      <div className="relative z-10">
       {/* Hero Banner */}
       <motion.div 
         initial={{ y: 30, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.7 }}
-        className="w-full h-[400px] md:h-[600px] overflow-hidden rounded-2xl mb-20 relative"
+        className="w-full h-[400px] md:h-[600px] overflow-hidden rounded-3xl mb-20 relative"
       >
         <img 
           src="https://images.unsplash.com/photo-1551232864-3f0890e580d9?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80&h=600&fit=crop&crop=focalpoint&fp-x=0.5&fp-y=0.45"
@@ -29,7 +35,8 @@ export default function TshirtStoreAboutUs() {
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.3, duration: 0.6 }}
             >
-              <span className="inline-block px-4 py-1 bg-white/20 backdrop-blur-sm rounded-full text-sm font-medium mb-6">
+              {/* Enhanced glassmorphism on the tag */}
+              <span className="inline-block px-4 py-1 bg-white/10 backdrop-blur-md border border-white/20 rounded-full text-sm font-medium mb-6">
                 Est. 2019
               </span>
               <h1 className="text-5xl md:text-7xl font-bold leading-tight mb-6">
@@ -51,31 +58,31 @@ export default function TshirtStoreAboutUs() {
         </motion.div>
       </motion.div>
       
-      {/* About Us Header */}
-      <div className="flex flex-col items-center text-center mb-20 max-w-3xl mx-auto"> 
+      {/* About Us Header - Full width with centered content */}
+      <div className="flex flex-col items-center text-center mb-20 max-w-4xl mx-auto"> 
         <motion.div
           initial={{ y: 20, opacity: 0 }}
           whileInView={{ y: 0, opacity: 1 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
         >
-          <div className="inline-flex items-center justify-center bg-gray-100 rounded-full px-4 py-1 mb-6">
-            <Info className="h-4 w-4 text-gray-900 mr-2" />
-            <span className="text-sm font-medium text-gray-700 uppercase tracking-wider">About Us</span>
+          <div className="inline-flex items-center justify-center bg-white/10 backdrop-blur-md border border-white/20 rounded-full px-4 py-1 mb-6">
+            <Info className="h-4 w-4 text-indigo-400 mr-2" />
+            <span className="text-sm font-medium text-slate-200 uppercase tracking-wider">About Us</span>
           </div>
-          <h1 className="text-4xl md:text-6xl font-bold text-gray-900 leading-tight mb-6">
+          <h1 className="text-4xl md:text-6xl font-bold text-white leading-tight mb-6">
             Innovative fashion for a <br className="hidden sm:block" />
-            <span className="text-gray-400">digital age</span>
+            <span className="text-slate-400">digital age</span>
           </h1>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+          <p className="text-xl text-slate-300 max-w-3xl mx-auto">
             We're a Munich-based t-shirt brand creating comfortable, stylish designs that express 
             your personality while maintaining the highest quality and ethical standards.
           </p>
         </motion.div>
       </div>
       
-      {/* Main Content Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-16 mb-24"> 
+      {/* Main Content Section - Full width grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-16 mb-24 max-w-7xl mx-auto"> 
         {/* Brand Description */}
         <motion.div 
           initial={{ x: -20, opacity: 0 }}
@@ -84,13 +91,13 @@ export default function TshirtStoreAboutUs() {
           transition={{ duration: 0.6 }}
           className="lg:col-span-2"
         >
-          <div className="prose prose-lg max-w-none mb-10">
-            <p className="text-gray-700 leading-relaxed"> 
+          <div className="prose prose-lg max-w-none mb-10 prose-invert prose-p:text-slate-300">
+            <p className="leading-relaxed"> 
               In a world of fast fashion, we take the slow, sustainable approach. Each design is carefully 
               crafted to balance artistic expression with everyday wearability, giving you pieces that 
               stand out while integrating seamlessly into your wardrobe.
             </p>
-            <p className="text-gray-700 leading-relaxed">
+            <p className="leading-relaxed">
               Our fabrics are selected for their quality, comfort, and environmental impact. We partner 
               with suppliers who share our commitment to ethical manufacturing and fair labor practices.
             </p>
@@ -99,14 +106,14 @@ export default function TshirtStoreAboutUs() {
           <motion.button 
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.98 }}
-            className="bg-black text-white px-8 py-4 rounded-full flex items-center gap-2 hover:bg-gray-800 transition-all duration-300 group"
+            className="bg-indigo-600 text-white px-8 py-4 rounded-full flex items-center gap-2 hover:bg-indigo-500 transition-all duration-300 group"
           >
             Shop Collection 
             <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform duration-300" />
           </motion.button>
         </motion.div>
         
-        {/* Stats/Highlights */}
+        {/* Stats/Highlights - Key Glassmorphism Section */}
         <motion.div 
           initial={{ x: 20, opacity: 0 }}
           whileInView={{ x: 0, opacity: 1 }}
@@ -115,28 +122,29 @@ export default function TshirtStoreAboutUs() {
           className="grid grid-cols-2 gap-4 h-fit"
         >
           {[
-            { icon: <Shirt className="h-6 w-6 text-gray-900" />, value: "50+", label: "Unique Designs" },
-            { icon: <Leaf className="h-6 w-6 text-gray-900" />, value: "100%", label: "Organic Cotton" },
-            { icon: <MapPin className="h-6 w-6 text-gray-900" />, value: "10+", label: "Countries Served" },
-            { icon: <Users className="h-6 w-6 text-gray-900" />, value: "5K+", label: "Happy Customers" }
+            { icon: <Shirt className="h-6 w-6 text-indigo-400" />, value: "50+", label: "Unique Designs" },
+            { icon: <Leaf className="h-6 w-6 text-indigo-400" />, value: "100%", label: "Organic Cotton" },
+            { icon: <MapPin className="h-6 w-6 text-indigo-400" />, value: "10+", label: "Countries Served" },
+            { icon: <Users className="h-6 w-6 text-indigo-400" />, value: "5K+", label: "Happy Customers" }
           ].map((item, index) => (
+            // Glass card item with red-black gradient
             <motion.div 
               key={index} 
-              whileHover={{ y: -5, boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.1)" }}
-              className="border border-gray-200 p-5 rounded-xl hover:bg-gray-50 transition-colors flex flex-col items-center text-center"
+              whileHover={{ y: -5, boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.2)" }}
+              className="bg-gradient-to-br from-red-900/20 via-red-800/15 to-black/20 backdrop-blur-lg border border-red-500/20 p-5 rounded-2xl hover:bg-gradient-to-br hover:from-red-800/25 hover:via-red-700/20 hover:to-black/25 transition-all duration-300 flex flex-col items-center text-center"
             >
-              <div className="bg-gray-100 p-3 rounded-full mb-3">
+              <div className="bg-gradient-to-br from-red-600/20 to-black/30 p-3 rounded-full mb-3">
                 {item.icon}
               </div>
-              <p className="text-3xl font-bold">{item.value}</p>
-              <p className="text-sm text-gray-600 mt-1">{item.label}</p>
+              <p className="text-3xl font-bold text-white">{item.value}</p>
+              <p className="text-sm text-slate-400 mt-1">{item.label}</p>
             </motion.div>
           ))}
         </motion.div>
       </div>
       
-      {/* Featured Images Grid */}
-      <div className="mb-24">
+      {/* Featured Images Grid - Full width */}
+      <div className="mb-24 w-full">
         <motion.div 
           initial={{ y: 30, opacity: 0 }}
           whileInView={{ y: 0, opacity: 1 }}
@@ -161,38 +169,38 @@ export default function TshirtStoreAboutUs() {
         </motion.div>
       </div>
       
-      {/* Our Journey Section */}
+      {/* Our Journey Section - Full width with max-width for content */}
       <motion.div 
         initial={{ y: 30, opacity: 0 }}
         whileInView={{ y: 0, opacity: 1 }}
         viewport={{ once: true }}
         transition={{ duration: 0.7 }}
-        className="mb-24 bg-gray-50 p-10 md:p-16 rounded-3xl"
+        className="mb-24 bg-gradient-to-br from-red-900/10 via-red-800/8 to-black/15 backdrop-blur-xl border border-red-500/20 p-10 md:p-16 rounded-3xl max-w-7xl mx-auto"
       > 
         <div className="flex items-center space-x-4 mb-12">
-          <div className="bg-black text-white p-3 rounded-full">
+          <div className="bg-gradient-to-br from-red-600 to-red-800 text-white p-3 rounded-full">
             <Camera className="h-6 w-6" />
           </div>
-          <h2 className="text-3xl md:text-4xl font-bold">Our Journey</h2>
+          <h2 className="text-3xl md:text-4xl font-bold text-white">Our Journey</h2>
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-x-16 gap-y-10">
-          <div className="space-y-6"> 
-            <p className="text-lg text-gray-700 leading-relaxed">
+          <div className="space-y-6 text-lg text-slate-300 leading-relaxed"> 
+            <p>
               Founded in 2019, our journey began with a simple idea: create t-shirts that people would love 
               to wear every day, made with sustainable materials and ethical practices.
             </p>
-            <p className="text-lg text-gray-700 leading-relaxed">
+            <p>
               What started as a small operation in a Munich apartment has grown into a beloved brand with 
               customers across Europe who share our passion for quality, style, and sustainability.
             </p>
           </div>
-          <div className="space-y-6"> 
-            <p className="text-lg text-gray-700 leading-relaxed">
+          <div className="space-y-6 text-lg text-slate-300 leading-relaxed"> 
+            <p>
               Each of our designs is created in-house by our talented team of artists who draw inspiration 
               from urban culture, nature, and contemporary art movements.
             </p>
-            <p className="text-lg text-gray-700 leading-relaxed">
+            <p>
               We believe that fashion should be both personal and responsible – that's why we use organic cotton 
               and ensure fair labor practices throughout our supply chain.
             </p>
@@ -200,10 +208,10 @@ export default function TshirtStoreAboutUs() {
         </div>
         
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mt-16">
-          {[2019, 2021, 2023].map((year, index) => (
-            <div key={index} className="bg-white p-6 rounded-xl shadow-sm">
-              <p className="text-4xl font-bold text-gray-900 mb-3">{year}</p>
-              <p className="text-gray-600">
+          {[2019, 2021, 2023].map((year) => (
+            <div key={year} className="bg-gradient-to-br from-red-800/15 via-red-700/10 to-black/20 border border-red-500/20 p-6 rounded-xl hover:bg-gradient-to-br hover:from-red-700/20 hover:via-red-600/15 hover:to-black/25 transition-all duration-300">
+              <p className="text-4xl font-bold text-white mb-3">{year}</p>
+              <p className="text-slate-400">
                 {year === 2019 && "Founded in Munich with just 5 designs and a dream."}
                 {year === 2021 && "Expanded to 10 team members and 30+ retail partners."}
                 {year === 2023 && "Launched our sustainability initiative and online store."}
@@ -213,13 +221,13 @@ export default function TshirtStoreAboutUs() {
         </div>
       </motion.div>
       
-      {/* Designer Spotlight */}
+      {/* Designer Spotlight - Full width with max-width for content */}
       <motion.div 
         initial={{ y: 30, opacity: 0 }}
         whileInView={{ y: 0, opacity: 1 }}
         viewport={{ once: true }}
         transition={{ duration: 0.7 }}
-        className="mb-24 flex flex-col md:flex-row gap-12 items-center"
+        className="mb-24 flex flex-col md:flex-row gap-12 items-center max-w-7xl mx-auto"
       >
         <div className="md:w-1/2 h-[400px] md:h-[550px] overflow-hidden rounded-2xl">
           <img 
@@ -229,53 +237,54 @@ export default function TshirtStoreAboutUs() {
           />
         </div>
         <div className="md:w-1/2 flex flex-col justify-center">
-          <span className="inline-block px-4 py-1 bg-gray-100 rounded-full text-sm font-medium mb-6">
+          <span className="inline-block px-4 py-1 bg-white/10 backdrop-blur-md border border-white/20 rounded-full text-sm font-medium mb-6 self-start">
             The Team
           </span>
-          <h3 className="text-3xl md:text-4xl font-bold mb-6">Meet Our Design Team</h3>
-          <p className="text-lg text-gray-700 leading-relaxed mb-8">
+          <h3 className="text-3xl md:text-4xl font-bold mb-6 text-white">Meet Our Design Team</h3>
+          <p className="text-lg text-slate-300 leading-relaxed mb-8">
             Our talented designers bring diverse backgrounds in fashion, graphic design, and fine arts. 
             They collaborate to create collections that blend contemporary trends with timeless appeal.
           </p>
-          <div className="p-6 bg-gray-50 rounded-xl border border-gray-100">
-            <div className="flex items-center gap-1 text-yellow-500 mb-3">
+          {/* Award section as a glass card */}
+          <div className="p-6 bg-gradient-to-br from-red-800/15 via-red-700/10 to-black/20 backdrop-blur-lg border border-red-500/20 rounded-xl hover:bg-gradient-to-br hover:from-red-700/20 hover:via-red-600/15 hover:to-black/25 transition-all duration-300">
+            <div className="flex items-center gap-1 text-yellow-400 mb-3">
               <Star className="h-5 w-5 fill-current" />
               <Star className="h-5 w-5 fill-current" />
               <Star className="h-5 w-5 fill-current" />
               <Star className="h-5 w-5 fill-current" />
               <Star className="h-5 w-5 fill-current" />
             </div>
-            <p className="text-gray-700 font-medium">
+            <p className="text-slate-200 font-medium">
               Recognized among top 10 indie fashion labels in 2022 by Fashion Forward Magazine
             </p>
           </div>
         </div>
       </motion.div>
       
-      {/* Mission Section */}
+      {/* Mission Section - Full width */}
       <motion.div 
         initial={{ y: 30, opacity: 0 }}
         whileInView={{ y: 0, opacity: 1 }}
         viewport={{ once: true }}
         transition={{ duration: 0.7 }}
-        className="border-t border-gray-200 pt-16"
+        className="border-t border-white/10 pt-16 w-full"
       > 
         <div className="text-center mb-12">
-          <span className="inline-block px-4 py-1 bg-gray-100 rounded-full text-sm font-medium mb-4">
+          <span className="inline-block px-4 py-1 bg-white/10 backdrop-blur-md border border-white/20 rounded-full text-sm font-medium mb-4">
             Our Purpose
           </span>
-          <h2 className="text-3xl md:text-5xl font-bold">Our Mission</h2>
+          <h2 className="text-3xl md:text-5xl font-bold text-white">Our Mission</h2>
         </div>
         
-        <div className="bg-black text-white p-10 md:p-16 rounded-2xl shadow-xl relative overflow-hidden"> 
-          <div className="absolute inset-0 bg-gradient-to-br from-gray-900 to-black opacity-90"></div>
+        {/* Final glassmorphism card with a gradient for visual interest - Full width with max-width for content */}
+        <div className="bg-gradient-to-br from-red-900/20 via-red-800/15 to-black/25 backdrop-blur-xl border border-red-500/20 text-white p-10 md:p-16 rounded-3xl shadow-2xl relative overflow-hidden max-w-7xl mx-auto hover:bg-gradient-to-br hover:from-red-800/25 hover:via-red-700/20 hover:to-black/30 transition-all duration-300"> 
           <div className="relative z-10">
-            <p className="text-2xl md:text-3xl italic font-light mb-10 leading-relaxed max-w-3xl mx-auto text-center"> 
+            <p className="text-2xl md:text-3xl italic font-light mb-10 leading-relaxed max-w-4xl mx-auto text-center text-slate-100"> 
               "To redefine streetwear by combining innovative design with sustainable practices, 
               creating clothing that looks good and does good."
             </p>
-            <div className="max-w-2xl mx-auto text-center">
-              <p className="leading-relaxed text-gray-300 mb-10">
+            <div className="max-w-3xl mx-auto text-center">
+              <p className="leading-relaxed text-slate-300 mb-10">
                 We're committed to reducing our environmental impact while delivering premium quality apparel 
                 that tells a story. Every stitch, every print, and every shipment reflects our dedication 
                 to these principles.
@@ -283,7 +292,7 @@ export default function TshirtStoreAboutUs() {
               <motion.button 
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.98 }}
-                className="border-2 border-white text-white px-8 py-3 rounded-full inline-flex items-center gap-2 hover:bg-white hover:text-black transition-all duration-300 group"
+                className="border-2 border-red-500 text-white px-8 py-3 rounded-full inline-flex items-center gap-2 hover:bg-red-600 hover:border-red-600 transition-all duration-300 group"
               >
                 Our Sustainability Pledge
                 <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform duration-300" />
@@ -292,6 +301,7 @@ export default function TshirtStoreAboutUs() {
           </div>
         </div>
       </motion.div>
+      </div>
     </motion.main>
   );
 }
