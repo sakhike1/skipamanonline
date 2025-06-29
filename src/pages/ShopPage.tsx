@@ -36,23 +36,23 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onClick }) => {
         <img
           src={product.images[currentImageIndex]}
           alt={product.name}
-          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 absolute inset-0 filter grayscale" // Solid B&W: grayscale filter
+          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 absolute inset-0 filter grayscale"
         />
         {product.images.length > 1 && (
-          <div className="absolute bottom-2 right-2 bg-black bg-opacity-70 text-white text-xs px-2 py-1 rounded-full"> {/* Slightly increased opacity for B&W */}
+          <div className="absolute bottom-2 right-2 bg-black bg-opacity-70 text-white text-xs px-2 py-1 rounded-full">
             {currentImageIndex + 1}/{product.images.length}
           </div>
         )}
       </div>
       <div className="p-4">
         <div className="flex justify-between items-start mb-1">
-          <h3 className="font-medium text-black line-clamp-1">{product.name}</h3> {/* Solid B&W: text-black */}
-          <span className="text-black font-medium">R{product.price.toFixed(0)}</span> {/* Solid B&W: text-black */}
+          <h3 className="font-medium text-black line-clamp-1">{product.name}</h3>
+          <span className="text-black font-medium">R{product.price.toFixed(0)}</span>
         </div>
-        <p className="text-sm text-neutral-600 mb-3 capitalize">{product.category}</p> {/* Solid B&W: darker neutral for subtext */}
+        <p className="text-sm text-neutral-600 mb-3 capitalize">{product.category}</p>
         <button
           onClick={() => onClick(product.id)}
-          className="w-full flex items-center justify-center gap-2 py-2 px-4 border border-black rounded-md text-sm font-medium text-black hover:bg-black hover:text-white transition-all duration-300 group-hover:border-black" // Text black by default, hover:border-black
+          className="w-full flex items-center justify-center gap-2 py-2 px-4 border border-black rounded-md text-sm font-medium text-black hover:bg-black hover:text-white transition-all duration-300 group-hover:border-black"
         >
           View Product
           <ArrowRight
@@ -132,28 +132,18 @@ const NewArrivalsSection: React.FC<{ onProductClick: (id: string) => void }> = (
               >
                 <button
                   onClick={() => onProductClick(featuredProducts[0].id)}
-                  className="group relative px-8 py-4 bg-black text-white font-medium overflow-hidden border-2 border-white transition-all duration-300"
+                  className="group relative px-12 py-3 font-medium overflow-hidden border-2 border-transparent rounded-full transition-all duration-300 bg-gradient-to-r from-gray-300 via-gray-400 to-gray-500 hover:from-yellow-400 hover:via-yellow-500 hover:to-yellow-600"
                 >
-                  <span className="relative z-10 group-hover:text-black transition-colors duration-300">Shop Collection</span>
-                  <div className="absolute inset-0 bg-white transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-300"></div>
+                  <span className="relative z-10 text-black group-hover:text-black transition-colors duration-300">Shop Collection</span>
+                  <div className="absolute inset-0 bg-gradient-to-r from-yellow-400 via-yellow-500 to-yellow-600 transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-300"></div>
                 </button>
                 <button
                   onClick={() => onProductClick(featuredProducts[1].id)}
-                  className="group relative px-8 py-4 bg-white text-black font-medium overflow-hidden border-2 border-black transition-all duration-300"
+                  className="group relative px-12 py-3 font-medium overflow-hidden border-2 border-transparent rounded-full transition-all duration-300 bg-gradient-to-r from-yellow-400 via-yellow-500 to-yellow-600 hover:from-gray-300 hover:via-gray-400 hover:to-gray-500"
                 >
-                  <span className="relative z-10 group-hover:text-white transition-colors duration-300">View New Arrivals</span>
-                  <div className="absolute inset-0 bg-[#8B4513] transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-300"></div>
+                  <span className="relative z-10 text-black group-hover:text-black transition-colors duration-300">View New Arrivals</span>
+                  <div className="absolute inset-0 bg-gradient-to-r from-gray-300 via-gray-400 to-gray-500 transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-300"></div>
                 </button>
-              </motion.div>
-
-              {/* Price Tag */}
-              <motion.div
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.5, delay: 0.4 }}
-                className="inline-block bg-white text-black px-6 py-3 rounded-full font-bold text-xl"
-              >
-                R500
               </motion.div>
             </div>
 
@@ -223,32 +213,57 @@ const NewArrivalsSection: React.FC<{ onProductClick: (id: string) => void }> = (
       {/* Featured Products Grid */}
       <div className="container mx-auto px-4 mt-12">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {featuredProducts.map((product) => (
+          {featuredProducts.map((product, index) => (
             <motion.div
               key={product.id}
               className="group"
               whileHover={{ y: -10 }}
               transition={{ duration: 0.3 }}
             >
-              <div className="relative overflow-hidden rounded-lg aspect-square bg-black">
+              <div className="relative overflow-hidden rounded-2xl aspect-square">
+                {/* Gradient Backgrounds - Different for each card */}
+                <div className={`absolute inset-0 ${
+                  index === 0 
+                    ? 'bg-gradient-to-br from-purple-500/20 via-pink-500/30 to-red-500/20' 
+                    : index === 1 
+                    ? 'bg-gradient-to-br from-cyan-500/20 via-blue-500/30 to-indigo-500/20'
+                    : 'bg-gradient-to-br from-yellow-500/20 via-orange-500/30 to-red-500/20'
+                } backdrop-blur-sm`}></div>
+                
+                {/* Glassmorphism Overlay */}
+                <div className="absolute inset-0 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl"></div>
+                
+                {/* Image Container */}
+                <div className="relative z-10 h-full">
                 <img
                   src={product.images[0]}
                   alt={product.name}
-                  className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700 filter grayscale hover:grayscale-0"
+                    className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700 filter grayscale hover:grayscale-0 rounded-2xl"
                   onClick={() => onProductClick(product.id)}
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                  
+                  {/* Always Visible Overlay with Glassmorphism */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent rounded-2xl">
                   <div className="absolute bottom-0 left-0 right-0 p-6">
-                    <h3 className="text-white text-xl font-medium mb-2">{product.name}</h3>
-                    <p className="text-white/80 mb-4">R500</p>
+                      {/* Glassmorphism Content Card */}
+                      <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-4">
+                        <h3 className="text-white text-xl font-medium mb-2 drop-shadow-lg">{product.name}</h3>
+                        <p className="text-white/90 mb-4 font-semibold">R500</p>
                     <button
                       onClick={() => onProductClick(product.id)}
-                      className="group relative px-6 py-2 text-sm font-medium rounded-full bg-white text-black overflow-hidden transition-all duration-300"
+                          className="group relative px-6 py-2 text-sm font-medium rounded-full bg-white/20 backdrop-blur-sm text-white border border-white/30 overflow-hidden transition-all duration-300 hover:bg-white hover:text-black"
                     >
-                      <span className="relative z-10 group-hover:text-white transition-colors duration-300">Shop Now</span>
-                      <div className="absolute inset-0 bg-black transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-300"></div>
+                          <span className="relative z-10 group-hover:text-black transition-colors duration-300">Shop Now</span>
+                          <div className="absolute inset-0 bg-white transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-300"></div>
                     </button>
               </div>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Always Visible Sparkle Effect */}
+                <div className="absolute top-4 right-4 w-8 h-8 bg-white/20 backdrop-blur-sm rounded-full border border-white/30 flex items-center justify-center">
+                  <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
             </div>
           </div>
             </motion.div>
@@ -323,17 +338,18 @@ const ShopPage: React.FC = () => {
   };
 
   return (
-    // Solid B&W: Page background white, default text black
-    <div className="container mx-auto px-4 py-8 pt-24 min-h-screen bg-white text-black">
+    // Full width white background
+    <div className="w-full px-4 py-8 pt-24 min-h-screen bg-white text-black">
       <NewArrivalsSection onProductClick={handleProductClick} />
 
-      {/* Solid B&W: Header text black, subtext neutral, border neutral */}
+      {/* Header section with max-width for content */}
+      <div className="max-w-7xl mx-auto">
       <div className="flex justify-between items-center mb-8 border-b border-neutral-300 pb-4">
         <h1 className="text-3xl font-bold text-black">Shop Collection</h1>
         <p className="text-neutral-600">{filteredProducts.length} products</p>
       </div>
 
-      {/* Solid B&W: Mobile filter button stark black/white */}
+        {/* Mobile filter button */}
       <div className="md:hidden mb-4">
         <button
           onClick={toggleFilters}
@@ -345,19 +361,20 @@ const ShopPage: React.FC = () => {
             <> <Filter size={16} /> <span>Show Filters</span> </>
           )}
         </button>
+        </div>
       </div>
 
-      <div className="flex flex-col md:flex-row gap-8">
+      <div className="flex flex-col md:flex-row gap-8 max-w-7xl mx-auto">
         {/* Filters sidebar */}
         {showFilters && (
           <div className="w-full md:w-72 flex-shrink-0">
-            {/* Solid B&W: Filter panel white with neutral border */}
+            {/* Filter panel white with neutral border */}
             <div className="bg-white rounded-lg border border-neutral-300 p-6">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-lg font-semibold text-black">Filters</h2>
                 <button
                   onClick={clearFilters}
-                  className="text-sm text-neutral-700 hover:text-black underline" // Darker neutral for "Clear all"
+                  className="text-sm text-neutral-700 hover:text-black underline"
                 >
                   Clear all
                 </button>
@@ -375,13 +392,13 @@ const ShopPage: React.FC = () => {
                         checked={selectedCategory === category}
                         onChange={() => {
                           setSelectedCategory(selectedCategory === category ? null : category);
-                          setCurrentPage(1); // Reset to first page when changing category
+                          setCurrentPage(1);
                         }}
-                        className="h-4 w-4 text-black focus:ring-black border-neutral-400 rounded accent-black" // accent-black for checkbox color
+                        className="h-4 w-4 text-black focus:ring-black border-neutral-400 rounded accent-black"
                       />
                       <label
                         htmlFor={`category-${category}`}
-                        className="ml-3 text-sm text-neutral-700 capitalize hover:text-black cursor-pointer" // Darker neutral for labels
+                        className="ml-3 text-sm text-neutral-700 capitalize hover:text-black cursor-pointer"
                       >
                         {category}
                       </label>
@@ -465,9 +482,8 @@ const ShopPage: React.FC = () => {
               )}
             </>
           ) : (
-            // Solid B&W: No products message box
             <div className="flex flex-col items-center justify-center py-16 bg-white border border-neutral-300 rounded-lg">
-              <p className="text-neutral-700 mb-4">No products match your filters</p> {/* Darker neutral */}
+              <p className="text-neutral-700 mb-4">No products match your filters</p>
               <button
                 onClick={clearFilters}
                 className="px-4 py-2 bg-black text-white rounded-md hover:bg-neutral-800 transition-colors"

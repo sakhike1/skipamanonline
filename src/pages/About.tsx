@@ -4,15 +4,23 @@ import { motion } from 'framer-motion';
 
 export default function TshirtStoreAboutUsV2() {
   return (
-    // Full width dark gradient background with subtle red overlay
+    // Full width dark gradient background with subtle purple overlay
     <motion.main 
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
       className="w-full px-4 sm:px-6 lg:px-8 pt-24 pb-24 min-h-screen bg-slate-900 text-slate-100 relative"
     > 
-      {/* Subtle red gradient overlay */}
-      <div className="absolute inset-0 bg-gradient-to-br from-red-900/5 via-transparent to-red-800/5 pointer-events-none"></div>
+      {/* Purple gradient background with glassmorphism */}
+      <div className="absolute inset-0 bg-gradient-to-br from-purple-900/20 via-gray-900/40 to-purple-800/20"></div>
+      
+      {/* Floating purple glassmorphism elements */}
+      <div className="absolute top-20 left-10 w-96 h-96 bg-gradient-to-r from-purple-500/10 to-purple-600/10 rounded-full blur-3xl animate-pulse"></div>
+      <div className="absolute bottom-20 right-10 w-80 h-80 bg-gradient-to-r from-purple-400/10 to-purple-500/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
+      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-72 h-72 bg-gradient-to-r from-purple-600/5 to-purple-700/5 rounded-full blur-3xl animate-pulse delay-500"></div>
+      
+      {/* Subtle purple gradient overlay */}
+      <div className="absolute inset-0 bg-gradient-to-br from-purple-900/5 via-transparent to-purple-800/5 pointer-events-none"></div>
       
       {/* Content container */}
       <div className="relative z-10">
@@ -127,13 +135,13 @@ export default function TshirtStoreAboutUsV2() {
             { icon: <MapPin className="h-6 w-6 text-indigo-400" />, value: "10+", label: "Countries Served" },
             { icon: <Users className="h-6 w-6 text-indigo-400" />, value: "5K+", label: "Happy Customers" }
           ].map((item, index) => (
-            // Glass card item with red-black gradient
+            // Glass card item with purple-black gradient
             <motion.div 
               key={index} 
               whileHover={{ y: -5, boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.2)" }}
-              className="bg-gradient-to-br from-red-900/20 via-red-800/15 to-black/20 backdrop-blur-lg border border-red-500/20 p-5 rounded-2xl hover:bg-gradient-to-br hover:from-red-800/25 hover:via-red-700/20 hover:to-black/25 transition-all duration-300 flex flex-col items-center text-center"
+              className="bg-gradient-to-br from-purple-900/20 via-purple-800/15 to-black/20 backdrop-blur-lg border border-purple-500/20 p-5 rounded-2xl hover:bg-gradient-to-br hover:from-purple-800/25 hover:via-purple-700/20 hover:to-black/25 transition-all duration-300 flex flex-col items-center text-center"
             >
-              <div className="bg-gradient-to-br from-red-600/20 to-black/30 p-3 rounded-full mb-3">
+              <div className="bg-gradient-to-br from-purple-600/20 to-black/30 p-3 rounded-full mb-3">
                 {item.icon}
               </div>
               <p className="text-3xl font-bold text-white">{item.value}</p>
@@ -175,10 +183,10 @@ export default function TshirtStoreAboutUsV2() {
         whileInView={{ y: 0, opacity: 1 }}
         viewport={{ once: true }}
         transition={{ duration: 0.7 }}
-        className="mb-24 bg-gradient-to-br from-red-900/10 via-red-800/8 to-black/15 backdrop-blur-xl border border-red-500/20 p-10 md:p-16 rounded-3xl max-w-7xl mx-auto"
+        className="mb-24 bg-gradient-to-br from-purple-900/10 via-purple-800/8 to-black/15 backdrop-blur-xl border border-purple-500/20 p-10 md:p-16 rounded-3xl max-w-7xl mx-auto"
       > 
         <div className="flex items-center space-x-4 mb-12">
-          <div className="bg-gradient-to-br from-red-600 to-red-800 text-white p-3 rounded-full">
+          <div className="bg-gradient-to-br from-purple-600 to-purple-800 text-white p-3 rounded-full">
             <Camera className="h-6 w-6" />
           </div>
           <h2 className="text-3xl md:text-4xl font-bold text-white">Our Journey</h2>
@@ -209,7 +217,7 @@ export default function TshirtStoreAboutUsV2() {
         
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mt-16">
           {[2019, 2021, 2023].map((year) => (
-            <div key={year} className="bg-gradient-to-br from-red-800/15 via-red-700/10 to-black/20 border border-red-500/20 p-6 rounded-xl hover:bg-gradient-to-br hover:from-red-700/20 hover:via-red-600/15 hover:to-black/25 transition-all duration-300">
+            <div key={year} className="bg-gradient-to-br from-purple-800/15 via-purple-700/10 to-black/20 border border-purple-500/20 p-6 rounded-xl hover:bg-gradient-to-br hover:from-purple-700/20 hover:via-purple-600/15 hover:to-black/25 transition-all duration-300">
               <p className="text-4xl font-bold text-white mb-3">{year}</p>
               <p className="text-slate-400">
                 {year === 2019 && "Founded in Munich with just 5 designs and a dream."}
@@ -246,7 +254,7 @@ export default function TshirtStoreAboutUsV2() {
             They collaborate to create collections that blend contemporary trends with timeless appeal.
           </p>
           {/* Award section as a glass card */}
-          <div className="p-6 bg-gradient-to-br from-red-800/15 via-red-700/10 to-black/20 backdrop-blur-lg border border-red-500/20 rounded-xl hover:bg-gradient-to-br hover:from-red-700/20 hover:via-red-600/15 hover:to-black/25 transition-all duration-300">
+          <div className="p-6 bg-gradient-to-br from-purple-800/15 via-purple-700/10 to-black/20 backdrop-blur-lg border border-purple-500/20 rounded-xl hover:bg-gradient-to-br hover:from-purple-700/20 hover:via-purple-600/15 hover:to-black/25 transition-all duration-300">
             <div className="flex items-center gap-1 text-yellow-400 mb-3">
               <Star className="h-5 w-5 fill-current" />
               <Star className="h-5 w-5 fill-current" />
@@ -277,7 +285,7 @@ export default function TshirtStoreAboutUsV2() {
         </div>
         
         {/* Final glassmorphism card with a gradient for visual interest - Full width with max-width for content */}
-        <div className="bg-gradient-to-br from-red-900/20 via-red-800/15 to-black/25 backdrop-blur-xl border border-red-500/20 text-white p-10 md:p-16 rounded-3xl shadow-2xl relative overflow-hidden max-w-7xl mx-auto hover:bg-gradient-to-br hover:from-red-800/25 hover:via-red-700/20 hover:to-black/30 transition-all duration-300"> 
+        <div className="bg-gradient-to-br from-purple-900/20 via-purple-800/15 to-black/25 backdrop-blur-xl border border-purple-500/20 text-white p-10 md:p-16 rounded-3xl shadow-2xl relative overflow-hidden max-w-7xl mx-auto hover:bg-gradient-to-br hover:from-purple-800/25 hover:via-purple-700/20 hover:to-black/30 transition-all duration-300"> 
           <div className="relative z-10">
             <p className="text-2xl md:text-3xl italic font-light mb-10 leading-relaxed max-w-4xl mx-auto text-center text-slate-100"> 
               "To redefine streetwear by combining innovative design with sustainable practices, 
@@ -292,7 +300,7 @@ export default function TshirtStoreAboutUsV2() {
               <motion.button 
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.98 }}
-                className="border-2 border-red-500 text-white px-8 py-3 rounded-full inline-flex items-center gap-2 hover:bg-red-600 hover:border-red-600 transition-all duration-300 group"
+                className="border-2 border-purple-500 text-white px-8 py-3 rounded-full inline-flex items-center gap-2 hover:bg-purple-600 hover:border-purple-600 transition-all duration-300 group"
               >
                 Our Sustainability Pledge
                 <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform duration-300" />

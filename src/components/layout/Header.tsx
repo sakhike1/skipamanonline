@@ -33,6 +33,7 @@ const Header: React.FC = () => {
   const inactivityTimerRef = useRef<NodeJS.Timeout>();
   const isShopPage = location.pathname === '/shop';
   const isAboutPage = location.pathname === '/about';
+  const isCheckoutPage = location.pathname === '/checkout';
   
   // Optimized scroll handler with debounce
   const handleScroll = useCallback(
@@ -108,17 +109,14 @@ const Header: React.FC = () => {
   
   // Determine text and icon colors based on scroll state and background
   const getTextColor = useCallback(() => {
-    if (location.pathname.includes('/product/') || isShopPage || isAboutPage) {
+    if (location.pathname.includes('/product/') || isShopPage || isAboutPage || isCheckoutPage) {
       return 'text-white';
-    }
-    if (location.pathname === '/checkout') {
-      return 'text-black';
     }
     if (isScrolled) {
       return 'text-gray-800';
     }
     return 'text-white';
-  }, [isScrolled, location.pathname, isShopPage, isAboutPage]);
+  }, [isScrolled, location.pathname, isShopPage, isAboutPage, isCheckoutPage]);
 
   const getHoverBgColor = useCallback(() => {
     if (isScrolled) return 'hover:bg-gray-100';
@@ -245,8 +243,8 @@ const Header: React.FC = () => {
   return (
     <header 
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        isAboutPage
-          ? 'bg-gradient-to-r from-red-900/95 via-black/90 to-black/95 backdrop-blur-sm shadow-md py-2'
+        isAboutPage || isCheckoutPage
+          ? 'bg-gradient-to-r from-purple-900/95 via-black/90 to-black/95 backdrop-blur-sm shadow-md py-2'
           : isHeaderDark || isShopPage
             ? 'bg-black/95 backdrop-blur-sm shadow-md py-2'
             : isScrolled

@@ -30,38 +30,37 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onClick }) => {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="group relative bg-transparent border border-black border-opacity-10 rounded-lg overflow-hidden cursor-pointer hover:bg-black hover:bg-opacity-10 transition-all duration-300"
+      className="group relative overflow-hidden rounded-2xl hover:shadow-xl transition-all duration-300"
       onClick={() => onClick(product.id)}
       onMouseEnter={handleImageHover}
       onMouseLeave={() => setCurrentImageIndex(0)}
     >
-      <div className="aspect-square overflow-hidden relative">
+      <div className="relative aspect-square overflow-hidden cursor-pointer">
+        {/* Gradient Background */}
+        <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 via-pink-500/15 to-red-500/10 backdrop-blur-sm"></div>
+        
+        {/* Glassmorphism Overlay */}
+        <div className="absolute inset-0 bg-white/5 backdrop-blur-md border border-white/20 rounded-2xl"></div>
+        
+        {/* Image Container */}
+        <div className="relative z-10 h-full">
         <img
           src={product.images[currentImageIndex]}
           alt={product.name}
-          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 absolute inset-0 filter grayscale group-hover:grayscale-0"
-        />
-        {product.images.length > 1 && (
-          <div className="absolute bottom-2 right-2 bg-black bg-opacity-30 text-white text-xs px-2 py-1 rounded-full backdrop-blur-sm select-none">
-            {currentImageIndex + 1}/{product.images.length}
-          </div>
-        )}
-        <div className="absolute inset-0 bg-black bg-opacity-40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-          <button className="bg-white text-black px-4 py-2 rounded-full font-semibold text-sm flex items-center gap-2">
-            <ShoppingBag size={16} />
-            Quick View
-          </button>
-        </div>
-      </div>
-      <div className="p-4">
-        <div className="flex justify-between items-start mb-1">
-          <h3 className="font-semibold text-black line-clamp-1 uppercase tracking-wide">{product.name}</h3>
-          <span className="text-black font-semibold">R500</span>
-        </div>
-        <p className="text-sm text-gray-600 mb-3 capitalize">{product.category}</p>
+            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 absolute inset-0 filter grayscale hover:grayscale-0 rounded-2xl"
+          />
+          
+          {/* Always Visible Overlay with Glassmorphism */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-transparent rounded-2xl">
+            <div className="absolute bottom-0 left-0 right-0 p-4">
+              {/* Glassmorphism Content Card */}
+              <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-3">
+                <h3 className="text-white text-lg font-medium mb-1 drop-shadow-lg line-clamp-1 uppercase tracking-wide">{product.name}</h3>
+                <p className="text-white/90 mb-2 font-semibold">R500</p>
+                <p className="text-white/80 text-sm capitalize mb-3">{product.category}</p>
         <button
           onClick={(e) => { e.stopPropagation(); onClick(product.id); }}
-          className="w-full flex items-center justify-center gap-2 py-2 px-4 border border-black border-opacity-20 rounded-full text-sm font-semibold text-black hover:bg-black hover:text-white transition-all duration-300 hover:translate-x-1"
+                  className="w-full flex items-center justify-center gap-2 py-2 px-4 rounded-full text-sm font-medium bg-white/20 backdrop-blur-sm text-white border border-white/30 hover:bg-white hover:text-black transition-all duration-300"
         >
           View Product
           <ArrowRight
@@ -69,6 +68,22 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onClick }) => {
             className="group-hover:translate-x-1 transition-transform duration-300"
           />
         </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        {/* Image Counter */}
+        {product.images.length > 1 && (
+          <div className="absolute top-3 right-3 bg-black/70 backdrop-blur-sm text-white text-xs px-2 py-1 rounded-full border border-white/20">
+            {currentImageIndex + 1}/{product.images.length}
+          </div>
+        )}
+        
+        {/* Floating Sparkle Effect */}
+        <div className="absolute top-3 left-3 w-6 h-6 bg-white/20 backdrop-blur-sm rounded-full border border-white/30 flex items-center justify-center">
+          <div className="w-1.5 h-1.5 bg-white rounded-full animate-pulse"></div>
+        </div>
       </div>
     </motion.div>
   );
@@ -79,38 +94,40 @@ const PromoCard: React.FC<{ onClick: () => void }> = ({ onClick }) => {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="group relative bg-transparent border border-black border-opacity-10 rounded-lg overflow-hidden cursor-pointer hover:bg-black hover:bg-opacity-10 transition-all duration-300"
+      className="group relative overflow-hidden rounded-2xl hover:shadow-xl transition-all duration-300"
       onClick={onClick}
     >
-      <div className="aspect-square overflow-hidden relative">
+      <div className="relative aspect-square overflow-hidden cursor-pointer">
+        {/* Gradient Background - Different colors for promo card */}
+        <div className="absolute inset-0 bg-gradient-to-br from-yellow-500/10 via-orange-500/15 to-red-500/10 backdrop-blur-sm"></div>
+        
+        {/* Glassmorphism Overlay */}
+        <div className="absolute inset-0 bg-white/5 backdrop-blur-md border border-white/20 rounded-2xl"></div>
+        
+        {/* Image Container */}
+        <div className="relative z-10 h-full">
         <img
           src="https://images.pexels.com/photos/3965557/pexels-photo-3965557.jpeg"
           alt="Special Promotion"
-          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 absolute inset-0 filter grayscale group-hover:grayscale-0"
-        />
-        <div className="absolute top-2 left-2 bg-red-600 text-white text-xs px-2 py-1 rounded-full flex items-center gap-1">
-          <Tag size={12} />
-          <span>LIMITED TIME</span>
-        </div>
-        <div className="absolute inset-0 bg-black bg-opacity-40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-          <button className="bg-white text-black px-4 py-2 rounded-full font-semibold text-sm flex items-center gap-2">
-            <ShoppingBag size={16} />
-            Shop Now
-          </button>
-        </div>
-      </div>
-      <div className="p-4">
+            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 absolute inset-0 filter grayscale hover:grayscale-0 rounded-2xl"
+          />
+          
+          {/* Always Visible Overlay with Glassmorphism */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-transparent rounded-2xl">
+            <div className="absolute bottom-0 left-0 right-0 p-4">
+              {/* Glassmorphism Content Card */}
+              <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-3">
         <div className="flex justify-between items-start mb-1">
-          <h3 className="font-semibold text-black line-clamp-1 uppercase tracking-wide">Summer Sale Collection</h3>
+                  <h3 className="text-white text-lg font-medium mb-1 drop-shadow-lg line-clamp-1 uppercase tracking-wide">Summer Sale Collection</h3>
           <div>
-            <span className="text-gray-500 font-medium line-through mr-2">R500</span>
-            <span className="text-black font-semibold">R500</span>
+                    <span className="text-white/60 font-medium line-through mr-2">R500</span>
+                    <span className="text-white/90 font-semibold">R500</span>
           </div>
         </div>
-        <p className="text-sm text-gray-600 mb-3">Up to 40% Off Selected Items</p>
+                <p className="text-white/80 text-sm mb-3">Up to 40% Off Selected Items</p>
         <button
           onClick={(e) => { e.stopPropagation(); onClick(); }}
-          className="w-full flex items-center justify-center gap-2 py-2 px-4 border border-black border-opacity-20 rounded-full text-sm font-semibold text-black hover:bg-black hover:text-white transition-all duration-300 hover:translate-x-1"
+                  className="w-full flex items-center justify-center gap-2 py-2 px-4 rounded-full text-sm font-medium bg-white/20 backdrop-blur-sm text-white border border-white/30 hover:bg-white hover:text-black transition-all duration-300"
         >
           View Offer
           <ArrowRight
@@ -118,6 +135,21 @@ const PromoCard: React.FC<{ onClick: () => void }> = ({ onClick }) => {
             className="group-hover:translate-x-1 transition-transform duration-300"
           />
         </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        {/* Limited Time Badge */}
+        <div className="absolute top-3 left-3 bg-red-600/80 backdrop-blur-sm text-white text-xs px-2 py-1 rounded-full border border-white/20 flex items-center gap-1">
+          <Tag size={12} />
+          <span>LIMITED TIME</span>
+        </div>
+        
+        {/* Floating Sparkle Effect */}
+        <div className="absolute top-3 right-3 w-6 h-6 bg-white/20 backdrop-blur-sm rounded-full border border-white/30 flex items-center justify-center">
+          <div className="w-1.5 h-1.5 bg-white rounded-full animate-pulse"></div>
+        </div>
       </div>
     </motion.div>
   );
@@ -228,14 +260,14 @@ const NewArrivalsPage: React.FC = () => {
                 <motion.img 
                   key={currentImageIndex}
                   src={heroImages[currentImageIndex]}
-                  alt="Sport Collection" 
+                alt="Sport Collection" 
                   className="w-full h-[1000px] object-cover rounded absolute inset-0"
                   initial={{ opacity: 0, scale: 1.1 }}
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.9 }}
                   transition={{ duration: 1, ease: "easeInOut" }}
-                  loading="lazy"
-                />
+                loading="lazy"
+              />
               </AnimatePresence>
             </div>
           </div>
@@ -316,7 +348,7 @@ const NewArrivalsPage: React.FC = () => {
         <div className="md:flex md:gap-10">
           {/* Filters Sidebar */}
           {(!isMobile || showFilters) && (
-            <aside className="md:w-72 bg-transparent border border-gray-300 rounded-lg p-6 text-black">
+            <aside className="md:w-72 bg-white border border-gray-300 rounded-lg p-6 text-black">
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-lg font-semibold uppercase tracking-wider">Filters</h3>
                 <button
