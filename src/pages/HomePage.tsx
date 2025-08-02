@@ -1,75 +1,54 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import Hero from '../components/home/Hero';
-import NewArrivals from '../components/home/NewArrivals';
-import FeaturedProducts from '../components/home/FeaturedProducts';
-import CustomRequest from '../components/home/CustomRequest';
 import { motion, AnimatePresence } from 'framer-motion';
+import Hero from '../components/home/Hero';
+import FeaturedProducts from '../components/home/FeaturedProducts';
+import NewArrivals from '../components/home/NewArrivals';
+import CustomRequest from '../components/home/CustomRequest';
+import { useNavigate } from 'react-router-dom';
+import { CheckCircle, AlertCircle, Mail } from 'lucide-react';
 
 const HomePage: React.FC = () => {
   const navigate = useNavigate();
   const [currentSlide, setCurrentSlide] = useState(0);
-  
+  const [email, setEmail] = useState('');
+  const [isSubscribing, setIsSubscribing] = useState(false);
+  const [showToast, setShowToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
+  const [toastType, setToastType] = useState<'success' | 'error'>('success');
+
   const handleProductClick = (productId: string) => {
     navigate(`/product/${productId}`);
   };
 
-  // Customer testimonials data
   const testimonials = [
     {
-      id: 1,
-      name: "John Doe",
-      initials: "JD",
+      name: "Sarah Johnson",
+      initials: "SJ",
       rating: 5,
-      text: "The quality of these t-shirts is exceptional. The fabric is soft, the fit is perfect, and the designs are unique. I've received many compliments!"
+      text: "The quality of these t-shirts is incredible! I love how they feel and the designs are so unique. Definitely my new favorite brand."
     },
     {
-      id: 2,
-      name: "Jane Smith",
-      initials: "JS",
+      name: "Michael Chen",
+      initials: "MC",
       rating: 5,
-      text: "I love the minimalist designs on these shirts. They're modern, eye-catching, and unlike anything else in my wardrobe. The shipping was also impressively fast."
+      text: "Fast shipping and amazing customer service. The fit is perfect and the material is so comfortable. Highly recommend!"
     },
     {
-      id: 3,
-      name: "Robert Johnson",
-      initials: "RJ",
-      rating: 4,
-      text: "Great customer service and the t-shirt quality is top-notch. Would definitely recommend to friends and family looking for unique, high-quality apparel."
-    },
-    {
-      id: 4,
-      name: "Sarah Wilson",
-      initials: "SW",
-      rating: 5,
-      text: "These t-shirts are absolutely amazing! The designs are so creative and the material feels premium. I've already ordered my second batch!"
-    },
-    {
-      id: 5,
-      name: "Michael Brown",
-      initials: "MB",
-      rating: 5,
-      text: "Fast delivery and excellent quality. The t-shirts fit perfectly and the prints are vibrant. Highly recommend this brand!"
-    },
-    {
-      id: 6,
-      name: "Emily Davis",
+      name: "Emma Davis",
       initials: "ED",
       rating: 5,
-      text: "I'm in love with these designs! They're unique, comfortable, and the customer service is outstanding. Will definitely be a returning customer."
+      text: "I've been looking for stylish, high-quality t-shirts and finally found them here. The attention to detail is outstanding."
     }
   ];
 
-  // Auto-advance slides
   useEffect(() => {
-    const timer = setInterval(() => {
+    const interval = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % testimonials.length);
-    }, 4000); // Change slide every 4 seconds
+    }, 5000);
 
-    return () => clearInterval(timer);
+    return () => clearInterval(interval);
   }, [testimonials.length]);
 
-  // Manual navigation
   const goToSlide = (index: number) => {
     setCurrentSlide(index);
   };
@@ -82,6 +61,50 @@ const HomePage: React.FC = () => {
     setCurrentSlide((prev) => (prev - 1 + testimonials.length) % testimonials.length);
   };
 
+  const validateEmail = (email: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
+  const handleSubscribe = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!email.trim()) {
+      showToastMessage('Please enter your email address', 'error');
+      return;
+    }
+
+    if (!validateEmail(email)) {
+      showToastMessage('Please enter a valid email address', 'error');
+      return;
+    }
+
+    setIsSubscribing(true);
+
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      // Success
+      showToastMessage('Successfully subscribed to our newsletter!', 'success');
+      setEmail('');
+    } catch (error) {
+      showToastMessage('Failed to subscribe. Please try again.', 'error');
+    } finally {
+      setIsSubscribing(false);
+    }
+  };
+
+  const showToastMessage = (message: string, type: 'success' | 'error') => {
+    setToastMessage(message);
+    setToastType(type);
+    setShowToast(true);
+    
+    setTimeout(() => {
+      setShowToast(false);
+    }, 4000);
+  };
+
   return (
     <div>
       <Hero />
@@ -91,30 +114,100 @@ const HomePage: React.FC = () => {
       
       {/* Newsletter Section */}
       <div className="bg-white py-16 border-t border-gray-100">
-      <div className="bg-white py-16 border-t border-gray-100 border-b">
-  <div className="container mx-auto px-4 text-center">
-    <h2 className="text-3xl md:text-4xl font-bold mb-5 text-gray-900">
-      New Arrivals Every Week
-    </h2>
-    <p className="max-w-2xl mx-auto text-lg mb-8 text-gray-600">
-      Subscribe to our newsletter and be the first to know about our latest designs and exclusive offers.
-    </p>
-    <div className="max-w-md mx-auto flex flex-col sm:flex-row gap-3">
-      <input
-        type="email"
-        placeholder="Your email address"
-        className="flex-1 px-5 py-3 rounded-md border border-gray-300 text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-800 focus:border-transparent transition-all"
-      />
-      <button className="bg-gray-900 text-white px-6 py-3 rounded-md font-medium hover:bg-gray-800 transition-colors whitespace-nowrap">
-        Subscribe
-      </button>
-    </div>
-    <p className="mt-4 text-sm text-gray-500">
-      We respect your privacy. Unsubscribe at any time.
-    </p>
-  </div>
-</div>
+        <div className="container mx-auto px-4 text-center">
+          <motion.h2 
+            className="text-3xl md:text-4xl font-bold mb-5 text-gray-900"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            viewport={{ once: true }}
+          >
+            New Arrivals Every Week
+          </motion.h2>
+          <motion.p 
+            className="max-w-2xl mx-auto text-lg mb-8 text-gray-600"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.1 }}
+            viewport={{ once: true }}
+          >
+            Subscribe to our newsletter and be the first to know about our latest designs and exclusive offers.
+          </motion.p>
+          
+          <motion.form 
+            onSubmit={handleSubscribe}
+            className="max-w-md mx-auto"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            viewport={{ once: true }}
+          >
+            <div className="flex flex-col sm:flex-row gap-3">
+              <div className="relative flex-1">
+                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Your email address"
+                  className="w-full pl-10 pr-5 py-3 rounded-md border border-gray-300 text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-800 focus:border-transparent transition-all"
+                  disabled={isSubscribing}
+                />
+              </div>
+              <button 
+                type="submit"
+                disabled={isSubscribing}
+                className="bg-gray-900 text-white px-6 py-3 rounded-md font-medium hover:bg-gray-800 transition-colors whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              >
+                {isSubscribing ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    Subscribing...
+                  </>
+                ) : (
+                  'Subscribe'
+                )}
+              </button>
+            </div>
+          </motion.form>
+          
+          <motion.p 
+            className="mt-4 text-sm text-gray-500"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.3 }}
+            viewport={{ once: true }}
+          >
+            We respect your privacy. Unsubscribe at any time.
+          </motion.p>
+        </div>
       </div>
+
+      {/* Toast Notification */}
+      <AnimatePresence>
+        {showToast && (
+          <motion.div
+            initial={{ opacity: 0, y: 50, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 50, scale: 0.9 }}
+            transition={{ duration: 0.3, ease: "easeOut" }}
+            className="fixed bottom-4 right-4 z-50"
+          >
+            <div className={`flex items-center gap-3 px-4 py-3 rounded-lg shadow-lg max-w-sm ${
+              toastType === 'success' 
+                ? 'bg-green-500 text-white' 
+                : 'bg-red-500 text-white'
+            }`}>
+              {toastType === 'success' ? (
+                <CheckCircle size={20} className="flex-shrink-0" />
+              ) : (
+                <AlertCircle size={20} className="flex-shrink-0" />
+              )}
+              <p className="text-sm font-medium">{toastMessage}</p>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
       
       {/* Testimonials */}
       <div className="relative py-16 overflow-hidden">

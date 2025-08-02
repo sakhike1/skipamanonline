@@ -19,7 +19,7 @@ const CheckoutPage: React.FC = () => {
   };
   
   return (
-    <div className="pt-20">
+    <div>
       {orderComplete ? (
         <OrderConfirmation orderId={orderId} onContinueShopping={handleContinueShopping} />
       ) : (

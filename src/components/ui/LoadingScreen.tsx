@@ -17,13 +17,13 @@ const LoadingScreen: React.FC = () => {
       if (initialLoadingScreen) {
         // Start fade-out of the HTML screen
         initialLoadingScreen.style.opacity = '0';
-        initialLoadingScreen.style.transition = 'opacity 0.5s ease-out';
+        initialLoadingScreen.style.transition = 'opacity 0.3s ease-out';
         
         // Remove from DOM after transition
         setTimeout(() => {
           initialLoadingScreen.remove();
           initialScreenHandled.current = true;
-        }, 500); // Matches transition duration
+        }, 300); // Reduced from 500ms for faster transition
       } else {
         initialScreenHandled.current = true; // Mark as handled even if not found
       }
@@ -39,7 +39,7 @@ const LoadingScreen: React.FC = () => {
       // Remove component from DOM after its fade-out transition completes
       setTimeout(() => {
         setDisplayComponent(false);
-      }, 700); // Must be slightly longer than the CSS transition duration (e.g., 500ms + buffer)
+      }, 400); // Reduced from 700ms for faster transition
     };
 
     // 1. Check if the page is already fully loaded (e.g., if JS runs late)
@@ -59,7 +59,7 @@ const LoadingScreen: React.FC = () => {
       if (isLoadingContent) { 
         handlePageLoaded();
       }
-    }, 1500); // Display for at least 1.5 seconds
+    }, 800); // Reduced from 1500ms for faster perceived loading
 
     //    b) Maximum display time: Acts as a safeguard in case 'load' event never fires
     //       or takes excessively long due to network issues.
@@ -67,7 +67,7 @@ const LoadingScreen: React.FC = () => {
       if (isLoadingContent) {
         handlePageLoaded();
       }
-    }, 8000); // Force hide after 8 seconds
+    }, 5000); // Reduced from 8000ms for better UX
 
     // Cleanup function: Remove event listener and clear timers on component unmount
     return () => {
@@ -90,16 +90,14 @@ const LoadingScreen: React.FC = () => {
       // Tailwind CSS for full-screen overlay and transition
       className={`fixed inset-0 z-[9999] bg-black/90 backdrop-blur-sm 
         flex flex-col items-center justify-center 
-        transition-opacity duration-700 ease-out 
+        transition-opacity duration-400 ease-out 
         ${isLoadingContent ? 'opacity-100' : 'opacity-0'}`}
     >
       <div className="flex flex-col items-center justify-center text-center">
-        {/* Custom Tailwind Spinner */}
+        {/* Optimized Spinner with reduced complexity */}
         <div className="relative w-16 h-16 mb-8">
-            {/* Spinner Base (outer ring) */}
-            <div className="absolute inset-0 border-4 border-solid border-gray-700 border-t-transparent rounded-full animate-[spin_2s_linear_infinite]"></div> 
-            {/* Spinner Accent (inner arc), slightly faster and offset spin */}
-            <div className="absolute inset-0 border-4 border-solid border-transparent border-t-[#FFD700] rounded-full animate-[spin_1s_linear_infinite_reverse_0.2s]"></div> 
+            {/* Simplified spinner for better performance */}
+            <div className="absolute inset-0 border-4 border-solid border-gray-700 border-t-transparent rounded-full animate-[spin_1.5s_linear_infinite]"></div> 
         </div>
 
         {/* Brand Name with improved styling */}

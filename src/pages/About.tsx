@@ -32,7 +32,7 @@ export default function TshirtStoreAboutUsV2() {
         className="w-full h-[400px] md:h-[600px] overflow-hidden rounded-3xl mb-20 relative"
       >
         <img 
-          src="https://images.unsplash.com/photo-1551232864-3f0890e580d9?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80&h=600&fit=crop&crop=focalpoint&fp-x=0.5&fp-y=0.45"
+          src="/images/6.jpg"
           alt="Fashion design workshop" 
           className="w-full h-full object-cover object-center filter grayscale hover:filter-none transition-all duration-1000 ease-out scale-105"
         />
@@ -162,14 +162,14 @@ export default function TshirtStoreAboutUsV2() {
         >
           <div className="md:col-span-8 h-[320px] md:h-[500px] overflow-hidden rounded-2xl">
             <img 
-              src="https://images.unsplash.com/photo-1492707892479-7bc8d5a4ee93?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80"
+              src="/images/7.jpg"
               alt="Fashion design team collaboration" 
               className="w-full h-full object-cover object-center filter grayscale hover:filter-none transition-all duration-700 ease-out"
             />
           </div>
           <div className="md:col-span-4 h-[320px] md:h-[500px] overflow-hidden rounded-2xl">
             <img 
-              src="https://images.unsplash.com/photo-1581337043246-9436d295bded?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" 
+              src="/images/8.jpg" 
               alt="T-shirt screen printing process" 
               className="w-full h-full object-cover object-center filter grayscale hover:filter-none transition-all duration-700 ease-out"
             />
@@ -239,7 +239,7 @@ export default function TshirtStoreAboutUsV2() {
       >
         <div className="md:w-1/2 h-[400px] md:h-[550px] overflow-hidden rounded-2xl">
           <img 
-            src="https://images.unsplash.com/photo-1516302752625-fcc3c50ae61f?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
+            src="/images/6.jpg" 
             alt="Our lead designer at work" 
             className="w-full h-full object-cover object-center filter grayscale hover:filter-none transition-all duration-700 ease-out"
           />

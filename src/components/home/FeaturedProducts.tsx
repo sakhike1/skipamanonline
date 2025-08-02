@@ -10,6 +10,11 @@ interface FeaturedProductsProps {
 
 const FeaturedProducts: React.FC<FeaturedProductsProps> = ({ onProductClick }) => {
   const [colorIndex, setColorIndex] = useState(0);
+  const [hoveredProduct, setHoveredProduct] = useState<string | null>(null);
+  const [isGlowing, setIsGlowing] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [currentImageIndex, setCurrentImageIndex] = useState<{ [key: string]: number }>({});
+  const [isTransitioning, setIsTransitioning] = useState(false);
   
   // Gold glitz color palette
   const colors = [
@@ -31,14 +36,54 @@ const FeaturedProducts: React.FC<FeaturedProductsProps> = ({ onProductClick }) =
     return () => clearInterval(interval);
   }, []);
 
+  // Initialize image indices
+  useEffect(() => {
+    const initialImageState = products.reduce((acc, product) => {
+      acc[product.id] = 0;
+      return acc;
+    }, {} as { [key: string]: number });
+    setCurrentImageIndex(initialImageState);
+  }, []);
+
+  // Auto-rotate images every 6 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentImageIndex(prev => {
+        const newState = { ...prev };
+        Object.keys(newState).forEach(productId => {
+          // Only rotate if not currently hovered
+          if (hoveredProduct !== productId) {
+            newState[productId] = (newState[productId] + 1) % 3;
+          }
+        });
+        return newState;
+      });
+    }, 6000);
+
+    return () => clearInterval(interval);
+  }, [hoveredProduct]);
+
   // Get all featured products
   const featuredProducts = products.filter(product => product.featured);
   const displayProducts = featuredProducts;
-  
-  // Track hover state for each product
-  const [hoveredProduct, setHoveredProduct] = useState<string | null>(null);
-  const [isGlowing, setIsGlowing] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+
+  const handleMouseEnter = (productId: string) => {
+    setHoveredProduct(productId);
+    setIsTransitioning(true);
+    
+    // Smoothly transition to next image
+    setTimeout(() => {
+      setCurrentImageIndex(prev => ({
+        ...prev,
+        [productId]: (prev[productId] + 1) % 3
+      }));
+      setIsTransitioning(false);
+    }, 150);
+  };
+
+  const handleMouseLeave = () => {
+    setHoveredProduct(null);
+  };
 
   useEffect(() => {
     // Create pulsating glow effect for the promo card
@@ -112,30 +157,53 @@ const FeaturedProducts: React.FC<FeaturedProductsProps> = ({ onProductClick }) =
             <article 
               key={product.id} 
               className="group"
-              onMouseEnter={() => setHoveredProduct(product.id)}
-              onMouseLeave={() => setHoveredProduct(null)}
+              onMouseEnter={() => handleMouseEnter(product.id)}
+              onMouseLeave={handleMouseLeave}
             >
               <div className="aspect-[3/4] overflow-hidden bg-neutral-800 rounded-lg relative">
-                <div className="absolute inset-0 bg-neutral-800 animate-pulse"></div>
-                <img
-                  src={product.images[0]}
-                  alt={product.name}
-                  className={`w-full h-full object-cover transition-all duration-700 opacity-0 transition-opacity duration-300 ${hoveredProduct === product.id ? 'scale-105 grayscale-0' : 'grayscale'}`}
-                  loading="lazy"
-                  width={400}
-                  height={533}
-                  decoding="async"
-                  fetchPriority="low"
-                  onLoad={(e) => {
-                    const target = e.target as HTMLImageElement;
-                    target.classList.remove('opacity-0');
-                  }}
-                />
+                {/* Preload all images */}
+                {product.images.map((imageSrc, index) => {
+                  const currentIndex = currentImageIndex[product.id] || 0;
+                  return (
+                    <img
+                      key={index}
+                      src={imageSrc}
+                      alt={`${product.name} - Image ${index + 1}`}
+                      className={`absolute inset-0 w-full h-full object-cover transition-all duration-700 ease-in-out
+                        ${index === currentIndex ? 'opacity-100 z-10' : 'opacity-0 z-0'}
+                        ${hoveredProduct === product.id ? 'scale-105' : 'scale-100'}
+                        ${isTransitioning ? 'blur-[1px]' : 'blur-0'}
+                      `}
+                      style={{ 
+                        transform: `scale(${hoveredProduct === product.id ? '1.05' : '1'})`,
+                        filter: `blur(${isTransitioning ? '1px' : '0px'})`,
+                      }}
+                    />
+                  );
+                })}
+                
                 {product.featured && (
                   <span className="absolute top-4 left-4 bg-white text-black px-3 py-1 text-xs font-bold tracking-widest z-30 rounded-full">
                     NEW
                   </span>
                 )}
+                
+                {/* Image indicators */}
+                <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-1.5 z-40">
+                  {product.images.map((_, index) => {
+                    const currentIndex = currentImageIndex[product.id] || 0;
+                    return (
+                      <div
+                        key={index}
+                        className={`w-1.5 h-1.5 rounded-full transition-all duration-300
+                          ${index === currentIndex 
+                            ? 'bg-white' 
+                            : 'bg-white/40'
+                          }`}
+                      />
+                    );
+                  })}
+                </div>
                 
                 {/* Quick add button that appears on hover */}
                 <div 
@@ -143,7 +211,7 @@ const FeaturedProducts: React.FC<FeaturedProductsProps> = ({ onProductClick }) =
                 >
                   <button 
                     onClick={(e) => handleViewProduct(e, product.id)}
-                    className="flex items-center justify-center w-10 h-10 bg-white rounded-full text-black hover:bg-white/90"
+                    className="flex items-center justify-center w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full text-black hover:bg-white shadow-lg"
                     aria-label="Quick view"
                   >
                     <Plus size={20} />

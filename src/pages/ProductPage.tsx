@@ -1,15 +1,19 @@
 import React, { useEffect, useState, Suspense } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getProductById } from '../data/products';
+import { getReviewsByProductId, getReviewStats } from '../data/reviews';
 import ProductDetail from '../components/product/ProductDetail';
+import ReviewsSection from '../components/product/ReviewsSection';
 import LoadingSkeleton from '../components/ui/LoadingSkeleton';
-import { Product } from '../types';
+import { Product, Review, ReviewStats } from '../types';
 
 const ProductPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(true);
   const [product, setProduct] = useState<Product | null>(null);
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [reviewStats, setReviewStats] = useState<ReviewStats | null>(null);
   
   useEffect(() => {
     let isMounted = true;
@@ -19,8 +23,18 @@ const ProductPage: React.FC = () => {
       
       try {
         const foundProduct = getProductById(id);
+        if (foundProduct && isMounted) {
+          setProduct(foundProduct);
+          
+          // Load reviews and stats
+          const productReviews = getReviewsByProductId(id);
+          const stats = getReviewStats(id);
+          
+          setReviews(productReviews);
+          setReviewStats(stats);
+        }
+        
         if (isMounted) {
-          setProduct(foundProduct || null);
           setIsLoading(false);
         }
       } catch (error) {
@@ -65,6 +79,21 @@ const ProductPage: React.FC = () => {
     <div className="pt-20">
       <Suspense fallback={<LoadingSkeleton />}>
         <ProductDetail product={product} onGoBack={handleGoBack} />
+        
+        {/* Reviews Section */}
+        {product && reviewStats && (
+          <div className="container mx-auto px-4 py-16">
+            <ReviewsSection
+              productId={product.id}
+              reviews={reviews}
+              stats={reviewStats}
+              onWriteReview={() => {
+                // TODO: Implement write review functionality
+                console.log('Write review clicked');
+              }}
+            />
+          </div>
+        )}
       </Suspense>
     </div>
   );

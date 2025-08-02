@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Product } from '../../types';
 import { ShoppingBag, Heart } from 'lucide-react';
 import { Button } from '../ui/Button';
+import { useWishlist } from '../../context/WishlistContext';
 
 interface ProductCardProps {
   product: Product;
@@ -11,10 +12,11 @@ interface ProductCardProps {
 const ProductCard: React.FC<ProductCardProps> = ({ product, onClick }) => {
   const [isHovered, setIsHovered] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [isFavorite, setIsFavorite] = useState(false);
+  const { isInWishlist, addToWishlist, removeFromWishlist } = useWishlist();
+  const isFavorite = isInWishlist(product.id);
   
   const formatPrice = (price: number) => {
-    return `R${price.toFixed(0)}`;
+    return `R${(price / 100).toFixed(2)}`;
   };
   
   const handleMouseEnter = () => {
@@ -31,7 +33,11 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onClick }) => {
   
   const toggleFavorite = (e: React.MouseEvent) => {
     e.stopPropagation();
-    setIsFavorite(!isFavorite);
+    if (isFavorite) {
+      removeFromWishlist(product.id);
+    } else {
+      addToWishlist(product.id);
+    }
   };
 
   const handleViewProduct = (e: React.MouseEvent) => {
@@ -64,6 +70,23 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onClick }) => {
       
       <div className="mt-6 space-y-2">
         <h3 className="text-lg tracking-wider text-white">{product.name}</h3>
+        
+        {/* Rating Display */}
+        {product.rating && (
+          <div className="flex items-center space-x-2">
+            <div className="flex text-yellow-400">
+              {[...Array(5)].map((_, i) => (
+                <span key={i} className={i < Math.round(product.rating!) ? 'text-yellow-400' : 'text-gray-400'}>
+                  ★
+                </span>
+              ))}
+            </div>
+            <span className="text-sm text-white/70">
+              {product.rating} ({product.reviewCount} reviews)
+            </span>
+          </div>
+        )}
+        
         <p className="text-white/70">{formatPrice(product.price)}</p>
         
         <div className="flex gap-2 mt-4">

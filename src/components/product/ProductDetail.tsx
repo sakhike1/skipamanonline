@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Product, Size, Color } from '../../types';
 import { Button } from '../ui/Button';
-import { Check, ChevronLeft, ChevronRight, Expand, ShoppingBag, X, Heart, ChevronDown, Plus, Minus, Sparkles } from 'lucide-react';
+import { Check, ChevronLeft, ChevronRight, Expand, ShoppingBag, X, Heart, ChevronDown, Plus, Minus, Sparkles, Ruler } from 'lucide-react';
 import { useCart } from '../../context/CartContext';
+import { useWishlist } from '../../context/WishlistContext';
 import { useHeader } from '../../context/HeaderContext';
+import SizeGuide from './SizeGuide';
 
 interface ProductDetailProps {
   product: Product;
@@ -22,6 +24,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, onGoBack }) => {
   const [isHoveringImage, setIsHoveringImage] = useState(false);
   
   const { addToCart, isInCart, cart } = useCart();
+  const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
   const { setIsHeaderDark } = useHeader();
   
   // Control header background when component mounts/unmounts
@@ -90,8 +93,12 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, onGoBack }) => {
     
   // Toggle wishlist
   const toggleWishlist = useCallback(() => {
-    setIsWishlistActive(!isWishlistActive);
-  }, [isWishlistActive]);
+    if (isInWishlist(product.id)) {
+      removeFromWishlist(product.id);
+    } else {
+      addToWishlist(product.id);
+    }
+  }, [isInWishlist, removeFromWishlist, addToWishlist, product.id]);
   
   return (
     <div className="w-full min-h-screen bg-gradient-to-br from-slate-50 via-white to-gray-100 relative overflow-hidden">
@@ -102,21 +109,21 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, onGoBack }) => {
         <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-gradient-to-r from-yellow-400/10 to-orange-400/10 rounded-full blur-3xl animate-pulse delay-500"></div>
       </div>
 
-      {/* Enhanced promo bar with glassmorphism */}
-      <div className="relative bg-gradient-to-r from-black via-gray-900 to-black text-white text-xs py-3 px-4 overflow-hidden whitespace-nowrap backdrop-blur-sm border-b border-white/10">
-        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent animate-shimmer"></div>
+      {/* Enhanced promo bar with modern design */}
+      <div className="relative bg-gradient-to-r from-purple-500 via-pink-500 to-purple-600 text-white text-xs py-4 px-4 overflow-hidden whitespace-nowrap backdrop-blur-sm border-b border-white/20 shadow-lg">
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-shimmer"></div>
         <div className="relative z-10 inline-block animate-marquee-smooth">
-          <span className="mx-4 font-medium">✨ FREE DELIVERY OVER €50 ✨</span>
-          <span className="text-yellow-400">•</span>
-          <span className="mx-4 font-medium">🔄 FREE RETURNS POLICY 🔄</span>
-          <span className="text-yellow-400">•</span>
-          <span className="mx-4 font-medium">🌍 WORLDWIDE DELIVERY 🌍</span>
-          <span className="text-yellow-400">•</span>
-          <span className="mx-4 font-medium">✨ FREE DELIVERY OVER €50 ✨</span>
-          <span className="text-yellow-400">•</span>
-          <span className="mx-4 font-medium">🔄 FREE RETURNS POLICY 🔄</span>
-          <span className="text-yellow-400">•</span>
-          <span className="mx-4 font-medium">🌍 WORLDWIDE DELIVERY 🌍</span>
+          <span className="mx-4 font-semibold tracking-wide">✨ FREE DELIVERY OVER €50 ✨</span>
+          <span className="text-white/80 font-bold">•</span>
+          <span className="mx-4 font-semibold tracking-wide">🔄 FREE RETURNS POLICY 🔄</span>
+          <span className="text-white/80 font-bold">•</span>
+          <span className="mx-4 font-semibold tracking-wide">🌍 WORLDWIDE DELIVERY 🌍</span>
+          <span className="text-white/80 font-bold">•</span>
+          <span className="mx-4 font-semibold tracking-wide">✨ FREE DELIVERY OVER €50 ✨</span>
+          <span className="text-white/80 font-bold">•</span>
+          <span className="mx-4 font-semibold tracking-wide">🔄 FREE RETURNS POLICY 🔄</span>
+          <span className="text-white/80 font-bold">•</span>
+          <span className="mx-4 font-semibold tracking-wide">🌍 WORLDWIDE DELIVERY 🌍</span>
         </div>
       </div>
       
@@ -168,7 +175,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, onGoBack }) => {
             </h1>
             <p className="text-2xl font-bold text-gray-900 mb-8 flex items-center">
               <span className="bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
-                R{product.price.toFixed(0)}
+                R{(product.price / 100).toFixed(2)}
               </span>
               <Sparkles className="ml-2 text-yellow-500 animate-pulse" size={20} />
             </p>
@@ -304,11 +311,12 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, onGoBack }) => {
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-lg font-bold text-gray-900">Choose Size</h2>
                 <button 
-                  className="text-sm text-black hover:text-gray-700 transition-colors font-semibold hover:scale-105"
-                  onClick={() => setShowSizeGuide(!showSizeGuide)}
+                  className="flex items-center space-x-1 text-sm text-black hover:text-gray-700 transition-colors font-semibold hover:scale-105"
+                  onClick={() => setShowSizeGuide(true)}
                   type="button"
                 >
-                  Size Guide
+                  <Ruler size={16} />
+                  <span>Size Guide</span>
                 </button>
               </div>
               
@@ -328,46 +336,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, onGoBack }) => {
                 ))}
               </div>
               
-              {/* Enhanced size guide modal */}
-              {showSizeGuide && (
-                <div className="mt-6 p-6 bg-white/90 backdrop-blur-md rounded-xl border border-gray-200/50 shadow-xl">
-                  <div className="flex justify-between items-center mb-4">
-                    <h3 className="text-lg font-bold text-gray-900">Size Guide</h3>
-                    <button 
-                      onClick={() => setShowSizeGuide(false)}
-                      className="text-black hover:text-gray-700 transition-colors hover:scale-110"
-                    >
-                      <X size={20} />
-                    </button>
-                  </div>
-                  <table className="min-w-full divide-y divide-gray-200 text-sm">
-                    <thead>
-                      <tr>
-                        <th className="px-3 py-3 text-left font-semibold text-gray-700">Size</th>
-                        <th className="px-3 py-3 text-left font-semibold text-gray-700">Chest (in)</th>
-                        <th className="px-3 py-3 text-left font-semibold text-gray-700">Length (in)</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-200">
-                      <tr className="hover:bg-gray-50">
-                        <td className="px-3 py-3 font-medium">S</td>
-                        <td className="px-3 py-3">36-38</td>
-                        <td className="px-3 py-3">27-28</td>
-                      </tr>
-                      <tr className="hover:bg-gray-50">
-                        <td className="px-3 py-3 font-medium">M</td>
-                        <td className="px-3 py-3">39-41</td>
-                        <td className="px-3 py-3">28-29</td>
-                      </tr>
-                      <tr className="hover:bg-gray-50">
-                        <td className="px-3 py-3 font-medium">L</td>
-                        <td className="px-3 py-3">42-44</td>
-                        <td className="px-3 py-3">29-30</td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-              )}
+
             </div>
             
             {/* Enhanced color selection */}
@@ -430,12 +399,14 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, onGoBack }) => {
                   <Heart 
                     size={24} 
                     className={`mr-3 transition-all duration-300 ${
-                      isWishlistActive 
+                      isInWishlist(product.id)
                         ? "fill-red-500 text-red-500 animate-pulse" 
                         : "group-hover:text-red-500 group-hover:scale-110"
                     }`} 
                   />
-                  <span className="text-sm font-semibold">Save to Wishlist</span>
+                  <span className="text-sm font-semibold">
+                    {isInWishlist(product.id) ? 'Remove from Wishlist' : 'Save to Wishlist'}
+                  </span>
                 </button>
               </div>
               
@@ -485,6 +456,12 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, onGoBack }) => {
           </div>
         </div>
       )}
+
+      {/* Size Guide Modal */}
+      <SizeGuide 
+        isOpen={showSizeGuide} 
+        onClose={() => setShowSizeGuide(false)} 
+      />
 
       <style>
         {`

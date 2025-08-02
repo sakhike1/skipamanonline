@@ -4,6 +4,7 @@ import { CreditCard, SignalLow as PaypalLogo, AlertCircle, Shield, Sparkles } fr
 import { useCart } from '../../context/CartContext';
 import EmptyCart from './EmptyCart';
 import { motion } from 'framer-motion';
+import { getProductById } from '../../data/products';
 
 interface CheckoutFormProps {
   onComplete: (orderId: string) => void;
@@ -57,10 +58,10 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ onComplete }) => {
   };
 
   const formatPrice = (price: number) => {
-    return `R${price.toFixed(0)}`;
+    return `R${(price / 100).toFixed(2)}`;
   };
   const subtotal = cart.total;
-  const shipping = subtotal > 50 ? 0 : 5.99;
+  const shipping = subtotal > 50000 ? 0 : 599; // 50000 cents = R500, 599 cents = R5.99
   const tax = subtotal * 0.07;
   const total = subtotal + shipping + tax;
 
@@ -442,7 +443,7 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ onComplete }) => {
                                 </div>
                               </div>
                               <p className="text-sm font-medium text-white">
-                                {formatPrice(product.price * item.quantity)}
+                                {formatPrice((product?.price || 0) * item.quantity)}
                               </p>
                             </motion.div>
                           );
@@ -499,12 +500,5 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ onComplete }) => {
     </div>
   );
 };
-
-const getProductById = (id: string) => ({
-  id,
-  name: 'Product ' + id,
-  price: 29.99,
-  images: ['https://images.pexels.com/photos/5698851/pexels-photo-5698851.jpeg'],
-});
 
 export default CheckoutForm;

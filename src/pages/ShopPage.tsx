@@ -47,7 +47,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onClick }) => {
       <div className="p-4">
         <div className="flex justify-between items-start mb-1">
           <h3 className="font-medium text-black line-clamp-1">{product.name}</h3>
-          <span className="text-black font-medium">R{product.price.toFixed(0)}</span>
+          <span className="text-black font-medium">R{(product.price / 100).toFixed(2)}</span>
         </div>
         <p className="text-sm text-neutral-600 mb-3 capitalize">{product.category}</p>
         <button
@@ -128,22 +128,91 @@ const NewArrivalsSection: React.FC<{ onProductClick: (id: string) => void }> = (
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 0.2 }}
-                className="flex flex-wrap gap-4"
+                className="flex flex-wrap gap-6"
               >
-                <button
+                <motion.button
                   onClick={() => onProductClick(featuredProducts[0].id)}
-                  className="group relative px-12 py-3 font-medium overflow-hidden border-2 border-transparent rounded-full transition-all duration-300 bg-gradient-to-r from-gray-300 via-gray-400 to-gray-500 hover:from-yellow-400 hover:via-yellow-500 hover:to-yellow-600"
+                  className="group relative px-12 py-4 font-semibold overflow-hidden border-2 border-white/20 rounded-full transition-all duration-500 bg-gradient-to-r from-white/10 via-white/20 to-white/10 backdrop-blur-sm hover:border-white/40 hover:shadow-2xl hover:shadow-white/20"
+                  whileHover={{ 
+                    scale: 1.05,
+                    y: -2,
+                    boxShadow: "0 20px 40px rgba(255, 255, 255, 0.2)"
+                  }}
+                  whileTap={{ scale: 0.95 }}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: 0.3 }}
                 >
-                  <span className="relative z-10 text-black group-hover:text-black transition-colors duration-300">Shop Collection</span>
-                  <div className="absolute inset-0 bg-gradient-to-r from-yellow-400 via-yellow-500 to-yellow-600 transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-300"></div>
-                </button>
-                <button
+                  <span className="relative z-10 text-white group-hover:text-white transition-colors duration-300 flex items-center gap-2">
+                    <span>Shop Collection</span>
+                    <motion.div
+                      className="group-hover:translate-x-1 transition-transform duration-300"
+                      whileHover={{ x: 3 }}
+                    >
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" className="text-white">
+                        <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    </motion.div>
+                  </span>
+                  <motion.div
+                    className="absolute inset-0 bg-gradient-to-r from-white/20 via-white/30 to-white/20"
+                    initial={{ x: "-100%" }}
+                    whileHover={{ x: "100%" }}
+                    transition={{ duration: 0.6, ease: "easeInOut" }}
+                  />
+                  <motion.div
+                    className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent"
+                    animate={{ x: ["-100%", "200%"] }}
+                    transition={{
+                      duration: 2,
+                      repeat: Infinity,
+                      ease: "easeInOut",
+                      repeatDelay: 1.5,
+                    }}
+                  />
+                </motion.button>
+                
+                <motion.button
                   onClick={() => onProductClick(featuredProducts[1].id)}
-                  className="group relative px-12 py-3 font-medium overflow-hidden border-2 border-transparent rounded-full transition-all duration-300 bg-gradient-to-r from-yellow-400 via-yellow-500 to-yellow-600 hover:from-gray-300 hover:via-gray-400 hover:to-gray-500"
+                  className="group relative px-12 py-4 font-semibold overflow-hidden border-2 border-yellow-400/50 rounded-full transition-all duration-500 bg-gradient-to-r from-yellow-400/20 via-yellow-500/30 to-yellow-400/20 backdrop-blur-sm hover:border-yellow-400 hover:shadow-2xl hover:shadow-yellow-400/30"
+                  whileHover={{ 
+                    scale: 1.05,
+                    y: -2,
+                    boxShadow: "0 20px 40px rgba(255, 193, 7, 0.3)"
+                  }}
+                  whileTap={{ scale: 0.95 }}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: 0.4 }}
                 >
-                  <span className="relative z-10 text-black group-hover:text-black transition-colors duration-300">View New Arrivals</span>
-                  <div className="absolute inset-0 bg-gradient-to-r from-gray-300 via-gray-400 to-gray-500 transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-300"></div>
-                </button>
+                  <span className="relative z-10 text-yellow-400 group-hover:text-yellow-300 transition-colors duration-300 flex items-center gap-2">
+                    <span>View New Arrivals</span>
+                    <motion.div
+                      className="group-hover:translate-x-1 transition-transform duration-300"
+                      whileHover={{ x: 3 }}
+                    >
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" className="text-yellow-400">
+                        <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    </motion.div>
+                  </span>
+                  <motion.div
+                    className="absolute inset-0 bg-gradient-to-r from-yellow-400/20 via-yellow-500/30 to-yellow-400/20"
+                    initial={{ x: "-100%" }}
+                    whileHover={{ x: "100%" }}
+                    transition={{ duration: 0.6, ease: "easeInOut" }}
+                  />
+                  <motion.div
+                    className="absolute inset-0 bg-gradient-to-r from-transparent via-yellow-400/20 to-transparent"
+                    animate={{ x: ["-100%", "200%"] }}
+                    transition={{
+                      duration: 2,
+                      repeat: Infinity,
+                      ease: "easeInOut",
+                      repeatDelay: 1.5,
+                    }}
+                  />
+                </motion.button>
               </motion.div>
             </div>
 
@@ -278,7 +347,7 @@ const ShopPage: React.FC = () => {
   const navigate = useNavigate();
   const [showFilters, setShowFilters] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const [priceRange, setPriceRange] = useState<[number, number]>([0, 500]);
+  const [priceRange, setPriceRange] = useState<[number, number]>([0, 50000]);
   const [currentPage, setCurrentPage] = useState(1);
   const productsPerPage = 12;
 
@@ -328,7 +397,7 @@ const ShopPage: React.FC = () => {
 
   const clearFilters = () => {
     setSelectedCategory(null);
-    setPriceRange([0, 500]);
+    setPriceRange([0, 50000]);
     setCurrentPage(1); // Reset to first page when clearing filters
   };
 
@@ -411,17 +480,17 @@ const ShopPage: React.FC = () => {
                 <h3 className="text-sm font-semibold text-black mb-3 uppercase tracking-wider">Price Range</h3>
                 <div className="space-y-4">
                   <div className="flex justify-between text-sm text-neutral-700">
-                    <span>R{priceRange[0]}</span>
-                    <span>R{priceRange[1]}</span>
+                                    <span>R{(priceRange[0] / 100).toFixed(2)}</span>
+                <span>R{(priceRange[1] / 100).toFixed(2)}</span>
                   </div>
                   <div className="flex items-center gap-4">
                     <input
                       type="range"
                       min="0"
-                      max="500"
+                      max="50000"
                       value={priceRange[1]}
                       onChange={(e) => {
-                        setPriceRange([priceRange[0], parseInt(e.target.value)]);
+                        setPriceRange([priceRange[0], Number(e.target.value)]);
                         setCurrentPage(1);
                       }}
                       className="w-full h-1 bg-neutral-300 rounded-full appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-black"

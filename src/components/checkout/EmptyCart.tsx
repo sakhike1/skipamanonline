@@ -78,7 +78,7 @@ const EmptyCart = () => {
   };
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-gray-900">
+    <div className="relative flex items-center justify-center overflow-hidden bg-gray-900 pt-20 pb-20">
       <Background />
 
       {/* Decorative floating sparkles with responsive positioning */}

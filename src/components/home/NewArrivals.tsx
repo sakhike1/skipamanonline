@@ -14,14 +14,14 @@ const NewArrivals: React.FC = () => {
 
   // Color palette for the animation
   const colors = [
-    '#FFD700', // Gold
-    '#FFA500', // Orange
-    '#FFC0CB', // Pink
-    '#FF69B4', // Hot Pink
-    '#DAA520', // Goldenrod
-    '#B8860B', // Dark Goldenrod
-    '#FFB6C1', // Light Pink
-    '#FFDAB9', // Peach
+    '#8B5CF6', // Purple
+    '#A855F7', // Violet
+    '#C084FC', // Light Purple
+    '#E879F9', // Pink Purple
+    '#9333EA', // Dark Purple
+    '#7C3AED', // Purple
+    '#A855F7', // Violet
+    '#8B5CF6', // Purple
   ];
 
   // Different color palette for trending section
@@ -91,11 +91,11 @@ const NewArrivals: React.FC = () => {
     };
   }, [hoveredProductId]);
 
-  // Get the first 3 products for new arrivals
-  const newArrivals = products.slice(0, 3);
+  // Get the first 4 products for new arrivals
+  const newArrivals = products.slice(0, 4);
   
-  // Get the next 3 products for trending
-  const trendingProducts = products.slice(3, 6);
+  // Get the next 4 products for trending
+  const trendingProducts = products.slice(4, 8);
 
   const handleViewProduct = (e: React.MouseEvent, productId: string) => {
     e.stopPropagation();
@@ -130,16 +130,16 @@ const NewArrivals: React.FC = () => {
     return (
       <div 
         key={product.id} 
-        className="group cursor-pointer transform hover:-translate-y-2 transition-transform duration-500 ease-out" 
+        className="group cursor-pointer transform hover:-translate-y-1 transition-all duration-500 ease-out" 
         onClick={() => navigate(`/product/${product.id}`)}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
       >
         {/* Product Image and Overlay */}
         <div 
-          className={`aspect-[4/5] overflow-hidden relative shadow-lg 
+          className={`aspect-[3/4] overflow-hidden relative shadow-xl rounded-lg
             ${isDarkTheme ? 'bg-neutral-900 border-white/10 group-hover:border-white/30' : 'bg-neutral-100 border-gray-200 group-hover:border-gray-400'}
-            border-2 transition-all duration-500 ease-out
+            border transition-all duration-500 ease-out
           `}
         >
           {/* Preload all images */}
@@ -150,11 +150,11 @@ const NewArrivals: React.FC = () => {
               alt={`${product.name} - Image ${index + 1}`}
               className={`absolute inset-0 w-full h-full object-cover transition-all duration-700 ease-in-out
                 ${index === currentIndex ? 'opacity-100 z-10' : 'opacity-0 z-0'}
-                ${hoveredProductId === product.id ? 'scale-110' : 'scale-100'}
+                ${hoveredProductId === product.id ? 'scale-105' : 'scale-100'}
                 ${isTransitioning ? 'blur-[1px]' : 'blur-0'}
               `}
               style={{ 
-                transform: `scale(${hoveredProductId === product.id ? '1.1' : '1'})`,
+                transform: `scale(${hoveredProductId === product.id ? '1.05' : '1'})`,
                 filter: `blur(${isTransitioning ? '1px' : '0px'})`,
               }}
             />
@@ -168,23 +168,23 @@ const NewArrivals: React.FC = () => {
           <button 
             onClick={(e) => e.stopPropagation()}
             aria-label="Add to cart"
-            className={`absolute top-4 right-4 w-10 h-10 rounded-full flex items-center justify-center z-40
+            className={`absolute top-3 right-3 w-9 h-9 rounded-full flex items-center justify-center z-40
               opacity-0 group-hover:opacity-100 transition-all duration-300 scale-90 group-hover:scale-100 
-              hover:bg-opacity-90 active:scale-95 shadow-md
-              ${isDarkTheme ? 'bg-white text-black' : 'bg-black text-white'}`}
+              hover:bg-opacity-90 active:scale-95 shadow-lg
+              ${isDarkTheme ? 'bg-white/90 text-black backdrop-blur-sm' : 'bg-black/90 text-white backdrop-blur-sm'}`}
           >
-            <ShoppingBag size={16} />
+            <ShoppingBag size={14} />
           </button>
 
           {/* Image indicators */}
-          <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2 z-40">
+          <div className="absolute bottom-3 left-1/2 transform -translate-x-1/2 flex space-x-1.5 z-40">
             {product.images.map((_, index) => (
               <div
                 key={index}
-                className={`w-2 h-2 rounded-full transition-all duration-300
+                className={`w-1.5 h-1.5 rounded-full transition-all duration-300
                   ${index === currentIndex 
                     ? (isDarkTheme ? 'bg-white' : 'bg-black') 
-                    : (isDarkTheme ? 'bg-white/30' : 'bg-black/30')
+                    : (isDarkTheme ? 'bg-white/40' : 'bg-black/40')
                   }`}
               />
             ))}
@@ -192,30 +192,30 @@ const NewArrivals: React.FC = () => {
         </div>
 
         {/* Product Details */}
-        <div className="mt-6 space-y-3">
-          <h3 className={`text-xl tracking-wider font-normal transition-colors duration-200 
+        <div className="mt-4 space-y-2">
+          <h3 className={`text-lg tracking-wide font-medium transition-colors duration-200 
             ${isDarkTheme ? 'text-white group-hover:text-gray-200' : 'text-gray-900 group-hover:text-black'}`}>
             {product.name}
           </h3>
-          <p className={`text-lg font-light ${isDarkTheme ? 'text-white/60' : 'text-gray-600'}`}>
-            R{product.price.toFixed(0)}
+          <p className={`text-base font-semibold ${isDarkTheme ? 'text-purple-400' : 'text-gray-800'}`}>
+            R{(product.price / 100).toFixed(2)}
           </p>
           
           {/* "View Product" Button */}
           <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
             onClick={(e) => handleViewProduct(e, product.id)}
             aria-label={`View product details for ${product.name}`}
-            className={`mt-6 w-full py-4 text-sm tracking-widest transition-all duration-300 active:scale-98 
-              flex items-center justify-center space-x-2 overflow-hidden relative 
+            className={`mt-3 w-full py-2.5 text-sm tracking-wide transition-all duration-300 active:scale-98 
+              flex items-center justify-center space-x-2 overflow-hidden relative rounded-md
               ${isDarkTheme 
-                ? 'text-white border border-white/30 group-hover:text-black hover:border-white/50' 
+                ? 'text-white border border-white/30 group-hover:text-black hover:border-white/50 bg-white/5' 
                 : 'text-white bg-black border border-black hover:bg-white hover:text-black group-hover:text-black'
               }`}
           >
             <span className="z-10 transition-transform duration-300 font-medium group-hover:-translate-x-0.5">VIEW PRODUCT</span>
-            <ArrowRight size={16} className="z-10 relative opacity-0 -translate-x-4 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300 ml-2" />
+            <ArrowRight size={14} className="z-10 relative opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300" />
             <div className={`absolute inset-0 w-0 group-hover:w-full transition-all duration-300 ease-out
               ${isDarkTheme ? 'bg-white' : 'bg-white'}`}></div>
           </motion.button>
@@ -227,50 +227,77 @@ const NewArrivals: React.FC = () => {
   return (
     <>
       {/* New Arrivals Section - Dark Theme */}
-      <div className="bg-black py-20 md:py-32 text-white relative overflow-hidden">
+      <div className="bg-black py-16 md:py-24 text-white relative overflow-hidden">
         <div className="container mx-auto px-6 sm:px-8">
           {/* Section Header */}
-          <div className="flex flex-col md:flex-row justify-between items-start mb-16 md:mb-20">
-            <div className="space-y-4">
-              <motion.h2 
-                className="font-sans text-[clamp(3rem,7vw,5rem)] md:text-[clamp(5rem,9vw,8rem)] font-bold leading-none tracking-tight"
-                animate={{
-                  color: colors[colorIndex],
-                  textShadow: [
-                    '0 0 10px rgba(255, 215, 0, 0.3)',
-                    '0 0 20px rgba(255, 215, 0, 0.4)',
-                    '0 0 10px rgba(255, 215, 0, 0.3)',
-                  ],
-                }}
-                transition={{
-                  duration: 5,
-                  ease: "easeInOut",
-                  repeat: Infinity,
-                }}
+          <div className="flex flex-col md:flex-row justify-between items-start mb-12 md:mb-16">
+            <div className="space-y-6">
+              <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8 }}
+                className="space-y-2"
               >
-                NEW<br />COLLECTION
-              </motion.h2>
-              <p className="font-light text-white/70 tracking-[0.2em] text-sm uppercase">
-                Redefining modern aesthetics
-              </p>
+                <motion.h2 
+                  className="font-sans text-[clamp(2.5rem,6vw,4rem)] md:text-[clamp(4rem,8vw,6rem)] font-bold leading-none tracking-tight"
+                  animate={{
+                    color: colors[colorIndex],
+                    textShadow: [
+                      '0 0 20px rgba(139, 92, 246, 0.4)',
+                      '0 0 40px rgba(139, 92, 246, 0.6)',
+                      '0 0 20px rgba(139, 92, 246, 0.4)',
+                    ],
+                  }}
+                  transition={{
+                    duration: 4,
+                    ease: "easeInOut",
+                    repeat: Infinity,
+                  }}
+                >
+                  NEW<br />
+                  <span className="bg-gradient-to-r from-purple-400 via-purple-500 to-purple-600 bg-clip-text text-transparent">
+                    SPORT COLLECTION
+                  </span>
+                </motion.h2>
+                <motion.p 
+                  className="font-light text-white/80 tracking-[0.15em] text-sm uppercase max-w-md"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.8, delay: 0.2 }}
+                >
+                  Redefining modern aesthetics with premium craftsmanship
+                </motion.p>
+              </motion.div>
             </div>
-            <div className="mt-8 md:mt-0 pt-4 md:pt-0">
+            <motion.div 
+              className="mt-8 md:mt-0 pt-4 md:pt-0"
+              initial={{ opacity: 0, x: 30 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8, delay: 0.3 }}
+            >
               <button 
-                onClick={() => navigate('/shop')}
-                className="relative overflow-hidden group flex items-center gap-2 hover:gap-4 transition-all duration-300 text-sm tracking-widest uppercase text-white border border-white/20 px-6 py-3 rounded-full hover:border-white"
+                onClick={() => navigate('/new-arrivals')}
+                className="group relative overflow-hidden flex items-center gap-3 hover:gap-4 transition-all duration-300 text-sm tracking-widest uppercase text-white border border-white/30 px-8 py-4 rounded-full hover:border-purple-400 hover:shadow-lg hover:shadow-purple-400/20"
                 aria-label="View all new arrivals"
               >
-                <span className="relative z-10 transition-colors duration-300 group-hover:text-black">View all</span> 
-                <ArrowRight size={16} className="relative z-10 transition-transform duration-300 group-hover:translate-x-1 group-hover:text-black" />
-                <div className="absolute inset-0 bg-white transform -translate-x-full group-hover:translate-x-0 transition-transform duration-300 ease-out"></div>
+                <span className="relative z-10 transition-colors duration-300 group-hover:text-purple-400">View all</span> 
+                <ArrowRight size={18} className="relative z-10 transition-transform duration-300 group-hover:translate-x-1 group-hover:text-purple-400" />
+                <div className="absolute inset-0 bg-gradient-to-r from-purple-400/10 to-purple-600/10 transform -translate-x-full group-hover:translate-x-0 transition-transform duration-300 ease-out"></div>
               </button>
-            </div>
+            </motion.div>
           </div>
 
           {/* Product Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-16 gap-x-10 md:gap-x-16">
-            {newArrivals.map(product => (
-              <ProductCard key={product.id} product={product} theme="dark" />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-10">
+            {newArrivals.slice(0, 4).map((product, index) => (
+              <motion.div
+                key={product.id}
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: index * 0.1 }}
+              >
+                <ProductCard product={product} theme="dark" />
+              </motion.div>
             ))}
           </div>
         </div>
@@ -318,9 +345,16 @@ const NewArrivals: React.FC = () => {
           </div>
 
           {/* Product Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-16 gap-x-10 md:gap-x-16">
-            {trendingProducts.map(product => (
-              <ProductCard key={product.id} product={product} theme="light" />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-10">
+            {trendingProducts.slice(0, 4).map((product, index) => (
+              <motion.div
+                key={product.id}
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: index * 0.1 }}
+              >
+                <ProductCard product={product} theme="light" />
+              </motion.div>
             ))}
           </div>
         </div>

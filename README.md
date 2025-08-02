@@ -1,129 +1,267 @@
-# Project Title
-THREADAI Shop
+# 🛍️ E-Commerce Application with Real API
 
-## Description
-THREADAI Shop is a modern e-commerce platform offering premium t-shirts with unique AI-inspired designs.
+A modern e-commerce application built with React, TypeScript, and a real Node.js/Express backend API with JWT authentication.
 
-## Features
-- Browse a curated collection of AI-inspired t-shirt designs.
-- View detailed information and images for each product.
-- Add and remove products from your shopping cart.
-- Seamless checkout process.
-- Responsive design for a great experience on desktops, tablets, and mobile devices.
-- User-friendly interface for easy navigation.
+## 🚀 Features
 
-## Tech Stack
-- **Frontend:** React, TypeScript
-- **Styling:** Tailwind CSS
-- **Routing:** React Router
-- **Build Tool:** Vite
-- **Icons:** Lucide React
-- **Linting:** ESLint
-- **Testing:** Jest
+### Frontend (React + TypeScript)
+- **Modern UI/UX**: Beautiful, responsive design with Tailwind CSS and Framer Motion
+- **JWT Authentication**: Complete login/register system with token management
+- **Protected Routes**: Role-based access control (user/admin)
+- **Shopping Features**: Product browsing, wishlist, cart management
+- **Admin Dashboard**: User management and statistics
+- **Real-time Updates**: Live authentication state management
 
-## Getting Started
+### Backend (Node.js + Express)
+- **RESTful API**: Complete CRUD operations
+- **JWT Authentication**: Secure token-based authentication
+- **Password Hashing**: bcrypt for secure password storage
+- **Input Validation**: Express-validator for data validation
+- **Security Middleware**: Helmet, CORS, rate limiting
+- **Error Handling**: Comprehensive error management
+- **Role-based Authorization**: Admin and user roles
+
+## 📁 Project Structure
+
+```
+project/
+├── src/                    # Frontend React application
+│   ├── components/         # React components
+│   ├── context/           # React context providers
+│   ├── pages/             # Page components
+│   ├── services/          # API service layer
+│   └── types/             # TypeScript type definitions
+├── backend/               # Backend Node.js API
+│   ├── middleware/        # Express middleware
+│   ├── models/           # Data models
+│   ├── routes/           # API routes
+│   ├── server.js         # Main server file
+│   └── package.json      # Backend dependencies
+└── README.md             # This file
+```
+
+## 🛠️ Setup Instructions
 
 ### Prerequisites
+- Node.js (v16 or higher)
+- npm or yarn
 
-Make sure you have Node.js and npm (or yarn) installed on your system.
-- Node.js (LTS version recommended): [https://nodejs.org/](https://nodejs.org/)
-- npm is included with Node.js
+### 1. Backend Setup
 
-### Installation
+```bash
+# Navigate to backend directory
+cd project/backend
 
-1.  **Clone the repository:**
-    ```bash
-    git clone https://github.com/your-username/thread-ai-shop.git
-    cd thread-ai-shop
-    ```
-    *(Replace `your-username/thread-ai-shop.git` with the actual repository URL if different)*
+# Install dependencies
+npm install
 
-2.  **Install dependencies:**
-    ```bash
-    npm install
-    ```
-    *(Or `yarn install` if you prefer yarn)*
+# Create environment file
+cp env.example .env
 
-3.  **Run the development server:**
-    ```bash
-    npm run dev
-    ```
-    This will start the development server, typically at `http://localhost:5173`. Open this URL in your browser to see the application.
+# Edit .env file with your configuration
+# Update JWT_SECRET and other settings as needed
 
-## Available Scripts
--   `npm run dev`
-    -   Starts the development server using Vite.
--   `npm run build`
-    -   Builds the application for production to the `dist` folder.
--   `npm run lint`
-    -   Lints the codebase using ESLint to identify and fix code style issues.
--   `npm run preview`
-    -   Serves the production build locally to preview before deployment.
--   `npm run test`
-    -   Runs unit tests using Jest.
--   `npm run test:watch`
-    -   Runs unit tests in watch mode, automatically re-running tests when files change.
--   `npm run test:coverage`
-    -   Generates a test coverage report.
-
-## Folder Structure
-```
-thread-ai-shop/
-├── public/             # Static assets
-├── src/                # Source files
-│   ├── components/     # Reusable UI components (e.g., Cart, ProductCard, Layout)
-│   │   ├── cart/
-│   │   ├── checkout/
-│   │   ├── home/
-│   │   ├── layout/
-│   │   ├── product/
-│   │   └── ui/         # General purpose UI elements (Button, LoadingSkeleton)
-│   ├── context/        # React context for state management (e.g., CartContext)
-│   ├── data/           # Static data, mock data (e.g., product information)
-│   ├── pages/          # Top-level page components (e.g., HomePage, ProductPage, CheckoutPage)
-│   ├── types/          # TypeScript type definitions
-│   ├── App.tsx         # Main application component
-│   ├── main.tsx        # Entry point of the application
-│   └── index.css       # Global styles or Tailwind base styles
-├── .gitignore          # Files and folders to be ignored by Git
-├── index.html          # Main HTML file
-├── package.json        # Project metadata and dependencies
-├── vite.config.ts      # Vite configuration
-├── tailwind.config.js  # Tailwind CSS configuration
-├── tsconfig.json       # TypeScript compiler options
-└── README.md           # Project documentation (this file)
+# Start the backend server
+npm run dev
 ```
 
-A brief overview of key directories:
--   `src/components`: Contains reusable UI components, organized by feature (e.g., `cart`, `product`) or general UI elements (`ui`).
--   `src/pages`: Houses the main page components that correspond to different routes in the application.
--   `src/context`: Used for managing global state using React's Context API (e.g., `CartContext`).
--   `src/data`: Stores static data or mock data, such as product information.
--   `public`: Contains static assets that are served directly.
+The backend will start on `http://localhost:3001`
 
-## Contributing
-Contributions are welcome! If you'd like to contribute to THREADAI Shop, please follow these general guidelines:
+### 2. Frontend Setup
 
-1.  Fork the repository.
-2.  Create a new branch for your feature or bug fix: `git checkout -b feature/your-feature-name` or `bugfix/issue-tracker-id`.
-3.  Make your changes, ensuring code is clean and well-commented where necessary.
-4.  Write or update tests for your changes.
-5.  Ensure all tests pass: `npm run test`.
-6.  Lint your code: `npm run lint`.
-7.  Commit your changes with a clear and descriptive commit message.
-8.  Push your branch to your fork: `git push origin feature/your-feature-name`.
-9.  Open a pull request to the main repository's `main` (or `develop`) branch.
+```bash
+# Navigate to project root
+cd project
 
-For more detailed contribution guidelines, please refer to the `CONTRIBUTING.md` file (if available).
+# Install dependencies
+npm install
 
-## License
-This project is currently unlicensed.
+# Start the frontend development server
+npm run dev
+```
 
-Consider adding an open-source license to define how others can use, modify, and distribute your code. Common choices include:
--   **MIT License:** Permissive and simple.
--   **Apache License 2.0:** Permissive, provides patent protection.
--   **GNU GPLv3:** Strong copyleft license.
+The frontend will start on `http://localhost:5173`
 
-You can add a `LICENSE` file to the root of your project and link to it here. For example:
+## 🔧 Configuration
 
-`This project is licensed under the MIT License - see the [LICENSE](LICENSE.md) file for details.`
+### Backend Environment Variables (.env)
+
+```env
+# Server Configuration
+PORT=3001
+NODE_ENV=development
+
+# JWT Configuration
+JWT_SECRET=your-super-secret-jwt-key-change-this-in-production
+JWT_EXPIRES_IN=24h
+JWT_REFRESH_EXPIRES_IN=7d
+
+# Security
+BCRYPT_ROUNDS=12
+RATE_LIMIT_WINDOW_MS=900000
+RATE_LIMIT_MAX_REQUESTS=100
+
+# CORS Configuration
+CORS_ORIGIN=http://localhost:5173
+```
+
+### Frontend API Configuration
+
+Update the API base URL in `src/services/authService.ts`:
+
+```typescript
+const API_BASE_URL = 'http://localhost:3001/api';
+```
+
+## 🔐 Authentication
+
+### Demo Credentials
+
+**Admin User:**
+- Email: `admin@demo.com`
+- Password: `admin123`
+
+**Regular User:**
+- Register a new account through the signup form
+
+### API Endpoints
+
+#### Authentication
+- `POST /api/auth/register` - Register new user
+- `POST /api/auth/login` - Login user
+- `POST /api/auth/logout` - Logout user
+- `POST /api/auth/refresh` - Refresh JWT token
+- `GET /api/auth/me` - Get current user
+
+#### Users (Admin Only)
+- `GET /api/users` - Get all users
+- `GET /api/users/:id` - Get user by ID
+- `PUT /api/users/:id` - Update user
+- `DELETE /api/users/:id` - Delete user
+- `GET /api/users/stats/overview` - Get user statistics
+
+#### Products
+- `GET /api/products` - Get all products
+- `GET /api/products/:id` - Get product by ID
+- `GET /api/products/categories/list` - Get product categories
+
+## 🎯 Key Features
+
+### 1. Real Authentication Flow
+- Users must register before logging in
+- Secure password hashing with bcrypt
+- JWT tokens with refresh mechanism
+- Automatic token validation and refresh
+
+### 2. Enhanced Error Handling
+- Clear error messages for different scenarios
+- Smart user guidance (e.g., "Account not found" → "Create account")
+- Professional error UI with animations
+
+### 3. Admin Dashboard
+- View all registered users
+- User statistics and analytics
+- Role-based access control
+- Real-time data from API
+
+### 4. Security Features
+- JWT token validation
+- Password hashing
+- Rate limiting
+- CORS protection
+- Input validation
+- Role-based authorization
+
+## 🚀 Production Deployment
+
+### Backend Deployment
+1. Set `NODE_ENV=production`
+2. Use a strong `JWT_SECRET`
+3. Configure proper CORS origins
+4. Set up a real database (MongoDB, PostgreSQL, etc.)
+5. Use environment variables for sensitive data
+
+### Frontend Deployment
+1. Build the application: `npm run build`
+2. Deploy to Vercel, Netlify, or your preferred hosting
+3. Update API base URL to production endpoint
+4. Configure environment variables
+
+## 🔄 Database Integration
+
+The current implementation uses in-memory storage. To integrate with a real database:
+
+### MongoDB Example
+```bash
+npm install mongoose
+```
+
+### PostgreSQL Example
+```bash
+npm install pg sequelize
+```
+
+Update the User model in `backend/models/user.js` to use your database.
+
+## 🧪 Testing
+
+### Backend Testing
+```bash
+cd backend
+npm test
+```
+
+### Frontend Testing
+```bash
+npm test
+```
+
+## 📝 API Documentation
+
+### Authentication Flow
+1. **Register**: `POST /api/auth/register`
+2. **Login**: `POST /api/auth/login`
+3. **Access Protected Routes**: Include `Authorization: Bearer <token>` header
+4. **Refresh Token**: `POST /api/auth/refresh` when token expires
+5. **Logout**: `POST /api/auth/logout`
+
+### Error Responses
+All API endpoints return consistent error responses:
+```json
+{
+  "error": "Error Type",
+  "message": "Human-readable error message"
+}
+```
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Add tests if applicable
+5. Submit a pull request
+
+## 📄 License
+
+This project is licensed under the MIT License.
+
+## 🆘 Support
+
+If you encounter any issues:
+1. Check the console for error messages
+2. Verify your environment configuration
+3. Ensure both frontend and backend are running
+4. Check the API endpoints are accessible
+
+## 🎉 What's Next?
+
+- [ ] Add real database integration
+- [ ] Implement product management
+- [ ] Add payment processing
+- [ ] Email verification
+- [ ] Password reset functionality
+- [ ] User profile management
+- [ ] Order management system
+- [ ] Analytics dashboard
+- [ ] Mobile app development

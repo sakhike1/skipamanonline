@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
-import { ShoppingBag, Search, Menu, X, Loader2, TrendingUp, Sparkles } from 'lucide-react';
+import { ShoppingBag, Search, Menu, X, Loader2, TrendingUp, Sparkles, Heart, User, LogOut, Settings, Shield } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useCart } from '../../context/CartContext';
+import { useWishlist } from '../../context/WishlistContext';
+import { useAuth } from '../../context/AuthContext';
 import { useHeader } from '../../context/HeaderContext';
 import CartPreview from '../cart/CartPreview';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -16,12 +18,15 @@ interface NavItem {
 
 const Header: React.FC = () => {
   const { cart } = useCart();
+  const { wishlist } = useWishlist();
+  const { user, isAuthenticated, logout } = useAuth();
   const { isHeaderDark } = useHeader();
   const location = useLocation();
   const navigate = useNavigate();
   const [isScrolled, setIsScrolled] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [showCartPreview, setShowCartPreview] = useState(false);
+  const [showUserMenu, setShowUserMenu] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [showSearchDropdown, setShowSearchDropdown] = useState(false);
   const [isSearchFocused, setIsSearchFocused] = useState(false);
@@ -30,10 +35,13 @@ const Header: React.FC = () => {
   const [hotProducts, setHotProducts] = useState(products.slice(0, 3)); // Get first 3 products as hottest
   const searchInputRef = useRef<HTMLInputElement>(null);
   const searchContainerRef = useRef<HTMLDivElement>(null);
+  const userMenuRef = useRef<HTMLDivElement>(null);
   const inactivityTimerRef = useRef<NodeJS.Timeout>();
   const isShopPage = location.pathname === '/shop';
   const isAboutPage = location.pathname === '/about';
   const isCheckoutPage = location.pathname === '/checkout';
+  const isWishlistPage = location.pathname === '/wishlist';
+  const isLoginPage = location.pathname === '/login';
   
   // Optimized scroll handler with debounce
   const handleScroll = useCallback(
@@ -86,6 +94,7 @@ const Header: React.FC = () => {
       setShowMobileMenu(false);
       setShowCartPreview(false);
       setIsSearchFocused(false);
+      setShowUserMenu(false);
     }
   }, []);
 
@@ -93,11 +102,33 @@ const Header: React.FC = () => {
     document.addEventListener('keydown', handleKeyDown as any);
     return () => document.removeEventListener('keydown', handleKeyDown as any);
   }, [handleKeyDown]);
+
+  // Handle click outside user menu
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
+        setShowUserMenu(false);
+      }
+    };
+
+    if (showUserMenu) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showUserMenu]);
   
   // Memoized cart count calculation
   const cartItemCount = useMemo(() => {
     return cart.items.reduce((total, item) => total + item.quantity, 0);
   }, [cart.items]);
+  
+  // Memoized wishlist count calculation
+  const wishlistCount = useMemo(() => {
+    return wishlist.items.length;
+  }, [wishlist.items]);
   
   const toggleMobileMenu = useCallback(() => {
     setShowMobileMenu(prev => !prev);
@@ -107,16 +138,30 @@ const Header: React.FC = () => {
     setShowCartPreview(prev => !prev);
   }, []);
   
+  const toggleUserMenu = useCallback(() => {
+    setShowUserMenu(prev => !prev);
+  }, []);
+  
+  const handleLogout = useCallback(async () => {
+    try {
+      await logout();
+      setShowUserMenu(false);
+      navigate('/');
+    } catch (error) {
+      console.error('Logout failed:', error);
+    }
+  }, [logout, navigate]);
+  
   // Determine text and icon colors based on scroll state and background
   const getTextColor = useCallback(() => {
-    if (location.pathname.includes('/product/') || isShopPage || isAboutPage || isCheckoutPage) {
+    if (location.pathname.includes('/product/') || isShopPage || isAboutPage || isCheckoutPage || isWishlistPage) {
       return 'text-white';
     }
     if (isScrolled) {
       return 'text-gray-800';
     }
     return 'text-white';
-  }, [isScrolled, location.pathname, isShopPage, isAboutPage, isCheckoutPage]);
+  }, [isScrolled, location.pathname, isShopPage, isAboutPage, isCheckoutPage, isWishlistPage]);
 
   const getHoverBgColor = useCallback(() => {
     if (isScrolled) return 'hover:bg-gray-100';
@@ -245,7 +290,7 @@ const Header: React.FC = () => {
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
         isAboutPage || isCheckoutPage
           ? 'bg-gradient-to-r from-purple-900/95 via-black/90 to-black/95 backdrop-blur-sm shadow-md py-2'
-          : isHeaderDark || isShopPage
+          : isHeaderDark || isShopPage || isWishlistPage || isLoginPage
             ? 'bg-black/95 backdrop-blur-sm shadow-md py-2'
             : isScrolled
               ? 'bg-white/95 backdrop-blur-sm shadow-md py-2'
@@ -463,6 +508,150 @@ const Header: React.FC = () => {
               </AnimatePresence>
             </motion.button>
             
+            {/* Wishlist Button */}
+            <motion.button 
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className={`
+                p-2 rounded-full relative transition-all ${textColor} ${hoverBgColor}
+              `}
+              onClick={() => navigate('/wishlist')}
+              aria-label={`Wishlist with ${wishlistCount} items`}
+            >
+              <Heart size={22} className="[filter:drop-shadow(0px_0px_1px_rgba(255,255,255,0.5))]" />
+              <AnimatePresence>
+                {wishlistCount > 0 && (
+                  <motion.span 
+                    className={`absolute -top-1 -right-1 ${isHeaderDark && !isScrolled ? 'bg-white text-black' : 'bg-black text-white'} 
+                    text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center`}
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    exit={{ scale: 0 }}
+                    transition={{ type: 'spring', stiffness: 500, damping: 25 }}
+                  >
+                    {wishlistCount}
+                  </motion.span>
+                )}
+              </AnimatePresence>
+            </motion.button>
+            
+            {/* User Menu / Login Button */}
+            {isAuthenticated ? (
+              <div className="relative" ref={userMenuRef}>
+                <motion.button 
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className={`
+                    flex items-center gap-2 px-3 py-2 rounded-full transition-all ${textColor} ${hoverBgColor}
+                  `}
+                  onClick={toggleUserMenu}
+                  aria-label="User menu"
+                >
+                  <User size={18} className="[filter:drop-shadow(0px_0px_1px_rgba(255,255,255,0.5))]" />
+                  <span className="hidden sm:block text-sm font-medium">
+                    {user?.firstName}
+                  </span>
+                </motion.button>
+                
+                {/* User Menu Dropdown */}
+                <AnimatePresence>
+                  {showUserMenu && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                      className="absolute right-0 mt-2 w-64 bg-white/10 backdrop-blur-xl rounded-lg overflow-hidden z-[100] border border-white/20 shadow-[0_8px_32px_0_rgba(31,38,135,0.15)]"
+                    >
+                      <div className="p-4">
+                        {/* Welcome Message */}
+                        <div className="mb-3">
+                          <p className="text-white/60 text-xs uppercase tracking-wider">
+                            Welcome back
+                          </p>
+                        </div>
+                        
+                        {/* User Info */}
+                        <div className="px-3 py-3 border-b border-white/10 mb-3">
+                          <p className="text-white font-semibold text-lg">
+                            {user?.firstName} {user?.lastName}
+                          </p>
+                          <p className="text-white/70 text-sm">
+                            {user?.email}
+                          </p>
+                          <div className="mt-2">
+                            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-500/20 text-purple-300 border border-purple-500/30">
+                              {user?.role === 'admin' ? 'Administrator' : 'Customer'}
+                            </span>
+                          </div>
+                        </div>
+                        
+                        {/* Menu Items */}
+                        <div className="space-y-1">
+                          <Link
+                            to="/profile"
+                            className="flex items-center px-3 py-2 text-sm text-white hover:bg-white/20 rounded-md transition-colors"
+                            onClick={() => setShowUserMenu(false)}
+                          >
+                            <User size={16} className="mr-3" />
+                            My Profile
+                          </Link>
+                          <Link
+                            to="/wishlist"
+                            className="flex items-center px-3 py-2 text-sm text-white hover:bg-white/20 rounded-md transition-colors"
+                            onClick={() => setShowUserMenu(false)}
+                          >
+                            <Heart size={16} className="mr-3" />
+                            My Wishlist
+                          </Link>
+                          <Link
+                            to="/settings"
+                            className="flex items-center px-3 py-2 text-sm text-white hover:bg-white/20 rounded-md transition-colors"
+                            onClick={() => setShowUserMenu(false)}
+                          >
+                            <Settings size={16} className="mr-3" />
+                            Settings
+                          </Link>
+                          {user?.role === 'admin' && (
+                            <Link
+                              to="/admin"
+                              className="flex items-center px-3 py-2 text-sm text-purple-300 hover:bg-purple-500/20 rounded-md transition-colors"
+                              onClick={() => setShowUserMenu(false)}
+                            >
+                              <Shield size={16} className="mr-3" />
+                              Admin Dashboard
+                            </Link>
+                          )}
+                          <div className="border-t border-white/10 my-2"></div>
+                          <button
+                            onClick={handleLogout}
+                            className="flex items-center w-full px-3 py-2 text-sm text-red-400 hover:bg-red-500/20 rounded-md transition-colors"
+                          >
+                            <LogOut size={16} className="mr-3" />
+                            Sign Out
+                          </button>
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            ) : (
+              <motion.button 
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className={`
+                  flex items-center gap-2 px-3 py-2 rounded-full transition-all ${textColor} ${hoverBgColor}
+                `}
+                onClick={() => navigate('/login')}
+                aria-label="Login"
+              >
+                <User size={18} className="[filter:drop-shadow(0px_0px_1px_rgba(255,255,255,0.5))]" />
+                <span className="hidden sm:block text-sm font-medium">
+                  Sign In
+                </span>
+              </motion.button>
+            )}
+            
             {/* Mobile Menu Button */}
             <motion.button 
               whileHover={{ scale: 1.05 }}
@@ -534,6 +723,14 @@ const Header: React.FC = () => {
                   className="pt-2 mt-2 border-t border-gray-100"
                   variants={mobileItemVariants}
                 >
+                  <Link
+                    to="/wishlist"
+                    className="text-gray-800 text-lg font-medium py-3 px-2 rounded-md hover:bg-gray-50 transition-all block"
+                    onClick={() => setShowMobileMenu(false)}
+                    aria-label="View my wishlist"
+                  >
+                    Wishlist {wishlistCount > 0 && `(${wishlistCount})`}
+                  </Link>
                   <Link
                     to="/account"
                     className="text-gray-800 text-lg font-medium py-3 px-2 rounded-md hover:bg-gray-50 transition-all block"

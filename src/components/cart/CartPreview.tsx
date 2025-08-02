@@ -15,7 +15,7 @@ const CartPreview: React.FC<CartPreviewProps> = ({ onClose }) => {
   
   // Format price
   const formatPrice = (price: number) => {
-    return `R${price.toFixed(0)}`;
+    return `R${(price / 100).toFixed(2)}`;
   };
   
   // Click outside handler

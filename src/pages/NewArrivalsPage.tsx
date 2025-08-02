@@ -1,8 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { products, getFeaturedProducts } from '../data/products';
-import { Filter, X, ArrowRight, ShoppingBag, Tag, Sparkles } from 'lucide-react';
+import { Filter, X, ArrowRight, ShoppingBag, Tag, Sparkles, Search } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import Skeleton from '../components/ui/LoadingSkeleton';
+import SearchBar from '../components/ui/SearchBar';
+import { useInfiniteScroll } from '../hooks/useInfiniteScroll';
 
 interface ProductCardProps {
   product: {
@@ -56,7 +59,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onClick }) => {
               {/* Glassmorphism Content Card */}
               <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-3">
                 <h3 className="text-white text-lg font-medium mb-1 drop-shadow-lg line-clamp-1 uppercase tracking-wide">{product.name}</h3>
-                <p className="text-white/90 mb-2 font-semibold">R500</p>
+                <p className="text-white/90 mb-2 font-semibold">R{(product.price / 100).toFixed(2)}</p>
                 <p className="text-white/80 text-sm capitalize mb-3">{product.category}</p>
         <button
           onClick={(e) => { e.stopPropagation(); onClick(product.id); }}
@@ -159,11 +162,15 @@ const NewArrivalsPage: React.FC = () => {
   const navigate = useNavigate();
   const [showFilters, setShowFilters] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const [priceRange, setPriceRange] = useState<[number, number]>([0, 500]);
+  const [priceRange, setPriceRange] = useState<[number, number]>([0, 50000]);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [currentPage, setCurrentPage] = useState(1);
   const [colorIndex, setColorIndex] = useState(0);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [displayedProducts, setDisplayedProducts] = useState<any[]>([]);
+  const [hasMore, setHasMore] = useState(true);
   const productsPerPage = 12;
   
   // Gold glitz color palette
@@ -183,6 +190,44 @@ const NewArrivalsPage: React.FC = () => {
     '/images/4.jpg',
     '/images/5.jpg'
   ];
+
+  // Initialize products
+  useEffect(() => {
+    const loadInitialProducts = async () => {
+      setIsLoading(true);
+      // Simulate API call delay
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      const initialProducts = getFeaturedProducts().slice(0, productsPerPage);
+      setDisplayedProducts(initialProducts);
+      setIsLoading(false);
+    };
+    
+    loadInitialProducts();
+  }, []);
+
+  // Load more products function for infinite scroll
+  const loadMoreProducts = useCallback(async () => {
+    if (isLoading || !hasMore) return;
+    
+    setIsLoading(true);
+    // Simulate API call delay
+    await new Promise(resolve => setTimeout(resolve, 800));
+    
+    const allProducts = getFeaturedProducts();
+    const currentLength = displayedProducts.length;
+    const nextProducts = allProducts.slice(currentLength, currentLength + productsPerPage);
+    
+    if (nextProducts.length === 0) {
+      setHasMore(false);
+    } else {
+      setDisplayedProducts(prev => [...prev, ...nextProducts]);
+    }
+    
+    setIsLoading(false);
+  }, [isLoading, hasMore, displayedProducts.length]);
+
+  // Infinite scroll hook
+  const { observerRef } = useInfiniteScroll(loadMoreProducts, hasMore);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -216,17 +261,23 @@ const NewArrivalsPage: React.FC = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
   
-  const filteredProducts = newArrivals.filter(product => {
-    if (selectedCategory && product.category !== selectedCategory) return false;
-    if (product.price < priceRange[0] || product.price > priceRange[1]) return false;
-    return true;
+  // Enhanced filtering with search
+  const filteredProducts = displayedProducts.filter(product => {
+    const matchesSearch = searchQuery === '' || 
+      product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      product.category.toLowerCase().includes(searchQuery.toLowerCase());
+    
+    const matchesCategory = !selectedCategory || product.category === selectedCategory;
+    const matchesPrice = product.price >= priceRange[0] && product.price <= priceRange[1];
+    
+    return matchesSearch && matchesCategory && matchesPrice;
   });
 
-  // Calculate pagination
-  const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
-  const indexOfLastProduct = currentPage * productsPerPage;
-  const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
-  const currentProducts = filteredProducts.slice(indexOfFirstProduct, indexOfLastProduct);
+  // Handle search
+  const handleSearch = (query: string) => {
+    setSearchQuery(query);
+    setCurrentPage(1);
+  };
   
   const handleProductClick = (productId: string) => {
     navigate(`/product/${productId}`);
@@ -236,8 +287,9 @@ const NewArrivalsPage: React.FC = () => {
   
   const clearFilters = () => {
     setSelectedCategory(null);
-    setPriceRange([0, 500]);
-    setCurrentPage(1); // Reset to first page when clearing filters
+    setPriceRange([0, 50000]);
+    setSearchQuery('');
+    setCurrentPage(1);
   };
 
   const handlePageChange = (pageNumber: number) => {
@@ -248,100 +300,221 @@ const NewArrivalsPage: React.FC = () => {
   return (
     <div>
       {/* Hero Section: full black bg with padding-top */}
-      <div className="bg-black text-white pt-28 md:pt-32 px-6 md:px-20 pb-20">
-        <div className="md:flex md:items-center md:justify-between gap-12">
+      <div className="bg-black text-white pt-28 md:pt-32 px-6 md:px-20 pb-20 relative overflow-hidden">
+        {/* Animated background elements */}
+        <div className="absolute inset-0">
+          <div className="absolute top-20 left-10 w-96 h-96 bg-gradient-to-r from-purple-500/20 to-purple-600/20 rounded-full blur-3xl animate-pulse"></div>
+          <div className="absolute bottom-20 right-10 w-80 h-80 bg-gradient-to-r from-purple-400/20 to-purple-500/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-72 h-72 bg-gradient-to-r from-purple-600/15 to-purple-700/15 rounded-full blur-3xl animate-pulse delay-500"></div>
+        </div>
+        
+        <div className="md:flex md:items-center md:justify-between gap-12 relative z-10">
           <div className="md:w-1/2 flex justify-center md:justify-start">
-            <div className="w-full max-w-[900px] h-[500px] overflow-hidden rounded relative">
-              {/* Red-Black Gradient Overlay */}
-              <div className="absolute inset-0 bg-gradient-to-br from-red-900 via-red-800 to-black opacity-60 z-10"></div>
+            <motion.div 
+              className="w-full max-w-[900px] h-[500px] overflow-hidden rounded-2xl relative shadow-2xl"
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.8, ease: "easeOut" }}
+            >
+              {/* Enhanced Purple Gradient Overlay */}
+              <div className="absolute inset-0 bg-gradient-to-br from-purple-900/70 via-purple-800/50 to-black/60 z-10"></div>
               
               {/* Rotating Images */}
               <AnimatePresence mode="wait">
                 <motion.img 
                   key={currentImageIndex}
                   src={heroImages[currentImageIndex]}
-                alt="Sport Collection" 
-                  className="w-full h-[1000px] object-cover rounded absolute inset-0"
+                  alt="Sport Collection" 
+                  className="w-full h-[1000px] object-cover rounded-2xl absolute inset-0"
                   initial={{ opacity: 0, scale: 1.1 }}
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.9 }}
                   transition={{ duration: 1, ease: "easeInOut" }}
-                loading="lazy"
-              />
+                  loading="lazy"
+                />
               </AnimatePresence>
-            </div>
+              
+              {/* Floating badge */}
+              <motion.div 
+                className="absolute top-6 left-6 bg-white/10 backdrop-blur-md border border-white/20 rounded-full px-4 py-2 z-20"
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.5, duration: 0.6 }}
+              >
+                <span className="text-sm font-medium text-white uppercase tracking-wider">New Arrivals</span>
+              </motion.div>
+            </motion.div>
           </div>
+          
           <div className="md:w-1/2 flex flex-col justify-center items-start relative z-20">
-            <motion.h1 
-              className="text-7xl font-extrabold uppercase tracking-widest leading-none"
-              animate={{
-                color: colors[colorIndex],
-                textShadow: [
-                  '0 0 10px rgba(255, 215, 0, 0.5)',
-                  '0 0 20px rgba(255, 215, 0, 0.7)',
-                  '0 0 10px rgba(255, 215, 0, 0.5)',
-                ],
-              }}
-              transition={{
-                duration: 2,
-                ease: "easeInOut",
-                repeat: Infinity,
-              }}
+            <motion.div
+              initial={{ opacity: 0, x: 30 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+              className="space-y-6"
             >
-              <span>NEW</span><br />
-              <span>SPORT COLLECTION</span>
-            </motion.h1>
-            <p className="mt-6 max-w-lg text-gray-400 leading-relaxed">
-              The brand was originally aimed at men's fashion. Starting in 1995 women's fashion was launched in all its dimensions: from the most urban lines to the more casual.
-            </p>
-            <button 
+              {/* Enhanced title with better typography */}
+              <div className="space-y-4">
+                <motion.h1 
+                  className="text-4xl md:text-5xl lg:text-6xl font-black uppercase tracking-tight leading-none"
+                  animate={{
+                    color: colors[colorIndex],
+                    textShadow: [
+                      '0 0 20px rgba(139, 92, 246, 0.6)',
+                      '0 0 40px rgba(139, 92, 246, 0.8)',
+                      '0 0 20px rgba(139, 92, 246, 0.6)',
+                    ],
+                  }}
+                  transition={{
+                    duration: 2,
+                    ease: "easeInOut",
+                    repeat: Infinity,
+                  }}
+                >
+                  <span className="block">NEW</span>
+                  <span className="block bg-gradient-to-r from-purple-400 via-purple-500 to-purple-600 bg-clip-text text-transparent">
+                    SPORT
+                  </span>
+                  <span className="block">COLLECTION</span>
+                </motion.h1>
+              </div>
+              
+              {/* Enhanced description */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 0.4 }}
+                className="space-y-4"
+              >
+                <p className="text-lg md:text-xl text-gray-300 leading-relaxed max-w-lg font-light">
+                  The brand was originally aimed at men's fashion. Starting in <span className="text-purple-400 font-semibold">1995</span> women's fashion was launched in all its dimensions: from the most urban lines to the more casual.
+                </p>
+                
+                {/* Feature highlights */}
+                <div className="flex flex-wrap gap-4 pt-4">
+                  <div className="flex items-center gap-2 bg-white/10 backdrop-blur-md border border-white/20 rounded-full px-4 py-2">
+                    <div className="w-2 h-2 bg-purple-400 rounded-full"></div>
+                    <span className="text-sm font-medium text-white">Premium Quality</span>
+                  </div>
+                  <div className="flex items-center gap-2 bg-white/10 backdrop-blur-md border border-white/20 rounded-full px-4 py-2">
+                    <div className="w-2 h-2 bg-purple-400 rounded-full"></div>
+                    <span className="text-sm font-medium text-white">Urban Style</span>
+                  </div>
+                  <div className="flex items-center gap-2 bg-white/10 backdrop-blur-md border border-white/20 rounded-full px-4 py-2">
+                    <div className="w-2 h-2 bg-purple-400 rounded-full"></div>
+                    <span className="text-sm font-medium text-white">Casual Comfort</span>
+                  </div>
+                </div>
+              </motion.div>
+              
+              {/* Enhanced CTA buttons */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 0.6 }}
+                className="flex flex-col sm:flex-row gap-4 pt-6"
+              >
+                <motion.button 
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => navigate('/shop')}
+                  className="group relative overflow-hidden bg-gradient-to-r from-purple-400 to-purple-600 text-white px-8 py-4 rounded-full font-semibold text-lg tracking-wide hover:shadow-lg hover:shadow-purple-400/30 transition-all duration-300"
+                >
+                  <span className="relative z-10">Shop Collection</span>
+                  <div className="absolute inset-0 bg-gradient-to-r from-purple-500 to-purple-700 transform translate-x-full group-hover:translate-x-0 transition-transform duration-300 ease-out"></div>
+                </motion.button>
+                
+                <motion.button 
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => navigate('/new-arrivals')}
+                  className="group relative overflow-hidden border-2 border-white/30 text-white px-8 py-4 rounded-full font-semibold text-lg tracking-wide hover:border-purple-400 transition-all duration-300"
+                >
+                  <span className="relative z-10">View Lookbook</span>
+                  <div className="absolute inset-0 bg-purple-400 transform translate-x-full group-hover:translate-x-0 transition-transform duration-300 ease-out"></div>
+                </motion.button>
+              </motion.div>
+            </motion.div>
+            
+            {/* Enhanced scroll button */}
+            <motion.button 
               aria-label="Scroll Down"
               onClick={() => window.scrollTo({ top: window.innerHeight, behavior: 'smooth' })}
-              className="mt-16 border border-gray-600 rounded-full p-3 flex items-center justify-center hover:border-white transition"
+              className="mt-16 group relative"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.8 }}
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.95 }}
             >
-              <svg
-                width="24"
-                height="24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="animate-bounce"
-              >
-                <path d="M6 9l6 6 6-6" />
-              </svg>
-            </button>
+              <div className="border-2 border-white/30 rounded-full p-4 flex items-center justify-center hover:border-purple-400 transition-all duration-300 group-hover:bg-white/10">
+                <svg
+                  width="24"
+                  height="24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="animate-bounce text-purple-400"
+                >
+                  <path d="M6 9l6 6 6-6" />
+                </svg>
+              </div>
+              <span className="block text-sm text-gray-400 mt-2 group-hover:text-purple-400 transition-colors duration-300">Scroll to explore</span>
+            </motion.button>
           </div>
         </div>
       </div>
 
       {/* Below section: white background with black text */}
       <div className="bg-white text-black min-h-screen px-6 md:px-20 py-12">
-        {/* Filter & Product Count Header */}
-        <div className="flex justify-between items-center mb-8 border-b border-gray-300 pb-3">
-          <h2 className="text-3xl font-bold uppercase tracking-wider">Latest Collection</h2>
-          <p className="text-gray-600">{filteredProducts.length} product{filteredProducts.length !== 1 ? 's' : ''}</p>
-        </div>
-
-        {/* Filter Toggle Button for Mobile */}
-        <div className="md:hidden mb-6">
-          <button
-            onClick={toggleFilters}
-            className="flex items-center justify-center w-full gap-2 py-3 bg-black text-white rounded-full text-sm font-semibold hover:bg-gray-800 transition-colors"
-          >
-            {showFilters ? (
-              <>
-                <X size={16} />
-                <span>Close Filters</span>
-              </>
-            ) : (
-              <>
-                <Filter size={16} />
-                <span>Show Filters</span>
-              </>
-            )}
-          </button>
+        {/* Modern Search & Filter Header */}
+        <div className="mb-8 space-y-6">
+          {/* Search Bar */}
+          <div className="flex justify-center">
+            <SearchBar 
+              onSearch={handleSearch}
+              placeholder="Search for products, categories, or trends..."
+              className="w-full max-w-2xl"
+            />
+          </div>
+          
+          {/* Results & Filter Toggle */}
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <div className="flex items-center gap-4">
+              <h2 className="text-3xl font-bold uppercase tracking-wider">Latest Collection</h2>
+              {searchQuery && (
+                <span className="text-sm text-gray-600 bg-gray-100 px-3 py-1 rounded-full">
+                  "{searchQuery}" - {filteredProducts.length} results
+                </span>
+              )}
+            </div>
+            
+            <div className="flex items-center gap-4">
+              <p className="text-gray-600">{filteredProducts.length} product{filteredProducts.length !== 1 ? 's' : ''}</p>
+              
+              {/* Mobile Filter Toggle */}
+              <div className="md:hidden">
+                <button
+                  onClick={toggleFilters}
+                  className="flex items-center gap-2 py-2 px-4 bg-black text-white rounded-full text-sm font-semibold hover:bg-gray-800 transition-colors"
+                >
+                  {showFilters ? (
+                    <>
+                      <X size={16} />
+                      <span>Close</span>
+                    </>
+                  ) : (
+                    <>
+                      <Filter size={16} />
+                      <span>Filters</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Main Content: Filters + Products */}
@@ -386,13 +559,13 @@ const NewArrivalsPage: React.FC = () => {
                 <div>
                   <h4 className="text-sm font-semibold mb-4 uppercase tracking-wide">Price Range</h4>
                   <div className="flex justify-between text-gray-600 text-sm mb-4">
-                    <span>R{priceRange[0]}</span>
-                    <span>R{priceRange[1]}</span>
+                                    <span>R{(priceRange[0] / 100).toFixed(2)}</span>
+                <span>R{(priceRange[1] / 100).toFixed(2)}</span>
                   </div>
                   <input
                     type="range"
                     min="0"
-                    max="500"
+                    max="50000"
                     value={priceRange[1]}
                     onChange={(e) => {
                       setPriceRange([priceRange[0], Number(e.target.value)]);
@@ -468,67 +641,65 @@ const NewArrivalsPage: React.FC = () => {
 
           {/* Products Grid */}
           <section className="flex-1">
-            {currentProducts.length > 0 ? (
+            {/* Initial Loading State */}
+            {displayedProducts.length === 0 && isLoading ? (
+              <Skeleton type="product" count={8} />
+            ) : filteredProducts.length > 0 ? (
               <>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
                   <PromoCard onClick={() => navigate('/summer-sale')} />
-                  {currentProducts.map(product => (
+                  {filteredProducts.map(product => (
                     <ProductCard key={product.id} product={product} onClick={handleProductClick} />
                   ))}
                 </div>
                 
-                {/* Pagination */}
-                {totalPages > 1 && (
-                  <div className="flex justify-center items-center space-x-2 mt-8">
-                    <button
-                      onClick={() => handlePageChange(currentPage - 1)}
-                      disabled={currentPage === 1}
-                      className={`px-3 py-1 rounded-md ${
-                        currentPage === 1
-                          ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                          : 'bg-black text-white hover:bg-neutral-800'
-                      }`}
-                    >
-                      Previous
-                    </button>
-                    
-                    {[...Array(totalPages)].map((_, index) => (
-                      <button
-                        key={index + 1}
-                        onClick={() => handlePageChange(index + 1)}
-                        className={`px-3 py-1 rounded-md ${
-                          currentPage === index + 1
-                            ? 'bg-black text-white'
-                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                        }`}
-                      >
-                        {index + 1}
-                      </button>
-                    ))}
-                    
-                    <button
-                      onClick={() => handlePageChange(currentPage + 1)}
-                      disabled={currentPage === totalPages}
-                      className={`px-3 py-1 rounded-md ${
-                        currentPage === totalPages
-                          ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                          : 'bg-black text-white hover:bg-neutral-800'
-                      }`}
-                    >
-                      Next
-                    </button>
+                {/* Infinite Scroll Loading */}
+                {isLoading && (
+                  <div className="mt-8 flex justify-center">
+                    <div className="flex items-center gap-3">
+                      <div className="w-6 h-6 border-2 border-gray-300 border-t-black rounded-full animate-spin"></div>
+                      <span className="text-gray-600">Loading more products...</span>
+                    </div>
                   </div>
                 )}
+                
+                {/* Infinite Scroll Observer */}
+                <div 
+                  ref={observerRef}
+                  className="h-10 mt-8 flex items-center justify-center"
+                >
+                  {hasMore && !isLoading && (
+                    <div className="text-gray-500 text-sm">
+                      Scroll to load more products
+                    </div>
+                  )}
+                  {!hasMore && filteredProducts.length > 0 && (
+                    <div className="text-gray-500 text-sm">
+                      You've reached the end of our collection
+                    </div>
+                  )}
+                </div>
               </>
             ) : (
               <div className="flex flex-col items-center justify-center py-24 bg-transparent border border-gray-300 rounded-lg">
-                <p className="text-gray-600 mb-6">No products match your filters</p>
-                <button
-                  onClick={clearFilters}
-                  className="px-6 py-2 rounded-full bg-black text-white hover:bg-gray-900 transition"
-                >
-                  Clear Filters
-                </button>
+                <div className="text-center space-y-4">
+                  <div className="w-16 h-16 mx-auto bg-gray-100 rounded-full flex items-center justify-center">
+                    <Search className="w-8 h-8 text-gray-400" />
+                  </div>
+                  <h3 className="text-xl font-semibold text-gray-800">No products found</h3>
+                  <p className="text-gray-600 max-w-md">
+                    {searchQuery 
+                      ? `No products match "${searchQuery}". Try adjusting your search or filters.`
+                      : "No products match your current filters. Try adjusting your preferences."
+                    }
+                  </p>
+                  <button
+                    onClick={clearFilters}
+                    className="px-6 py-3 rounded-full bg-black text-white hover:bg-gray-900 transition-all duration-300 hover:scale-105"
+                  >
+                    Clear All Filters
+                  </button>
+                </div>
               </div>
             )}
           </section>
