@@ -149,7 +149,6 @@ const LoginForm: React.FC = () => {
         </motion.div>
 
         {/* Error Messages */}
-        {console.log('Rendering error message, errorInfo:', errorInfo)}
         {errorInfo && (
           <motion.div
             initial={{ opacity: 0, y: -10 }}

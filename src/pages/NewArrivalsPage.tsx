@@ -427,7 +427,15 @@ const NewArrivalsPage: React.FC = () => {
                 <motion.button 
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.98 }}
-                  onClick={() => navigate('/new-arrivals')}
+                  onClick={() => {
+                    const productsSection = document.getElementById('products-section');
+                    if (productsSection) {
+                      productsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    } else {
+                      // Fallback: scroll to a specific position
+                      window.scrollTo({ top: window.innerHeight, behavior: 'smooth' });
+                    }
+                  }}
                   className="group relative overflow-hidden border-2 border-white/30 text-white px-8 py-4 rounded-full font-semibold text-lg tracking-wide hover:border-purple-400 transition-all duration-300"
                 >
                   <span className="relative z-10">View Lookbook</span>
@@ -468,7 +476,7 @@ const NewArrivalsPage: React.FC = () => {
       </div>
 
       {/* Below section: white background with black text */}
-      <div className="bg-white text-black min-h-screen px-6 md:px-20 py-12">
+      <div id="products-section" className="bg-white text-black min-h-screen px-6 md:px-20 py-12">
         {/* Modern Search & Filter Header */}
         <div className="mb-8 space-y-6">
           {/* Search Bar */}

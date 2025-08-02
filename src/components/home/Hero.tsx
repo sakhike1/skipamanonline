@@ -6,7 +6,6 @@ import image4 from '../../assets/image1.jpg';
 import image5 from '../../assets/image1.jpg';
 import video1 from '../../assets/video1.mp4';
 import { useNavigate } from 'react-router-dom';
-import { videoPreloader, videoUtils } from '../../utils/videoPreloader';
 
 interface SlideData {
   id: string;
@@ -160,157 +159,6 @@ const ParticleEffect: React.FC<{ key: string }> = () => {
   );
 };
 
-// Optimized Video Component with preloading
-const OptimizedVideo: React.FC<{
-  src: string;
-  thumbnail?: string;
-  onLoad: () => void;
-  onError: () => void;
-  isPlaying: boolean;
-  onTogglePlay: () => void;
-}> = ({ src, thumbnail, onLoad, onError, isPlaying, onTogglePlay }) => {
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const [isLoaded, setIsLoaded] = useState(false);
-  const [hasError, setHasError] = useState(false);
-  const [isPreloaded, setIsPreloaded] = useState(false);
-
-  // Check if video is already preloaded
-  useEffect(() => {
-    if (videoPreloader.isPreloaded(src)) {
-      setIsPreloaded(true);
-      setIsLoaded(true);
-      onLoad();
-    }
-  }, [src, onLoad]);
-
-  // Preload video when component mounts
-  useEffect(() => {
-    if (!isPreloaded && videoRef.current) {
-      // Set preload attributes for faster loading
-      videoRef.current.preload = 'metadata';
-      videoRef.current.load();
-      
-      // Start loading the video data
-      const loadVideo = async () => {
-        try {
-          if (videoRef.current) {
-            await videoRef.current.play();
-            videoRef.current.pause();
-            setIsLoaded(true);
-            onLoad();
-          }
-        } catch (error) {
-          console.warn('Video preload failed:', error);
-          // Continue anyway, video will load when needed
-        }
-      };
-      
-      loadVideo();
-    }
-  }, [src, onLoad, isPreloaded]);
-
-  // Handle video playback when isPlaying changes
-  useEffect(() => {
-    if (videoRef.current && isLoaded) {
-      if (isPlaying) {
-        videoRef.current.play().catch(console.error);
-      } else {
-        videoRef.current.pause();
-      }
-    }
-  }, [isPlaying, isLoaded]);
-
-  const handleCanPlay = () => {
-    setIsLoaded(true);
-    onLoad();
-    
-    // Start playing if it should be playing
-    if (isPlaying && videoRef.current) {
-      videoRef.current.play().catch(console.error);
-    }
-  };
-
-  const handleError = () => {
-    setHasError(true);
-    onError();
-  };
-
-  const handleTogglePlay = () => {
-    if (videoRef.current) {
-      if (isPlaying) {
-        videoRef.current.pause();
-      } else {
-        videoRef.current.play().catch(console.error);
-      }
-      onTogglePlay();
-    }
-  };
-
-  if (hasError) {
-    return (
-      <div className="absolute inset-0 flex items-center justify-center bg-gray-900/50">
-        <p className="text-white">Failed to load video</p>
-      </div>
-    );
-  }
-
-  return (
-    <>
-      {/* Show thumbnail while video loads */}
-      {!isLoaded && thumbnail && (
-        <motion.img
-          src={thumbnail}
-          alt="Video thumbnail"
-          className="absolute inset-0 w-full h-full object-cover"
-          initial={{ opacity: 1 }}
-          animate={{ opacity: isLoaded ? 0 : 1 }}
-          transition={{ duration: 0.3 }}
-        />
-      )}
-      
-      {/* Loading indicator */}
-      {!isLoaded && (
-        <div className="absolute inset-0 flex items-center justify-center bg-gray-900/50">
-          <Loader2 className="w-8 h-8 text-white animate-spin" />
-        </div>
-      )}
-      
-      {/* Video element */}
-      <video
-        ref={videoRef}
-        src={src}
-        className="absolute inset-0 w-full h-full object-cover"
-        loop
-        muted
-        playsInline
-        autoPlay
-        preload="metadata"
-        poster={thumbnail}
-        onCanPlay={handleCanPlay}
-        onError={handleError}
-        style={{ opacity: isLoaded ? 1 : 0 }}
-      />
-      
-      {/* Play/Pause overlay */}
-      <button
-        onClick={handleTogglePlay}
-        className="absolute inset-0 w-full h-full flex items-center justify-center bg-black/20 hover:bg-black/30 transition-colors"
-        aria-label={isPlaying ? 'Pause video' : 'Play video'}
-      >
-        {!isPlaying && isLoaded && (
-          <motion.div
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            className="w-16 h-16 rounded-full bg-white/90 flex items-center justify-center"
-          >
-            <Play className="w-8 h-8 text-black" />
-          </motion.div>
-        )}
-      </button>
-    </>
-  );
-};
-
 const HeroSection: React.FC = () => {
   const navigate = useNavigate();
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
@@ -321,33 +169,10 @@ const HeroSection: React.FC = () => {
   const [currentTextIndex, setCurrentTextIndex] = useState(0);
   const [leftTextIndex, setLeftTextIndex] = useState(0);
   const [rightTextIndex, setRightTextIndex] = useState(0);
+  const videoRef = useRef<HTMLVideoElement>(null);
   const slideInterval = useRef<NodeJS.Timeout | null>(null);
   const textInterval = useRef<NodeJS.Timeout | null>(null);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
-
-  // Preload all videos on component mount
-  useEffect(() => {
-    const videoSlides = SLIDES_DATA.filter(slide => slide.media.type === 'video');
-    const videoUrls = videoSlides.map(slide => ({
-      src: slide.media.url,
-      options: { priority: 'high' as const, preload: 'metadata' as const }
-    }));
-    
-    // Preload videos in background
-    videoPreloader.preloadMultiple(videoUrls).catch(console.warn);
-  }, []);
-
-  // Preload next video when current slide changes
-  useEffect(() => {
-    const currentSlide = SLIDES_DATA[currentSlideIndex];
-    if (currentSlide.media.type === 'video') {
-      // Preload the video with high priority
-      videoPreloader.preloadVideo(currentSlide.media.url, {
-        priority: 'high',
-        preload: 'metadata'
-      }).catch(console.warn);
-    }
-  }, [currentSlideIndex]);
 
   const startAutoSlide = useCallback(() => {
     if (slideInterval.current) clearInterval(slideInterval.current);
@@ -418,7 +243,14 @@ const HeroSection: React.FC = () => {
   };
 
   const togglePlay = () => {
-    setIsPlaying(!isPlaying);
+    if (videoRef.current) {
+      if (isPlaying) {
+        videoRef.current.pause();
+      } else {
+        videoRef.current.play();
+      }
+      setIsPlaying(!isPlaying);
+    }
   };
 
   const currentSlide = SLIDES_DATA[currentSlideIndex];
@@ -426,14 +258,47 @@ const HeroSection: React.FC = () => {
   const renderMedia = () => {
     if (currentSlide.media.type === 'video') {
       return (
-        <OptimizedVideo
-          src={currentSlide.media.url}
-          thumbnail={currentSlide.media.thumbnail}
-          onLoad={handleMediaLoad}
-          onError={handleMediaError}
-          isPlaying={isPlaying}
-          onTogglePlay={togglePlay}
-        />
+        <>
+          {isMediaLoading && (
+            <div className="absolute inset-0 flex items-center justify-center bg-gray-900/50">
+              <Loader2 className="w-8 h-8 text-white animate-spin" />
+            </div>
+          )}
+          {mediaError ? (
+            <div className="absolute inset-0 flex items-center justify-center bg-gray-900/50">
+              <p className="text-white">Failed to load video</p>
+            </div>
+          ) : (
+            <>
+              <video
+                ref={videoRef}
+                src={currentSlide.media.url}
+                className="absolute inset-0 w-full h-full object-cover"
+                loop
+                muted
+                playsInline
+                autoPlay
+                onLoad={handleMediaLoad}
+                onError={handleMediaError}
+              />
+              <button
+                onClick={togglePlay}
+                className="absolute inset-0 w-full h-full flex items-center justify-center bg-black/20 hover:bg-black/30 transition-colors"
+                aria-label={isPlaying ? 'Pause video' : 'Play video'}
+              >
+                {!isPlaying && (
+                  <motion.div
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    className="w-16 h-16 rounded-full bg-white/90 flex items-center justify-center"
+                  >
+                    <Play className="w-8 h-8 text-black" />
+                  </motion.div>
+                )}
+              </button>
+            </>
+          )}
+        </>
       );
     }
 

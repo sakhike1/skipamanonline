@@ -176,6 +176,13 @@ async function handleStaticRequest(request) {
 // Handle page requests
 async function handlePageRequest(request) {
   try {
+    // Check if the request URL is cacheable (exclude chrome-extension, data:, etc.)
+    const url = new URL(request.url);
+    if (url.protocol === 'chrome-extension:' || url.protocol === 'data:' || url.protocol === 'blob:') {
+      // For unsupported schemes, just fetch without caching
+      return await fetch(request);
+    }
+    
     const networkResponse = await fetch(request);
     
     if (networkResponse.ok) {
