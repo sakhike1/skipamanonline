@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useReducer, useEffect, ReactNode } from 'react';
 import { User, LoginCredentials, RegisterCredentials } from '../types';
-import authService from '../services/authService';
+import firebaseAuthService from '../firebase/authService';
 
 // Auth State Interface
 interface AuthState {
@@ -91,32 +91,23 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   // Initialize auth state on app load
   useEffect(() => {
-    const initializeAuth = async () => {
-      try {
-        if (authService.isAuthenticated()) {
-          const user = authService.getCurrentUser();
-          if (user) {
-            dispatch({ type: 'AUTH_SUCCESS', payload: user });
-          } else {
-            dispatch({ type: 'AUTH_FAILURE', payload: 'User data not found' });
-          }
-        } else {
-          dispatch({ type: 'AUTH_FAILURE', payload: 'Not authenticated' });
-        }
-      } catch (error) {
-        dispatch({ type: 'AUTH_FAILURE', payload: 'Authentication initialization failed' });
+    const unsubscribe = firebaseAuthService.onAuthStateChanged((user) => {
+      if (user) {
+        dispatch({ type: 'AUTH_SUCCESS', payload: user });
+      } else {
+        dispatch({ type: 'AUTH_FAILURE', payload: 'Not authenticated' });
       }
-    };
+    });
 
-    initializeAuth();
+    return () => unsubscribe();
   }, []);
 
   // Login function
   const login = async (credentials: LoginCredentials) => {
     try {
       dispatch({ type: 'AUTH_START' });
-      const response = await authService.login(credentials);
-      dispatch({ type: 'AUTH_SUCCESS', payload: response.user });
+      const user = await firebaseAuthService.login(credentials.email, credentials.password);
+      dispatch({ type: 'AUTH_SUCCESS', payload: user });
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Login failed';
       console.log('AuthContext: Setting error:', errorMessage); // Debug log
@@ -133,8 +124,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const register = async (credentials: RegisterCredentials) => {
     try {
       dispatch({ type: 'AUTH_START' });
-      const response = await authService.register(credentials);
-      dispatch({ type: 'AUTH_SUCCESS', payload: response.user });
+      const user = await firebaseAuthService.register(
+        credentials.email, 
+        credentials.password, 
+        credentials.firstName, 
+        credentials.lastName
+      );
+      dispatch({ type: 'AUTH_SUCCESS', payload: user });
     } catch (error) {
       dispatch({ 
         type: 'AUTH_FAILURE', 
@@ -146,7 +142,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   // Logout function
   const logout = async () => {
     try {
-      await authService.logout();
+      await firebaseAuthService.logout();
       dispatch({ type: 'AUTH_LOGOUT' });
     } catch (error) {
       // Even if logout API fails, clear local state

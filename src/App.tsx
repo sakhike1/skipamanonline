@@ -4,6 +4,8 @@ import { CartProvider } from './context/CartContext';
 import { WishlistProvider } from './context/WishlistContext';
 import { AuthProvider } from './context/AuthContext';
 import { HeaderProvider } from './context/HeaderContext';
+import { ProfileProvider } from './context/ProfileContext';
+import { OrderProvider } from './context/OrderContext';
 import Layout from './components/layout/Layout';
 import LoadingScreen from './components/ui/LoadingScreen';
 import ProtectedRoute from './components/auth/ProtectedRoute';
@@ -17,6 +19,7 @@ const NewArrivalsPage = lazy(() => import('./pages/NewArrivalsPage'));
 const SearchPage = lazy(() => import('./pages/SearchPage'));
 const WishlistPage = lazy(() => import('./pages/WishlistPage'));
 const CheckoutPage = lazy(() => import('./pages/CheckoutPage'));
+const SettingsPage = lazy(() => import('./pages/SettingsPage'));
 const LoginForm = lazy(() => import('./components/auth/LoginForm'));
 const RegisterForm = lazy(() => import('./components/auth/RegisterForm'));
 const AdminPage = lazy(() => import('./pages/AdminPage'));
@@ -32,14 +35,16 @@ const PageLoader = () => (
 function App() {
   return (
     <AuthProvider>
-      <CartProvider>
-        <WishlistProvider>
-          <HeaderProvider>
-            <LoadingScreen />
-            <Router>
-              <Layout>
-                <Suspense fallback={<PageLoader />}>
-                  <Routes>
+      <ProfileProvider>
+        <OrderProvider>
+          <CartProvider>
+            <WishlistProvider>
+              <HeaderProvider>
+                <LoadingScreen />
+                <Router>
+                  <Layout>
+                    <Suspense fallback={<PageLoader />}>
+                      <Routes>
                     {/* Public Routes */}
                     <Route path="/" element={<HomePage />} />
                     <Route path="/shop" element={<ShopPage />} />
@@ -70,6 +75,22 @@ function App() {
                         </ProtectedRoute>
                       } 
                     />
+                    <Route 
+                      path="/settings" 
+                      element={
+                        <ProtectedRoute>
+                          <SettingsPage />
+                        </ProtectedRoute>
+                      } 
+                    />
+                    <Route 
+                      path="/profile" 
+                      element={
+                        <ProtectedRoute>
+                          <SettingsPage />
+                        </ProtectedRoute>
+                      } 
+                    />
                     
                     {/* Admin Routes */}
                     <Route 
@@ -87,6 +108,8 @@ function App() {
           </HeaderProvider>
         </WishlistProvider>
       </CartProvider>
+        </OrderProvider>
+      </ProfileProvider>
     </AuthProvider>
   );
 }

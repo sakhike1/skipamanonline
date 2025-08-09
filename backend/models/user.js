@@ -9,6 +9,57 @@ let users = [
     lastName: 'User',
     password: '$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewdBPj4J/HS.iK2O', // admin123
     role: 'admin',
+    phone: '',
+    dateOfBirth: '',
+    gender: 'prefer_not_to_say',
+    addresses: [],
+    preferences: {
+      language: 'en',
+      currency: 'USD',
+      emailNotifications: {
+        orderUpdates: true,
+        promotions: true,
+        newsletter: true
+      }
+    },
+    createdAt: new Date('2024-01-01').toISOString(),
+    updatedAt: new Date('2024-01-01').toISOString()
+  },
+  {
+    id: 'user_001',
+    email: 'user@demo.com',
+    firstName: 'John',
+    lastName: 'Doe',
+    password: '$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewdBPj4J/HS.iK2O', // admin123
+    role: 'user',
+    phone: '+1234567890',
+    dateOfBirth: '1990-01-01',
+    gender: 'male',
+    addresses: [
+      {
+        id: 'addr_001',
+        firstName: 'John',
+        lastName: 'Doe',
+        company: '',
+        address1: '123 Main St',
+        address2: 'Apt 4B',
+        city: 'New York',
+        state: 'NY',
+        postalCode: '10001',
+        country: 'USA',
+        phone: '+1234567890',
+        isDefault: true
+      }
+    ],
+    preferences: {
+      language: 'en',
+      currency: 'USD',
+      emailNotifications: {
+        orderUpdates: true,
+        promotions: true,
+        newsletter: true
+      }
+    },
     createdAt: new Date('2024-01-01').toISOString(),
     updatedAt: new Date('2024-01-01').toISOString()
   }
@@ -44,6 +95,19 @@ class User {
       lastName,
       password: hashedPassword,
       role,
+      phone: '',
+      dateOfBirth: '',
+      gender: 'prefer_not_to_say',
+      addresses: [],
+      preferences: {
+        language: 'en',
+        currency: 'USD',
+        emailNotifications: {
+          orderUpdates: true,
+          promotions: true,
+          newsletter: true
+        }
+      },
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };

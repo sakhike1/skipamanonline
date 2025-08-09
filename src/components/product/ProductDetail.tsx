@@ -400,8 +400,8 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, onGoBack }) => {
                     size={24} 
                     className={`mr-3 transition-all duration-300 ${
                       isInWishlist(product.id)
-                        ? "fill-red-500 text-red-500 animate-pulse" 
-                        : "group-hover:text-red-500 group-hover:scale-110"
+                        ? "fill-purple-500 text-purple-500 animate-pulse" 
+                        : "group-hover:text-purple-500 group-hover:scale-110"
                     }`} 
                   />
                   <span className="text-sm font-semibold">

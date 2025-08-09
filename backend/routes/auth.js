@@ -10,7 +10,7 @@ const router = express.Router();
 const generateToken = (userId) => {
   return jwt.sign(
     { userId },
-    process.env.JWT_SECRET,
+    process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-this-in-production',
     { expiresIn: process.env.JWT_EXPIRES_IN || '24h' }
   );
 };
@@ -19,7 +19,7 @@ const generateToken = (userId) => {
 const generateRefreshToken = (userId) => {
   return jwt.sign(
     { userId, type: 'refresh' },
-    process.env.JWT_SECRET,
+    process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-this-in-production',
     { expiresIn: process.env.JWT_REFRESH_EXPIRES_IN || '7d' }
   );
 };
@@ -169,7 +169,7 @@ router.post('/refresh', async (req, res) => {
     }
 
     // Verify refresh token
-    const decoded = jwt.verify(refreshToken, process.env.JWT_SECRET);
+    const decoded = jwt.verify(refreshToken, process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-this-in-production');
     
     if (decoded.type !== 'refresh') {
       return res.status(401).json({

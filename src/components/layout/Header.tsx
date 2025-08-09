@@ -363,11 +363,23 @@ const Header: React.FC = () => {
               <motion.div
                 ref={searchContainerRef}
                 initial={false}
-                animate={{ width: isSearchFocused ? 200 : 40 }}
-                className="relative"
+                animate={{ 
+                  width: isSearchFocused ? 280 : 48,
+                  scale: isSearchFocused ? 1.02 : 1
+                }}
+                className="relative group"
                 onMouseMove={handleMouseMove}
                 onMouseLeave={handleMouseLeave}
               >
+                {/* Glow effect on focus */}
+                <div className={`
+                  absolute inset-0 rounded-full blur-xl transition-all duration-500
+                  ${isSearchFocused 
+                    ? 'bg-gradient-to-r from-yellow-400/30 via-orange-400/20 to-pink-400/30' 
+                    : 'bg-transparent'
+                  }
+                `}></div>
+                
                 <input
                   ref={searchInputRef}
                   type="text"
@@ -377,35 +389,76 @@ const Header: React.FC = () => {
                   onBlur={handleSearchBlur}
                   placeholder={isSearchFocused ? "Search products..." : ""}
                   className={`
-                    w-full px-4 py-2 rounded-full 
+                    relative w-full px-5 py-3 rounded-full 
                     ${isSearchFocused 
-                      ? 'bg-white/20 backdrop-blur-xl border-white/30' 
-                      : 'bg-black/10 backdrop-blur-md border-white/10'
+                      ? 'bg-white/25 backdrop-blur-xl border-white/40 shadow-lg shadow-white/10' 
+                      : 'bg-black/15 backdrop-blur-md border-white/15 hover:bg-black/20'
                     }
-                    ${isScrolled ? 'text-black placeholder-black/60' : 'text-white placeholder-white/60'}
+                    ${isScrolled ? 'text-black placeholder-black/70' : 'text-white placeholder-white/70'}
                     border
-                    focus:outline-none focus:ring-1 focus:ring-white/40 focus:border-white/40
+                    focus:outline-none focus:ring-1 focus:ring-yellow-400/50 focus:border-yellow-400/50
                     shadow-[0_8px_32px_0_rgba(31,38,135,0.15)]
-                    transition-all duration-300
-                    hover:bg-white/25
+                    transition-all duration-500 ease-out
+                    text-sm font-medium
+                    group-hover:border-white/30
                   `}
                   aria-label="Search products"
                 />
+                
+                {/* Search icon with animation */}
+                <motion.button
+                  type="button"
+                  onClick={() => searchInputRef.current?.focus()}
+                  className="absolute left-3 top-1/2 -translate-y-1/2 p-2 rounded-full hover:bg-white/10 transition-all duration-300 cursor-pointer z-10"
+                  animate={{ 
+                    opacity: isSearchFocused ? 0 : 1,
+                    scale: isSearchFocused ? 0.8 : 1,
+                    x: isSearchFocused ? -10 : 0
+                  }}
+                  transition={{ duration: 0.3 }}
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
+                >
+                  <Search 
+                    size={18} 
+                    className={`
+                      ${isScrolled ? 'text-black/70' : 'text-white/70'}
+                      transition-colors duration-300
+                    `} 
+                  />
+                </motion.button>
+                
+                {/* Submit button with modern styling */}
                 <motion.button
                   type="submit"
                   className={`
-                    absolute right-2 top-1/2 -translate-y-1/2 p-1
-                    rounded-full transition-all 
-                    ${isScrolled ? 'text-black hover:text-black/90' : 'text-white hover:text-white/90'}
-                    hover:bg-white/20
+                    absolute right-2 top-1/2 -translate-y-1/2 p-2
+                    rounded-full transition-all duration-300
+                    ${isSearchFocused 
+                      ? 'bg-gradient-to-r from-yellow-400 to-orange-500 text-black shadow-lg shadow-yellow-400/30' 
+                      : `${isScrolled ? 'text-black/70 hover:text-black' : 'text-white/70 hover:text-white'} hover:bg-white/20`
+                    }
                     backdrop-blur-sm
+                    hover:scale-110
+                    active:scale-95
                   `}
-                  whileHover={{ scale: 1.05 }}
+                  whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.95 }}
                   aria-label="Submit search"
                 >
-                  <Search size={20} />
+                  <Search size={16} />
                 </motion.button>
+                
+                {/* Loading indicator */}
+                {isSearchFocused && searchQuery && (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="absolute right-12 top-1/2 -translate-y-1/2"
+                  >
+                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                  </motion.div>
+                )}
               </motion.div>
             </form>
 

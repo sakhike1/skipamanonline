@@ -211,8 +211,8 @@ const HomePage: React.FC = () => {
       
       {/* Testimonials */}
       <div className="relative py-16 overflow-hidden">
-        {/* Sophisticated gradient background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-purple-900/20 via-gray-900/40 to-purple-800/20"></div>
+        {/* Enhanced gradient background */}
+        <div className="absolute inset-0 bg-gradient-to-br from-black/40 via-purple-900/30 to-black/50"></div>
         
         {/* Floating purple glassmorphism elements */}
         <div className="absolute top-10 left-10 w-64 h-64 bg-gradient-to-r from-purple-500/10 to-purple-600/10 rounded-full blur-3xl animate-pulse"></div>

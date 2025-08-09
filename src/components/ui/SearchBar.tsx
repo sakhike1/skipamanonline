@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Search, Mic, X, Filter, Sparkles } from 'lucide-react';
+import { Search, Mic, X, Filter, Sparkles, TrendingUp } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { products } from '../../data/products';
 
@@ -177,12 +177,30 @@ const SearchBar: React.FC<SearchBarProps> = ({
   return (
     <div className={`relative w-full max-w-2xl ${className}`} ref={suggestionsRef}>
       {/* Search Input */}
-      <div className="relative">
+      <div className="relative group">
+        {/* Glow effect on focus */}
+        <div className="absolute inset-0 rounded-2xl blur-xl transition-all duration-500 opacity-0 group-focus-within:opacity-100 bg-gradient-to-r from-yellow-400/20 via-orange-400/15 to-pink-400/20"></div>
+        
         <motion.div
-          className="relative flex items-center bg-white/10 backdrop-blur-md border border-white/20 rounded-full overflow-hidden focus-within:border-yellow-400 transition-all duration-300"
+          className="relative flex items-center bg-white/15 backdrop-blur-xl border-2 border-white/25 rounded-2xl overflow-hidden focus-within:border-yellow-400/60 focus-within:shadow-2xl focus-within:shadow-yellow-400/20 transition-all duration-500 group-hover:border-white/40"
           whileFocus={{ scale: 1.02 }}
+          whileHover={{ scale: 1.01 }}
         >
-          <Search className="absolute left-4 h-5 w-5 text-gray-400" />
+          {/* Search icon with pulse animation */}
+          <motion.div 
+            className="absolute left-5 h-5 w-5 text-gray-400 group-focus-within:text-yellow-400"
+            animate={{ 
+              scale: [1, 1.1, 1],
+              opacity: [0.7, 1, 0.7]
+            }}
+            transition={{ 
+              duration: 2,
+              repeat: Infinity,
+              ease: "easeInOut"
+            }}
+          >
+            <Search size={20} />
+          </motion.div>
           
           <input
             ref={inputRef}
@@ -191,79 +209,100 @@ const SearchBar: React.FC<SearchBarProps> = ({
             onChange={(e) => handleInputChange(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder={placeholder}
-            className="w-full pl-12 pr-20 py-4 bg-transparent text-white placeholder-gray-400 focus:outline-none text-lg"
+            className="w-full pl-14 pr-32 py-5 bg-transparent text-white placeholder-gray-400 focus:outline-none text-lg font-medium"
           />
           
-          <div className="absolute right-2 flex items-center gap-2">
+          <div className="absolute right-3 flex items-center gap-2">
+            {/* Clear button with modern animation */}
             {query && (
               <motion.button
-                whileHover={{ scale: 1.1 }}
+                initial={{ opacity: 0, scale: 0 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0 }}
+                whileHover={{ scale: 1.1, rotate: 90 }}
                 whileTap={{ scale: 0.9 }}
                 onClick={() => {
                   setQuery('');
                   setSuggestions([]);
                   setShowSuggestions(false);
                 }}
-                className="p-2 text-gray-400 hover:text-white transition-colors"
+                className="p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-full transition-all duration-300"
               >
                 <X size={18} />
               </motion.button>
             )}
             
+            {/* Voice search button with modern styling */}
             <motion.button
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
               onClick={startVoiceSearch}
-              className={`p-2 rounded-full transition-all duration-300 ${
+              className={`p-2.5 rounded-full transition-all duration-300 ${
                 isListening 
-                  ? 'bg-red-500 text-white animate-pulse' 
-                  : 'text-gray-400 hover:text-white hover:bg-white/10'
+                  ? 'bg-gradient-to-r from-red-500 to-pink-500 text-white shadow-lg shadow-red-500/30 animate-pulse' 
+                  : 'text-gray-400 hover:text-white hover:bg-white/10 hover:shadow-lg hover:shadow-white/10'
               }`}
             >
               <Mic size={18} />
             </motion.button>
             
+            {/* Search button with gradient and modern effects */}
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={handleSearch}
-              className="bg-gradient-to-r from-yellow-400 to-yellow-600 text-black px-6 py-2 rounded-full font-semibold hover:shadow-lg hover:shadow-yellow-400/30 transition-all duration-300"
+              className="bg-gradient-to-r from-yellow-400 via-orange-500 to-yellow-600 text-black px-6 py-3 rounded-xl font-semibold hover:shadow-xl hover:shadow-yellow-400/30 transition-all duration-300 relative overflow-hidden group"
             >
-              Search
+              {/* Shimmer effect */}
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+              <span className="relative z-10">Search</span>
             </motion.button>
           </div>
         </motion.div>
       </div>
 
-      {/* Search Suggestions */}
+      {/* Search Suggestions with modern styling */}
       <AnimatePresence>
         {showSuggestions && (
           <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            className="absolute top-full left-0 right-0 mt-2 bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl overflow-hidden z-50 max-h-96 overflow-y-auto"
+            initial={{ opacity: 0, y: -20, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -20, scale: 0.95 }}
+            transition={{ duration: 0.3, ease: "easeOut" }}
+            className="absolute top-full left-0 right-0 mt-3 bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl overflow-hidden z-50 max-h-96 overflow-y-auto shadow-2xl shadow-black/20"
           >
+            {/* Glass morphism effect */}
+            <div className="absolute inset-0 bg-gradient-to-b from-white/5 to-white/10"></div>
+            
             {suggestions.length > 0 ? (
-              <div className="p-4 space-y-2">
+              <div className="p-4 space-y-2 relative">
                 {suggestions.map((suggestion, index) => (
                   <motion.div
                     key={suggestion.id}
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: index * 0.05 }}
+                    whileHover={{ scale: 1.02, x: 5 }}
                     onClick={() => handleSuggestionClick(suggestion)}
-                    className="flex items-center gap-3 p-3 rounded-xl hover:bg-white/10 cursor-pointer transition-all duration-200 group"
+                    className="group cursor-pointer relative p-3 rounded-xl hover:bg-white/20 transition-all duration-300 border border-transparent hover:border-white/20"
                   >
+                    <div className="flex items-center gap-3">
+                      {/* Icon based on suggestion type */}
                     <div className="flex-shrink-0">
-                      {suggestion.type === 'trending' && (
-                        <Sparkles className="h-4 w-4 text-yellow-400" />
-                      )}
                       {suggestion.type === 'product' && (
-                        <Search className="h-4 w-4 text-blue-400" />
+                          <div className="w-10 h-10 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-lg flex items-center justify-center">
+                            <Sparkles size={16} className="text-black" />
+                          </div>
                       )}
                       {suggestion.type === 'category' && (
-                        <Filter className="h-4 w-4 text-green-400" />
+                          <div className="w-10 h-10 bg-gradient-to-br from-blue-400 to-purple-500 rounded-lg flex items-center justify-center">
+                            <Filter size={16} className="text-white" />
+                          </div>
+                        )}
+                        {suggestion.type === 'trending' && (
+                          <div className="w-10 h-10 bg-gradient-to-br from-green-400 to-teal-500 rounded-lg flex items-center justify-center">
+                            <TrendingUp size={16} className="text-white" />
+                          </div>
                       )}
                     </div>
                     
@@ -272,15 +311,24 @@ const SearchBar: React.FC<SearchBarProps> = ({
                       <p className="text-gray-400 text-sm">{suggestion.category}</p>
                     </div>
                     
-                    <div className="flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <Search className="h-4 w-4 text-gray-400" />
+                      {/* Arrow indicator */}
+                      <motion.div
+                        className="opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                        initial={{ x: -10 }}
+                        whileHover={{ x: 0 }}
+                      >
+                        <TrendingUp size={16} className="text-yellow-400" />
+                      </motion.div>
                     </div>
                   </motion.div>
                 ))}
               </div>
             ) : (
-              <div className="p-4 text-center text-gray-400">
-                No results found
+              <div className="p-8 text-center">
+                <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center">
+                  <Search size={24} className="text-black" />
+                </div>
+                <p className="text-gray-400">No suggestions found</p>
               </div>
             )}
           </motion.div>

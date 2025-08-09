@@ -4,7 +4,7 @@ import { LoginCredentials, RegisterCredentials, AuthResponse, User, JWTPayload }
 const API_BASE_URL = 'http://localhost:3001/api';
 
 // Fallback to mock data if API is not available
-const USE_MOCK_FALLBACK = true; // Set to false when backend is working
+const USE_MOCK_FALLBACK = false; // Set to false when backend is working
 
 class AuthService {
   private tokenKey = 'auth_token';
@@ -82,20 +82,21 @@ class AuthService {
   }
 
   private generateToken(): string {
+    // For mock mode, we'll use a simple token that the backend can recognize
+    // This is not secure for production, but works for development
     const payload = {
-      userId: 'user_id',
-      email: 'user@example.com',
-      role: 'user',
+      userId: '1', // Use a valid user ID that exists in the backend
+      email: 'admin@demo.com',
+      role: 'admin',
       iat: Math.floor(Date.now() / 1000),
       exp: Math.floor(Date.now() / 1000) + (24 * 60 * 60), // 24 hours
     };
     
-    // Simple mock JWT generation
-    const header = btoa(JSON.stringify({ alg: 'HS256', typ: 'JWT' }));
-    const payloadStr = btoa(JSON.stringify(payload));
-    const signature = btoa('mock_signature_' + Date.now());
-    
-    return `${header}.${payloadStr}.${signature}`;
+    // Create a simple token that the backend can decode
+    const tokenData = btoa(JSON.stringify(payload));
+    console.log('Generated mock token payload:', payload);
+    console.log('Generated mock token:', `mock.${tokenData}.token`);
+    return `mock.${tokenData}.token`;
   }
 
   // JWT Token Validation
