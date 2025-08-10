@@ -1,119 +1,255 @@
 import React, { useEffect, useState, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const LoadingScreen: React.FC = () => {
-  // isLoadingContent: controls the visual state (opacity transition)
   const [isLoadingContent, setIsLoadingContent] = useState(true); 
-  // displayComponent: controls whether the component is mounted in the DOM
   const [displayComponent, setDisplayComponent] = useState(true);
-
-  // useRef to track if the initial HTML loading screen has been handled
+  const [loadingProgress, setLoadingProgress] = useState(0);
+  const [loadingText, setLoadingText] = useState('Initializing...');
   const initialScreenHandled = useRef(false);
 
   useEffect(() => {
-    // Function to remove the initial HTML loading screen (e.g., from public/index.html)
     const removeInitialHtmlLoadingScreen = () => {
-      if (initialScreenHandled.current) return; // Prevent multiple removals
+      if (initialScreenHandled.current) return;
       const initialLoadingScreen = document.getElementById('loading-screen');
       if (initialLoadingScreen) {
-        // Start fade-out of the HTML screen
         initialLoadingScreen.style.opacity = '0';
         initialLoadingScreen.style.transition = 'opacity 0.5s ease-out';
         
-        // Remove from DOM after transition
         setTimeout(() => {
           initialLoadingScreen.remove();
           initialScreenHandled.current = true;
-        }, 500); // Matches transition duration
+        }, 500);
       } else {
-        initialScreenHandled.current = true; // Mark as handled even if not found
+        initialScreenHandled.current = true;
       }
     };
 
-    // Immediately try to remove the initial HTML loading screen
     removeInitialHtmlLoadingScreen();
 
-    // Function to initiate the fade-out of the React loading screen
+    // Simulate loading progress
+    const progressInterval = setInterval(() => {
+      setLoadingProgress(prev => {
+        if (prev >= 90) {
+          clearInterval(progressInterval);
+          return 90;
+        }
+        return prev + Math.random() * 15;
+      });
+    }, 200);
+
+    // Update loading text based on progress
+    const textInterval = setInterval(() => {
+      setLoadingText(prev => {
+        if (loadingProgress < 20) return 'Initializing...';
+        if (loadingProgress < 40) return 'Loading assets...';
+        if (loadingProgress < 60) return 'Preparing interface...';
+        if (loadingProgress < 80) return 'Almost ready...';
+        return 'Finalizing...';
+      });
+    }, 500);
+
     const handlePageLoaded = () => {
-      setIsLoadingContent(false); // Start the CSS fade-out transition for this component
+      setLoadingProgress(100);
+      setLoadingText('Ready!');
       
-      // Remove component from DOM after its fade-out transition completes
+      setTimeout(() => {
+        setIsLoadingContent(false);
+      }, 500);
+      
       setTimeout(() => {
         setDisplayComponent(false);
-      }, 700); // Must be slightly longer than the CSS transition duration (e.g., 500ms + buffer)
+      }, 1200);
     };
 
-    // 1. Check if the page is already fully loaded (e.g., if JS runs late)
     if (document.readyState === 'complete') {
       handlePageLoaded();
-      return; // Exit as loading is complete
+      return;
     }
 
-    // 2. Listen for the 'load' event, which fires when all assets are loaded
     window.addEventListener('load', handlePageLoaded);
 
-    // 3. Fallback Timers for robustness and user experience
-    //    a) Minimum display time: Ensures the loading screen is shown for at least 'X' seconds
-    //       to prevent a 'flash' on very fast loads.
     const minDisplayTimer = setTimeout(() => {
-      // Only initiate fade-out if not already doing so
       if (isLoadingContent) { 
         handlePageLoaded();
       }
-    }, 1500); // Display for at least 1.5 seconds
+    }, 2000);
 
-    //    b) Maximum display time: Acts as a safeguard in case 'load' event never fires
-    //       or takes excessively long due to network issues.
     const maxDisplayTimer = setTimeout(() => {
       if (isLoadingContent) {
         handlePageLoaded();
       }
-    }, 8000); // Force hide after 8 seconds
+    }, 10000);
 
-    // Cleanup function: Remove event listener and clear timers on component unmount
     return () => {
       window.removeEventListener('load', handlePageLoaded);
       clearTimeout(minDisplayTimer);
       clearTimeout(maxDisplayTimer);
+      clearInterval(progressInterval);
+      clearInterval(textInterval);
     };
-  }, []); // Empty dependency array ensures this effect runs only once on mount
+  }, [loadingProgress]);
 
-  // Don't render anything if the component is no longer meant to be displayed
   if (!displayComponent) return null;
 
   return (
-    <div 
-      // ARIA attributes for accessibility
-      role="status" // Indicates to screen readers that this is a status message
-      aria-live="polite" // Announce changes politely (e.g., "Page loading")
-      aria-label="Page loading" // Provides a more descriptive label
-
-      // Tailwind CSS for full-screen overlay and transition
-      className={`fixed inset-0 z-[9999] bg-black/90 backdrop-blur-sm 
-        flex flex-col items-center justify-center 
-        transition-opacity duration-700 ease-out 
-        ${isLoadingContent ? 'opacity-100' : 'opacity-0'}`}
-    >
-      <div className="flex flex-col items-center justify-center text-center">
-        {/* Custom Tailwind Spinner */}
-        <div className="relative w-16 h-16 mb-8">
-            {/* Spinner Base (outer ring) */}
-            <div className="absolute inset-0 border-4 border-solid border-gray-700 border-t-transparent rounded-full animate-[spin_2s_linear_infinite]"></div> 
-            {/* Spinner Accent (inner arc), slightly faster and offset spin */}
-            <div className="absolute inset-0 border-4 border-solid border-transparent border-t-[#FFD700] rounded-full animate-[spin_1s_linear_infinite_reverse_0.2s]"></div> 
+    <AnimatePresence>
+      <motion.div 
+        role="status"
+        aria-live="polite"
+        aria-label="Page loading"
+        className="fixed inset-0 z-[9999] bg-gradient-to-br from-black via-gray-900 to-black backdrop-blur-sm"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: isLoadingContent ? 1 : 0 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.8, ease: "easeInOut" }}
+      >
+        {/* Animated Background Elements */}
+        <div className="absolute inset-0 overflow-hidden">
+          {/* Floating orbs */}
+          <motion.div
+            className="absolute top-1/4 left-1/4 w-32 h-32 bg-purple-500/10 rounded-full blur-3xl"
+            animate={{
+              x: [0, 100, 0],
+              y: [0, -50, 0],
+              scale: [1, 1.2, 1],
+            }}
+            transition={{
+              duration: 8,
+              repeat: Infinity,
+              ease: "easeInOut"
+            }}
+          />
+          <motion.div
+            className="absolute bottom-1/4 right-1/4 w-40 h-40 bg-pink-500/10 rounded-full blur-3xl"
+            animate={{
+              x: [0, -80, 0],
+              y: [0, 60, 0],
+              scale: [1, 0.8, 1],
+            }}
+            transition={{
+              duration: 10,
+              repeat: Infinity,
+              ease: "easeInOut",
+              delay: 2
+            }}
+          />
+          <motion.div
+            className="absolute top-1/2 left-1/2 w-24 h-24 bg-yellow-500/10 rounded-full blur-2xl"
+            animate={{
+              x: [0, 60, 0],
+              y: [0, -40, 0],
+              scale: [1, 1.3, 1],
+            }}
+            transition={{
+              duration: 6,
+              repeat: Infinity,
+              ease: "easeInOut",
+              delay: 1
+            }}
+          />
         </div>
 
-        {/* Brand Name with improved styling */}
-        <div className="text-white text-4xl sm:text-5xl font-extrabold tracking-widest leading-none">
-          <span className="drop-shadow-lg">SKIPA</span>
-          <span className="text-[#FFD700] drop-shadow-lg">MAN</span>
+        <div className="relative z-10 flex flex-col items-center justify-center h-full">
+          <motion.div 
+            className="flex flex-col items-center justify-center text-center max-w-md mx-auto px-6"
+            initial={{ opacity: 0, y: 50 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+          >
+            {/* Enhanced Spinner */}
+            <div className="relative mb-12">
+              {/* Outer ring */}
+              <motion.div
+                className="w-24 h-24 border-4 border-white/20 rounded-full"
+                animate={{ rotate: 360 }}
+                transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+              />
+              
+              {/* Inner ring */}
+              <motion.div
+                className="absolute inset-2 border-4 border-transparent border-t-purple-500 rounded-full"
+                animate={{ rotate: -360 }}
+                transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+              />
+              
+              {/* Center dot */}
+              <motion.div
+                className="absolute inset-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full"
+                animate={{
+                  scale: [1, 1.1, 1],
+                  opacity: [0.8, 1, 0.8]
+                }}
+                transition={{
+                  duration: 2,
+                  repeat: Infinity,
+                  ease: "easeInOut"
+                }}
+              />
+              
+              {/* Progress indicator */}
+              <motion.div
+                className="absolute inset-0 border-4 border-transparent border-t-white rounded-full"
+                style={{
+                  background: `conic-gradient(from 0deg, white ${loadingProgress * 3.6}deg, transparent ${loadingProgress * 3.6}deg)`
+                }}
+                transition={{ duration: 0.3 }}
+              />
+            </div>
+
+            {/* Brand Name */}
+            <motion.div 
+              className="text-white text-5xl sm:text-6xl font-black tracking-widest leading-none mb-6"
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.8, delay: 0.4 }}
+            >
+              <span className="drop-shadow-2xl bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
+                SKIPA
+              </span>
+              <span className="drop-shadow-2xl bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent">
+                MAN
+              </span>
+            </motion.div>
+            
+            {/* Loading Text */}
+            <motion.p 
+              className="text-white/80 text-lg sm:text-xl font-medium tracking-wide mb-8"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.6, delay: 0.6 }}
+            >
+              {loadingText}
+            </motion.p>
+
+            {/* Progress Bar */}
+            <motion.div 
+              className="w-64 h-2 bg-white/10 rounded-full overflow-hidden mb-4"
+              initial={{ opacity: 0, scaleX: 0 }}
+              animate={{ opacity: 1, scaleX: 1 }}
+              transition={{ duration: 0.8, delay: 0.8 }}
+            >
+              <motion.div
+                className="h-full bg-gradient-to-r from-purple-500 via-pink-500 to-purple-500 rounded-full"
+                initial={{ width: 0 }}
+                animate={{ width: `${loadingProgress}%` }}
+                transition={{ duration: 0.3 }}
+              />
+            </motion.div>
+
+            {/* Progress Percentage */}
+            <motion.p 
+              className="text-white/60 text-sm font-mono"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.6, delay: 1 }}
+            >
+              {Math.round(loadingProgress)}%
+            </motion.p>
+          </motion.div>
         </div>
-        
-        {/* Subtle loading message with a pulse effect */}
-        <p className="text-white/70 text-sm sm:text-base mt-4 tracking-wide animate-pulse">
-          Loading the latest collection...
-        </p>
-      </div>
-    </div>
+      </motion.div>
+    </AnimatePresence>
   );
 };
 

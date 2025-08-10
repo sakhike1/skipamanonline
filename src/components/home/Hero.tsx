@@ -438,10 +438,11 @@ const HeroSection: React.FC = () => {
                       size="lg" 
                       className={`
                         group flex items-center space-x-2 
-                        bg-black text-white hover:bg-gray-800
+                        bg-white/10 backdrop-blur-sm text-white hover:bg-white/20
                         shadow-lg hover:shadow-xl transition-all duration-300
                         transform hover:-translate-y-1
-                        border border-white/10
+                        border-0 rounded-full
+                        focus:outline-none focus:ring-0
                       `}
                       onClick={() => navigate('/shop')}
                     >

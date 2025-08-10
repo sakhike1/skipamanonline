@@ -216,7 +216,7 @@ const CartPreview: React.FC<CartPreviewProps> = ({ onClose }) => {
                     e.stopPropagation();
                     onClose();
                   }}
-                  className="border border-black text-black hover:bg-black hover:text-white py-3 rounded-full transition-colors"
+                  className="border border-black text-black hover:bg-gray-100 hover:text-black py-3 rounded-full transition-colors"
                 >
                   Continue Shopping
                 </Button>

@@ -8,6 +8,7 @@ import { ProfileProvider } from './context/ProfileContext';
 import { OrderProvider } from './context/OrderContext';
 import Layout from './components/layout/Layout';
 import LoadingScreen from './components/ui/LoadingScreen';
+import LoadingSpinner from './components/ui/LoadingSpinner';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 
 // Lazy load pages
@@ -27,8 +28,13 @@ const DemoAuthPage = lazy(() => import('./pages/DemoAuthPage'));
 
 // Loading fallback component
 const PageLoader = () => (
-  <div className="flex items-center justify-center min-h-screen">
-    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-black"></div>
+  <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+    <LoadingSpinner
+      variant="gradient"
+      size="xl"
+      color="purple"
+      text="Loading page..."
+    />
   </div>
 );
 

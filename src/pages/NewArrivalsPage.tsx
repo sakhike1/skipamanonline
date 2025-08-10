@@ -664,10 +664,12 @@ const NewArrivalsPage: React.FC = () => {
                 {/* Infinite Scroll Loading */}
                 {isLoading && (
                   <div className="mt-8 flex justify-center">
-                    <div className="flex items-center gap-3">
-                      <div className="w-6 h-6 border-2 border-gray-300 border-t-black rounded-full animate-spin"></div>
-                      <span className="text-gray-600">Loading more products...</span>
-                    </div>
+                    <LoadingSpinner
+                      variant="dots"
+                      size="md"
+                      color="primary"
+                      text="Loading more products..."
+                    />
                   </div>
                 )}
                 

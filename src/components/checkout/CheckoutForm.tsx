@@ -98,7 +98,7 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ onComplete }) => {
             animate="visible"
           >
             {/* Page Header */}
-            <div className="text-center mb-12">
+            <div className="text-center mb-12 pt-8">
               <motion.h1 
                 className="text-4xl md:text-5xl font-bold text-white mb-4"
                 variants={itemVariants}

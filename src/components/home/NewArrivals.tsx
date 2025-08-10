@@ -305,43 +305,77 @@ const NewArrivals: React.FC = () => {
 
       {/* Trending Section - Light Theme */}
       <div className="bg-white py-20 md:py-32 relative overflow-hidden">
+        {/* Subtle Background Pattern */}
+        <div className="absolute inset-0 opacity-[0.02]">
+          <div className="absolute inset-0" style={{
+            backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23000000' fill-opacity='0.1'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+          }}></div>
+        </div>
+        
         <div className="container mx-auto px-6 sm:px-8">
           {/* Section Header */}
           <div className="flex flex-col md:flex-row justify-between items-start mb-16 md:mb-20">
-            <div className="space-y-4">
-              <motion.h2 
-                className="font-sans text-[clamp(3rem,7vw,5rem)] md:text-[clamp(5rem,9vw,8rem)] font-bold leading-none tracking-tight"
-                animate={{
-                  color: trendingColors[trendingColorIndex],
-                  textShadow: [
-                    '0 0 10px rgba(26, 26, 26, 0.2)',
-                    '0 0 20px rgba(26, 26, 26, 0.3)',
-                    '0 0 10px rgba(26, 26, 26, 0.2)',
-                  ],
-                }}
-                transition={{
-                  duration: 1.8,
-                  ease: "easeInOut",
-                  repeat: Infinity,
-                }}
+            <div className="space-y-6">
+              {/* Badge */}
+              <motion.div 
+                className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-50 to-pink-50 border border-purple-200/50 rounded-full"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6 }}
               >
-                TRENDING<br />NOW
-              </motion.h2>
-              <p className="font-light text-gray-600 tracking-[0.2em] text-sm uppercase">
-                Discover the latest trends
-              </p>
+                <div className="w-2 h-2 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full animate-pulse"></div>
+                <span className="text-xs font-medium text-purple-700 tracking-wider uppercase">Hot Right Now</span>
+              </motion.div>
+              
+              <div className="space-y-4">
+                <motion.h2 
+                  className="font-sans text-[clamp(2.5rem,6vw,4rem)] md:text-[clamp(3.5rem,8vw,6rem)] font-black leading-[0.9] tracking-tight"
+                  animate={{
+                    color: trendingColors[trendingColorIndex],
+                    textShadow: [
+                      '0 0 20px rgba(139, 92, 246, 0.1)',
+                      '0 0 40px rgba(139, 92, 246, 0.2)',
+                      '0 0 20px rgba(139, 92, 246, 0.1)',
+                    ],
+                  }}
+                  transition={{
+                    duration: 2.5,
+                    ease: "easeInOut",
+                    repeat: Infinity,
+                  }}
+                >
+                  TRENDING<br />
+                  <span className="bg-gradient-to-r from-purple-600 via-pink-600 to-purple-600 bg-clip-text text-transparent">
+                    NOW
+                  </span>
+                </motion.h2>
+                <motion.p 
+                  className="font-medium text-gray-700 tracking-[0.15em] text-sm uppercase max-w-md"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: 0.2 }}
+                >
+                  Discover the latest trends that are making waves in fashion
+                </motion.p>
+              </div>
             </div>
-            <div className="mt-8 md:mt-0 pt-4 md:pt-0">
+            
+            <motion.div 
+              className="mt-8 md:mt-0 pt-4 md:pt-0"
+              initial={{ opacity: 0, x: 30 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6, delay: 0.3 }}
+            >
               <button 
                 onClick={() => navigate('/shop')}
-                className="relative overflow-hidden group flex items-center gap-2 hover:gap-4 px-6 py-3 transition-all duration-300 text-sm tracking-widest uppercase text-white bg-black border border-black rounded-full hover:border-black"
+                className="group relative overflow-hidden flex items-center gap-3 hover:gap-4 px-8 py-4 transition-all duration-300 text-sm tracking-widest uppercase text-white bg-gradient-to-r from-purple-600 to-pink-600 border border-purple-600 rounded-full hover:shadow-xl hover:shadow-purple-500/25 hover:scale-105"
                 aria-label="View all trending products"
               >
-                <span className="relative z-10 transition-colors duration-300 group-hover:text-black">View all</span>
-                <ArrowRight size={16} className="relative z-10 transition-transform duration-300 group-hover:translate-x-1 group-hover:text-black" />
-                <div className="absolute inset-0 bg-white transform translate-x-full group-hover:translate-x-0 transition-transform duration-300 ease-out"></div>
+                <span className="relative z-10 transition-colors duration-300">Explore Trends</span>
+                <ArrowRight size={16} className="relative z-10 transition-transform duration-300 group-hover:translate-x-1" />
+                <div className="absolute inset-0 bg-gradient-to-r from-purple-700 to-pink-700 transform translate-x-full group-hover:translate-x-0 transition-transform duration-300 ease-out"></div>
               </button>
-            </div>
+            </motion.div>
           </div>
 
           {/* Product Grid */}

@@ -57,7 +57,13 @@ const ProductPage: React.FC = () => {
   };
   
   if (isLoading) {
-    return <LoadingSkeleton />;
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 pt-20">
+        <div className="container mx-auto px-4 py-8">
+          <LoadingSkeleton type="checkout" theme="light" />
+        </div>
+      </div>
+    );
   }
   
   if (!product) {

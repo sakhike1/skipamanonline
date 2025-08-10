@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { Users, User, Mail, Calendar, Shield, TrendingUp, AlertCircle } from 'lucide-react';
 import authService from '../services/authService';
 import { User as UserType } from '../types';
+import LoadingSpinner from '../components/ui/LoadingSpinner';
 
 const AdminPage: React.FC = () => {
   const [users, setUsers] = useState<UserType[]>([]);
@@ -40,7 +41,12 @@ const AdminPage: React.FC = () => {
       <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-800 pt-20">
         <div className="container mx-auto px-4 py-8">
           <div className="flex items-center justify-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500"></div>
+            <LoadingSpinner
+              variant="gradient"
+              size="xl"
+              color="purple"
+              text="Loading admin dashboard..."
+            />
           </div>
         </div>
       </div>
