@@ -1,4 +1,4 @@
-import React, { Suspense, lazy } from 'react';
+import React, { Suspense, lazy, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { CartProvider } from './context/CartContext';
 import { WishlistProvider } from './context/WishlistContext';
@@ -7,7 +7,6 @@ import { HeaderProvider } from './context/HeaderContext';
 import { ProfileProvider } from './context/ProfileContext';
 import { OrderProvider } from './context/OrderContext';
 import Layout from './components/layout/Layout';
-import LoadingScreen from './components/ui/LoadingScreen';
 import LoadingSpinner from './components/ui/LoadingSpinner';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 
@@ -39,6 +38,38 @@ const PageLoader = () => (
 );
 
 function App() {
+  // Remove HTML loading screen when React app loads
+  useEffect(() => {
+    const removeLoadingScreen = () => {
+      const loadingScreen = document.getElementById('loading-screen');
+      if (loadingScreen) {
+        // Start fade-out animation
+        loadingScreen.style.opacity = '0';
+        loadingScreen.style.transition = 'opacity 0.8s ease-out';
+        
+        // Remove from DOM after animation
+        setTimeout(() => {
+          loadingScreen.remove();
+        }, 800);
+      }
+    };
+
+    // Remove immediately if DOM is already ready
+    if (document.readyState === 'complete') {
+      removeLoadingScreen();
+    } else {
+      // Wait for page to load
+      window.addEventListener('load', removeLoadingScreen);
+      
+      // Fallback: remove after 3 seconds
+      setTimeout(removeLoadingScreen, 3000);
+    }
+
+    return () => {
+      window.removeEventListener('load', removeLoadingScreen);
+    };
+  }, []);
+
   return (
     <AuthProvider>
       <ProfileProvider>
@@ -46,7 +77,6 @@ function App() {
           <CartProvider>
             <WishlistProvider>
               <HeaderProvider>
-                <LoadingScreen />
                 <Router>
                   <Layout>
                     <Suspense fallback={<PageLoader />}>
