@@ -167,11 +167,65 @@ export const products: Product[] = [
 ];
 
 export const getProductById = (id: string): Product | undefined => {
-  return products.find(product => product.id === id);
+  // First check in the original products
+  const originalProduct = products.find(product => product.id === id);
+  if (originalProduct) return originalProduct;
+  
+  // If not found, check in the generated products
+  const allProducts = getFeaturedProducts();
+  return allProducts.find(product => product.id === id);
 };
 
 export const getFeaturedProducts = (): Product[] => {
-  return products.filter(product => product.featured);
+  // Get the original 8 products
+  const originalProducts = products.filter(product => product.featured);
+  
+  // Generate additional products to reach 200 total
+  const additionalProducts: Product[] = [];
+  
+  for (let i = 9; i <= 200; i++) {
+    const categories = ['basics', 'graphic', 'essentials', 'vintage', 'performance', 'streetwear', 'designer'];
+    const category = categories[i % categories.length];
+    
+    const productNames = [
+      'Classic Crew Neck',
+      'Modern Fit Tee',
+      'Premium Cotton',
+      'Street Style',
+      'Urban Collection',
+      'Designer Series',
+      'Limited Edition',
+      'Signature Line',
+      'Exclusive Drop',
+      'Seasonal Collection'
+    ];
+    
+    const name = `${productNames[i % productNames.length]} #${i}`;
+    
+    additionalProducts.push({
+      id: i.toString(),
+      name,
+      description: `High-quality t-shirt with premium materials and modern design. Part of our ${category} collection.`,
+      price: 45000 + (i * 100), // Varying prices
+      images: [
+        '/images/1.png',
+        '/images/2.png',
+        '/images/3.png',
+      ],
+      sizes: ['S', 'M', 'L', 'XL', 'XXL'],
+      colors: [
+        { name: 'Black', value: '#000000' },
+        { name: 'White', value: '#FFFFFF' },
+        { name: 'Gray', value: '#808080' },
+      ],
+      category,
+      featured: true,
+      rating: 4.0 + (i % 10) * 0.1, // Varying ratings
+      reviewCount: 50 + (i % 100),
+    });
+  }
+  
+  return [...originalProducts, ...additionalProducts];
 };
 
 export const getProductsByCategory = (category: string): Product[] => {

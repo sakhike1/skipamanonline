@@ -5,7 +5,6 @@ import { Filter, X, ArrowRight, ShoppingBag, Tag, Sparkles, Search } from 'lucid
 import { motion, AnimatePresence } from 'framer-motion';
 import Skeleton from '../components/ui/LoadingSkeleton';
 import SearchBar from '../components/ui/SearchBar';
-import { useInfiniteScroll } from '../hooks/useInfiniteScroll';
 
 interface ProductCardProps {
   product: {
@@ -164,14 +163,15 @@ const NewArrivalsPage: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 50000]);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [displayedProducts, setDisplayedProducts] = useState<any[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [colorIndex, setColorIndex] = useState(0);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [isLoading, setIsLoading] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [displayedProducts, setDisplayedProducts] = useState<any[]>([]);
-  const [hasMore, setHasMore] = useState(true);
-  const productsPerPage = 12;
+  const productsPerPage = 9; // Show 9 products per page
+  const maxProducts = 200; // Limit to 200 products
   
   // Gold glitz color palette
   const colors = [
@@ -193,41 +193,43 @@ const NewArrivalsPage: React.FC = () => {
 
   // Initialize products
   useEffect(() => {
-    const loadInitialProducts = async () => {
-      setIsLoading(true);
+    const loadAllProducts = async () => {
+      setIsInitialLoading(true);
       // Simulate API call delay
       await new Promise(resolve => setTimeout(resolve, 1000));
-      const initialProducts = getFeaturedProducts().slice(0, productsPerPage);
-      setDisplayedProducts(initialProducts);
-      setIsLoading(false);
+      const allProducts = getFeaturedProducts().slice(0, maxProducts); // Limit to 200 products
+      setDisplayedProducts(allProducts);
+      setIsInitialLoading(false);
     };
     
-    loadInitialProducts();
+    loadAllProducts();
   }, []);
 
-  // Load more products function for infinite scroll
-  const loadMoreProducts = useCallback(async () => {
-    if (isLoading || !hasMore) return;
-    
-    setIsLoading(true);
-    // Simulate API call delay
-    await new Promise(resolve => setTimeout(resolve, 800));
-    
-    const allProducts = getFeaturedProducts();
-    const currentLength = displayedProducts.length;
-    const nextProducts = allProducts.slice(currentLength, currentLength + productsPerPage);
-    
-    if (nextProducts.length === 0) {
-      setHasMore(false);
-    } else {
-      setDisplayedProducts(prev => [...prev, ...nextProducts]);
-    }
-    
-    setIsLoading(false);
-  }, [isLoading, hasMore, displayedProducts.length]);
+  // Pagination logic
+  const totalPages = Math.ceil(displayedProducts.length / productsPerPage);
+  const startIndex = currentPage === 1 ? 0 : (currentPage - 1) * productsPerPage - 1;
+  const endIndex = currentPage === 1 ? 8 : startIndex + productsPerPage;
 
-  // Infinite scroll hook
-  const { observerRef } = useInfiniteScroll(loadMoreProducts, hasMore);
+  // Remove infinite scroll related code
+  // const loadMoreProducts = useCallback(async () => {
+  //   if (!hasMore) return;
+    
+  //   // Simulate API call delay
+  //   await new Promise(resolve => setTimeout(resolve, 800));
+    
+  //   const allProducts = getFeaturedProducts();
+  //   const currentLength = displayedProducts.length;
+  //   const nextProducts = allProducts.slice(currentLength, currentLength + productsPerPage);
+    
+  //   if (nextProducts.length === 0) {
+  //     setHasMore(false);
+  //   } else {
+  //     setDisplayedProducts(prev => [...prev, ...nextProducts]);
+  //   }
+  // }, [hasMore]);
+
+  // // Infinite scroll hook
+  // const { observerRef, loading: infiniteScrollLoading } = useInfiniteScroll(loadMoreProducts, hasMore);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -273,6 +275,10 @@ const NewArrivalsPage: React.FC = () => {
     return matchesSearch && matchesCategory && matchesPrice;
   });
 
+  // Paginated products for current page
+  const paginatedProducts = filteredProducts.slice(startIndex, endIndex);
+  const totalFilteredPages = Math.ceil(filteredProducts.length / productsPerPage);
+
   // Handle search
   const handleSearch = (query: string) => {
     setSearchQuery(query);
@@ -294,7 +300,99 @@ const NewArrivalsPage: React.FC = () => {
 
   const handlePageChange = (pageNumber: number) => {
     setCurrentPage(pageNumber);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    // Scroll to the "Latest Collection" section instead of top of page
+    const productsSection = document.getElementById('products-section');
+    if (productsSection) {
+      productsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, selectedCategory, priceRange]);
+
+  // Pagination component
+  const Pagination = () => {
+    // Always show pagination if we have products, even if it's just one page
+    if (filteredProducts.length === 0) return null;
+
+    const getPageNumbers = () => {
+      const pages = [];
+      const maxVisiblePages = 5;
+      
+      if (totalFilteredPages <= maxVisiblePages) {
+        for (let i = 1; i <= totalFilteredPages; i++) {
+          pages.push(i);
+        }
+      } else {
+        if (currentPage <= 3) {
+          for (let i = 1; i <= 4; i++) {
+            pages.push(i);
+          }
+          pages.push('...');
+          pages.push(totalFilteredPages);
+        } else if (currentPage >= totalFilteredPages - 2) {
+          pages.push(1);
+          pages.push('...');
+          for (let i = totalFilteredPages - 3; i <= totalFilteredPages; i++) {
+            pages.push(i);
+          }
+        } else {
+          pages.push(1);
+          pages.push('...');
+          for (let i = currentPage - 1; i <= currentPage + 1; i++) {
+            pages.push(i);
+          }
+          pages.push('...');
+          pages.push(totalFilteredPages);
+        }
+      }
+      
+      return pages;
+    };
+
+    return (
+      <div className="flex flex-col items-center space-y-4 mt-8">
+        <div className="flex justify-center items-center space-x-2">
+          {/* Previous button */}
+          <button
+            onClick={() => handlePageChange(currentPage - 1)}
+            disabled={currentPage === 1}
+            className="px-3 py-2 rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          >
+            Previous
+          </button>
+
+          {/* Page numbers */}
+          {getPageNumbers().map((page, index) => (
+            <button
+              key={index}
+              onClick={() => typeof page === 'number' && handlePageChange(page)}
+              disabled={page === '...'}
+              className={`px-3 py-2 rounded-lg border transition-colors ${
+                page === currentPage
+                  ? 'bg-black text-white border-black'
+                  : page === '...'
+                  ? 'border-gray-300 text-gray-400 cursor-default'
+                  : 'border-gray-300 text-gray-600 hover:bg-gray-50'
+              }`}
+            >
+              {page}
+            </button>
+          ))}
+
+          {/* Next button */}
+          <button
+            onClick={() => handlePageChange(currentPage + 1)}
+            disabled={currentPage === totalFilteredPages}
+            className="px-3 py-2 rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          >
+            Next
+          </button>
+        </div>
+      </div>
+    );
   };
 
   return (
@@ -404,6 +502,10 @@ const NewArrivalsPage: React.FC = () => {
                     <div className="w-2 h-2 bg-purple-400 rounded-full"></div>
                     <span className="text-sm font-medium text-white">Casual Comfort</span>
                   </div>
+                  <div className="flex items-center gap-2 bg-white/10 backdrop-blur-md border border-white/20 rounded-full px-4 py-2">
+                    <div className="w-2 h-2 bg-purple-400 rounded-full"></div>
+                    <span className="text-sm font-medium text-white">{maxProducts} Products</span>
+                  </div>
                 </div>
               </motion.div>
               
@@ -495,12 +597,29 @@ const NewArrivalsPage: React.FC = () => {
               {searchQuery && (
                 <span className="text-sm text-gray-600 bg-gray-100 px-3 py-1 rounded-full">
                   "{searchQuery}" - {filteredProducts.length} results
+                  {filteredProducts.length >= maxProducts && (
+                    <span className="ml-1 text-xs">(max)</span>
+                  )}
                 </span>
               )}
             </div>
             
             <div className="flex items-center gap-4">
-              <p className="text-gray-600">{filteredProducts.length} product{filteredProducts.length !== 1 ? 's' : ''}</p>
+              <p className="text-gray-600">
+                Showing {startIndex + 1}-{Math.min(endIndex, filteredProducts.length)} of {filteredProducts.length} product{filteredProducts.length !== 1 ? 's' : ''}
+                {currentPage === 1 && <span className="ml-2 text-xs text-gray-400">(8 + 1 promo)</span>}
+                {filteredProducts.length >= maxProducts && (
+                  <span className="ml-2 text-xs text-gray-400">
+                    (Limit reached)
+                  </span>
+                )}
+              </p>
+              
+              {totalFilteredPages > 1 && (
+                <p className="text-gray-500 text-sm">
+                  Page {currentPage} of {totalFilteredPages}
+                </p>
+              )}
               
               {/* Mobile Filter Toggle */}
               <div className="md:hidden">
@@ -650,45 +769,46 @@ const NewArrivalsPage: React.FC = () => {
           {/* Products Grid */}
           <section className="flex-1">
             {/* Initial Loading State */}
-            {displayedProducts.length === 0 && isLoading ? (
+            {isInitialLoading ? (
               <Skeleton type="product" count={8} />
             ) : filteredProducts.length > 0 ? (
               <>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-                  <PromoCard onClick={() => navigate('/summer-sale')} />
-                  {filteredProducts.map(product => (
+                <motion.div 
+                  key={currentPage}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ duration: 0.3 }}
+                  className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"
+                >
+                  {currentPage === 1 && <PromoCard onClick={() => navigate('/summer-sale')} />}
+                  {paginatedProducts.map(product => (
                     <ProductCard key={product.id} product={product} onClick={handleProductClick} />
                   ))}
-                </div>
+                </motion.div>
                 
-                {/* Infinite Scroll Loading */}
-                {isLoading && (
+                {/* Pagination */}
+                <Pagination />
+                
+                {/* Product limit message */}
+                {filteredProducts.length >= maxProducts && (
                   <div className="mt-8 flex justify-center">
-                    <LoadingSpinner
-                      variant="dots"
-                      size="md"
-                      color="primary"
-                      text="Loading more products..."
-                    />
+                    <div className="text-center space-y-2">
+                      <div className="text-gray-500 text-sm">
+                        You've reached our limit of {maxProducts} products
+                      </div>
+                      <div className="text-gray-400 text-xs">
+                        Browse our complete collection in the main shop
+                      </div>
+                      <button
+                        onClick={() => navigate('/shop')}
+                        className="mt-2 px-4 py-2 text-sm bg-black text-white rounded-full hover:bg-gray-800 transition-colors"
+                      >
+                        View All Products
+                      </button>
+                    </div>
                   </div>
                 )}
-                
-                {/* Infinite Scroll Observer */}
-                <div 
-                  ref={observerRef}
-                  className="h-10 mt-8 flex items-center justify-center"
-                >
-                  {hasMore && !isLoading && (
-                    <div className="text-gray-500 text-sm">
-                      Scroll to load more products
-                    </div>
-                  )}
-                  {!hasMore && filteredProducts.length > 0 && (
-                    <div className="text-gray-500 text-sm">
-                      You've reached the end of our collection
-                    </div>
-                  )}
-                </div>
               </>
             ) : (
               <div className="flex flex-col items-center justify-center py-24 bg-transparent border border-gray-300 rounded-lg">
