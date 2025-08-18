@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowRight, ShoppingBag } from 'lucide-react';
 import { products } from '../../data/products';
 import { motion } from 'framer-motion';
-import './NewArrivals.css';
 
 const NewArrivals: React.FC = () => {
   const navigate = useNavigate();
@@ -241,10 +240,22 @@ const NewArrivals: React.FC = () => {
           className="absolute inset-0 opacity-20"
           style={{
             background: `linear-gradient(105deg, transparent 40%, rgba(255, 255, 255, 0.1) 50%, transparent 60%)`,
-            animation: 'shimmer 3s ease-in-out infinite',
             backgroundSize: '200% 200%',
+            animation: 'shimmer 3s ease-in-out infinite',
           }}
         ></div>
+        
+        {/* CSS Animations */}
+        <style>{`
+          @keyframes shimmer {
+            0% {
+              background-position: -200% 0;
+            }
+            100% {
+              background-position: 200% 0;
+            }
+          }
+        `}</style>
         
         {/* Floating Particles */}
         <div className="absolute inset-0 overflow-hidden">
@@ -336,7 +347,7 @@ const NewArrivals: React.FC = () => {
                   </span>
                   <br />
                   <span className="relative inline-block">
-                    <span className="bg-gradient-to-r from-purple-300 via-pink-300 to-purple-300 bg-clip-text text-transparent font-black tracking-wider glitz-text">
+                    <span className="bg-gradient-to-r from-purple-300 via-pink-300 to-purple-300 bg-clip-text text-transparent font-black tracking-wider">
                       SPORT COLLECTION
                     </span>
                     {/* Glowing outline effect */}
@@ -387,7 +398,7 @@ const NewArrivals: React.FC = () => {
                 {/* Glowing border effect on hover */}
                 <div className="absolute inset-0 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                   <div className="absolute inset-0 rounded-full border border-purple-400/50 animate-pulse"></div>
-                  <div className="absolute inset-0 rounded-full border border-pink-400/50 animate-pulse animation-delay-150"></div>
+                  <div className="absolute inset-0 rounded-full border border-pink-400/50 animate-pulse" style={{ animationDelay: '150ms' }}></div>
                 </div>
               </button>
             </motion.div>

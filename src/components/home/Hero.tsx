@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '../ui/Button';
-import { ArrowRight, ShoppingCart, Star, Loader2, Play } from 'lucide-react';
+import { ArrowRight, ShoppingCart, Loader2, Play } from 'lucide-react';
 import image4 from '../../assets/image1.jpg';
 import image5 from '../../assets/image6.jpg';
 import video1 from '../../assets/video1.mp4';
