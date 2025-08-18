@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowRight, ShoppingBag } from 'lucide-react';
 import { products } from '../../data/products';
 import { motion } from 'framer-motion';
+import './NewArrivals.css';
 
 const NewArrivals: React.FC = () => {
   const navigate = useNavigate();
@@ -137,9 +138,10 @@ const NewArrivals: React.FC = () => {
       >
         {/* Product Image and Overlay */}
         <div 
-          className={`aspect-[3/4] overflow-hidden relative shadow-xl rounded-lg
-            ${isDarkTheme ? 'bg-neutral-900 border-white/10 group-hover:border-white/30' : 'bg-neutral-100 border-gray-200 group-hover:border-gray-400'}
+          className={`aspect-[3/4] overflow-hidden relative shadow-xl rounded-lg product-glow luxury-shimmer
+            ${isDarkTheme ? 'bg-neutral-900 border-white/10 group-hover:border-purple-400/50' : 'bg-neutral-100 border-gray-200 group-hover:border-gray-400'}
             border transition-all duration-500 ease-out
+            ${isDarkTheme ? 'group-hover:shadow-2xl group-hover:shadow-purple-500/20' : ''}
           `}
         >
           {/* Preload all images */}
@@ -210,14 +212,14 @@ const NewArrivals: React.FC = () => {
             className={`mt-3 w-full py-2.5 text-sm tracking-wide transition-all duration-300 active:scale-98 
               flex items-center justify-center space-x-2 overflow-hidden relative rounded-md
               ${isDarkTheme 
-                ? 'text-white border border-white/30 group-hover:text-black hover:border-white/50 bg-white/5' 
+                ? 'text-white border border-purple-400/30 group-hover:text-white hover:border-purple-400/80 bg-gradient-to-r from-purple-900/20 to-pink-900/20 backdrop-blur-sm hover:shadow-lg hover:shadow-purple-500/30' 
                 : 'text-white bg-black border border-black hover:bg-white hover:text-black group-hover:text-black'
               }`}
           >
-            <span className="z-10 transition-transform duration-300 font-medium group-hover:-translate-x-0.5">VIEW PRODUCT</span>
-            <ArrowRight size={14} className="z-10 relative opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300" />
+            <span className={`z-10 transition-all duration-300 font-medium group-hover:-translate-x-0.5 ${isDarkTheme ? 'group-hover:text-black' : ''}`}>VIEW PRODUCT</span>
+            <ArrowRight size={14} className={`z-10 relative opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300 ${isDarkTheme ? 'group-hover:text-black' : ''}`} />
             <div className={`absolute inset-0 w-0 group-hover:w-full transition-all duration-300 ease-out
-              ${isDarkTheme ? 'bg-white' : 'bg-white'}`}></div>
+              ${isDarkTheme ? 'bg-gradient-to-r from-purple-400 to-pink-400' : 'bg-white'}`}></div>
           </motion.button>
         </div>
       </div>
@@ -227,8 +229,82 @@ const NewArrivals: React.FC = () => {
   return (
     <>
       {/* New Arrivals Section - Dark Theme */}
-      <div className="bg-black py-16 md:py-24 text-white relative overflow-hidden">
-        <div className="container mx-auto px-6 sm:px-8">
+      <div className="py-16 md:py-24 text-white relative overflow-hidden">
+        {/* Sophisticated Black Gradient Background */}
+        <div className="absolute inset-0 bg-gradient-to-br from-black via-gray-900 to-black"></div>
+        
+        {/* Glitzy Overlay Effect */}
+        <div className="absolute inset-0 bg-gradient-to-t from-purple-900/10 via-transparent to-pink-900/10"></div>
+        
+        {/* Animated Shimmer Effect */}
+        <div 
+          className="absolute inset-0 opacity-20"
+          style={{
+            background: `linear-gradient(105deg, transparent 40%, rgba(255, 255, 255, 0.1) 50%, transparent 60%)`,
+            animation: 'shimmer 3s ease-in-out infinite',
+            backgroundSize: '200% 200%',
+          }}
+        ></div>
+        
+        {/* Floating Particles */}
+        <div className="absolute inset-0 overflow-hidden">
+          {[...Array(30)].map((_, i) => (
+            <motion.div
+              key={i}
+              className="absolute w-1 h-1 bg-white rounded-full"
+              style={{
+                left: `${Math.random() * 100}%`,
+                top: `${Math.random() * 100}%`,
+                filter: 'blur(1px)',
+              }}
+              animate={{
+                y: [-20, -100],
+                opacity: [0, 1, 0],
+                scale: [0, 1.5, 0],
+              }}
+              transition={{
+                duration: Math.random() * 5 + 5,
+                repeat: Infinity,
+                delay: Math.random() * 5,
+                ease: "easeOut",
+              }}
+            />
+          ))}
+        </div>
+        
+        {/* Glittery Sparkles */}
+        <div className="absolute inset-0">
+          {[...Array(20)].map((_, i) => (
+            <motion.div
+              key={`sparkle-${i}`}
+              className="absolute"
+              style={{
+                left: `${Math.random() * 100}%`,
+                top: `${Math.random() * 100}%`,
+              }}
+            >
+              <motion.div
+                className="w-0.5 h-0.5 bg-white rounded-full"
+                animate={{
+                  scale: [0, 1, 0],
+                  opacity: [0, 1, 0],
+                  rotate: [0, 180],
+                }}
+                transition={{
+                  duration: 2,
+                  repeat: Infinity,
+                  delay: Math.random() * 2,
+                  ease: "easeInOut",
+                }}
+                style={{
+                  boxShadow: '0 0 6px rgba(255, 255, 255, 0.8)',
+                }}
+              />
+            </motion.div>
+          ))}
+        </div>
+        
+        <div className="container mx-auto px-6 sm:px-8 relative z-10">
           {/* Section Header */}
           <div className="flex flex-col md:flex-row justify-between items-start mb-12 md:mb-16">
             <div className="space-y-6">
@@ -239,13 +315,14 @@ const NewArrivals: React.FC = () => {
                 className="space-y-2"
               >
                 <motion.h2 
-                  className="font-sans text-[clamp(2.5rem,6vw,4rem)] md:text-[clamp(4rem,8vw,6rem)] font-bold leading-none tracking-tight"
+                  className="font-sans text-[clamp(2.5rem,6vw,4rem)] md:text-[clamp(4rem,8vw,6rem)] font-bold leading-none tracking-tight relative"
                   animate={{
                     color: colors[colorIndex],
                     textShadow: [
-                      '0 0 20px rgba(139, 92, 246, 0.4)',
-                      '0 0 40px rgba(139, 92, 246, 0.6)',
-                      '0 0 20px rgba(139, 92, 246, 0.4)',
+                      '0 0 30px rgba(139, 92, 246, 0.8)',
+                      '0 0 60px rgba(139, 92, 246, 0.6)',
+                      '0 0 90px rgba(168, 85, 247, 0.4)',
+                      '0 0 120px rgba(168, 85, 247, 0.2)',
                     ],
                   }}
                   transition={{
@@ -254,18 +331,41 @@ const NewArrivals: React.FC = () => {
                     repeat: Infinity,
                   }}
                 >
-                  NEW<br />
-                  <span className="bg-gradient-to-r from-purple-400 via-purple-500 to-purple-600 bg-clip-text text-transparent">
-                    SPORT COLLECTION
+                  <span className="relative z-10">
+                    NEW
+                  </span>
+                  <br />
+                  <span className="relative inline-block">
+                    <span className="bg-gradient-to-r from-purple-300 via-pink-300 to-purple-300 bg-clip-text text-transparent font-black tracking-wider glitz-text">
+                      SPORT COLLECTION
+                    </span>
+                    {/* Glowing outline effect */}
+                    <span className="absolute inset-0 bg-gradient-to-r from-purple-400 via-pink-400 to-purple-400 bg-clip-text text-transparent font-black tracking-wider blur-sm opacity-70" aria-hidden="true">
+                      SPORT COLLECTION
+                    </span>
                   </span>
                 </motion.h2>
                 <motion.p 
-                  className="font-light text-white/80 tracking-[0.15em] text-sm uppercase max-w-md"
+                  className="font-light text-white/90 tracking-[0.2em] text-sm uppercase max-w-md relative"
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.8, delay: 0.2 }}
                 >
-                  Redefining modern aesthetics with premium craftsmanship
+                  <span className="relative z-10 inline-block">
+                    Redefining modern aesthetics with premium craftsmanship
+                  </span>
+                  <motion.div
+                    className="absolute -bottom-2 left-0 h-px bg-gradient-to-r from-transparent via-purple-400 to-transparent"
+                    animate={{
+                      width: ["0%", "100%", "0%"],
+                      opacity: [0, 1, 0],
+                    }}
+                    transition={{
+                      duration: 3,
+                      repeat: Infinity,
+                      ease: "easeInOut",
+                    }}
+                  />
                 </motion.p>
               </motion.div>
             </div>
@@ -277,12 +377,18 @@ const NewArrivals: React.FC = () => {
             >
               <button 
                 onClick={() => navigate('/new-arrivals')}
-                className="group relative overflow-hidden flex items-center gap-3 hover:gap-4 transition-all duration-300 text-sm tracking-widest uppercase text-white border border-white/30 px-8 py-4 rounded-full hover:border-purple-400 hover:shadow-lg hover:shadow-purple-400/20"
+                className="group relative overflow-hidden flex items-center gap-3 hover:gap-4 transition-all duration-300 text-sm tracking-widest uppercase text-white border border-white/20 px-8 py-4 rounded-full hover:border-purple-400 hover:shadow-2xl hover:shadow-purple-400/30 backdrop-blur-sm bg-white/5"
                 aria-label="View all new arrivals"
               >
-                <span className="relative z-10 transition-colors duration-300 group-hover:text-purple-400">View all</span> 
-                <ArrowRight size={18} className="relative z-10 transition-transform duration-300 group-hover:translate-x-1 group-hover:text-purple-400" />
-                <div className="absolute inset-0 bg-gradient-to-r from-purple-400/10 to-purple-600/10 transform -translate-x-full group-hover:translate-x-0 transition-transform duration-300 ease-out"></div>
+                <span className="relative z-10 transition-all duration-300 group-hover:text-transparent group-hover:bg-gradient-to-r group-hover:from-purple-300 group-hover:to-pink-300 group-hover:bg-clip-text font-medium">View all</span> 
+                <ArrowRight size={18} className="relative z-10 transition-all duration-300 group-hover:translate-x-1 group-hover:text-purple-300" />
+                <div className="absolute inset-0 bg-gradient-to-r from-purple-400/20 to-pink-400/20 transform -translate-x-full group-hover:translate-x-0 transition-transform duration-300 ease-out"></div>
+                
+                {/* Glowing border effect on hover */}
+                <div className="absolute inset-0 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                  <div className="absolute inset-0 rounded-full border border-purple-400/50 animate-pulse"></div>
+                  <div className="absolute inset-0 rounded-full border border-pink-400/50 animate-pulse animation-delay-150"></div>
+                </div>
               </button>
             </motion.div>
           </div>
