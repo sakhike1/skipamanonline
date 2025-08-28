@@ -35,9 +35,16 @@ const SearchPage: React.FC = () => {
     }, 300);
   };
 
-  // Handle product click
+  // Handle product click with scroll to top
   const handleProductClick = (productId: string) => {
     navigate(`/product/${productId}`);
+    // Scroll to top after navigation
+    setTimeout(() => {
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
+    }, 100);
   };
 
   // Initial search on component mount

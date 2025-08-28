@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
-import { ShoppingBag, Search, Menu, X, Loader2, TrendingUp, Sparkles, Heart, User, LogOut, Settings, Shield } from 'lucide-react';
+import { ShoppingBag, Search, Menu, X, TrendingUp, Sparkles, Heart, User, LogOut, Settings, Shield } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useCart } from '../../context/CartContext';
 import { useWishlist } from '../../context/WishlistContext';
@@ -31,8 +31,7 @@ const Header: React.FC = () => {
   const [showSearchDropdown, setShowSearchDropdown] = useState(false);
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [isInteracting, setIsInteracting] = useState(false);
-  const [isHovering, setIsHovering] = useState(false);
-  const [hotProducts, setHotProducts] = useState(products.slice(0, 3)); // Get first 3 products as hottest
+  const [hotProducts] = useState(products.slice(0, 3)); // Get first 3 products as hottest
   const searchInputRef = useRef<HTMLInputElement>(null);
   const searchContainerRef = useRef<HTMLDivElement>(null);
   const userMenuRef = useRef<HTMLDivElement>(null);
@@ -55,9 +54,6 @@ const Header: React.FC = () => {
           for (const section of sections) {
             const rect = section.getBoundingClientRect();
             if (rect.top <= 80 && rect.bottom >= 80) {
-              const bgColor = window.getComputedStyle(section).backgroundColor;
-              const isDark = bgColor.includes('0, 0, 0') || bgColor.includes('rgb(0,') || 
-                            section.classList.contains('bg-black') || section.classList.contains('bg-neutral-900');
               // Note: Header background is now controlled by context, not scroll position
               break;
             }
@@ -179,37 +175,7 @@ const Header: React.FC = () => {
     { name: 'About', path: '/about', ariaLabel: 'Learn more about us' }
   ], []);
   
-  // Animation variants for mobile menu
-  const mobileMenuVariants = {
-    hidden: { 
-      opacity: 0, 
-      y: -20,
-      transition: { duration: 0.2 } 
-    },
-    visible: { 
-      opacity: 1, 
-      y: 0,
-      transition: { 
-        duration: 0.3,
-        staggerChildren: 0.05,
-        delayChildren: 0.05
-      }
-    },
-    exit: { 
-      opacity: 0, 
-      y: -20,
-      transition: { duration: 0.2 } 
-    }
-  };
-  
-  const mobileItemVariants = {
-    hidden: { opacity: 0, x: -10 },
-    visible: { 
-      opacity: 1, 
-      x: 0,
-      transition: { duration: 0.2 } 
-    }
-  };
+  // Removed unused animation variants
   
   // Handle scroll
   useEffect(() => {
@@ -232,18 +198,7 @@ const Header: React.FC = () => {
     }
   }, [location.pathname]);
 
-  const resetInactivityTimer = () => {
-    if (inactivityTimerRef.current) {
-      clearTimeout(inactivityTimerRef.current);
-    }
-    setIsInteracting(true);
-    inactivityTimerRef.current = setTimeout(() => {
-      if (!isSearchFocused) {
-        setShowSearchDropdown(false);
-        setIsInteracting(false);
-      }
-    }, 2000);
-  };
+  // Removed resetInactivityTimer as it's not being used
 
   const handleSearchFocus = () => {
     setIsSearchFocused(true);
@@ -356,15 +311,15 @@ const Header: React.FC = () => {
           </nav>
           
           {/* Action Buttons */}
-          <div className="flex items-center space-x-6">
-            {/* Search Form with Dropdown */}
-            <div className="relative">
+          <div className="flex items-center space-x-2 sm:space-x-4 lg:space-x-6">
+            {/* Search Form with Dropdown - Hidden on mobile, shown on larger screens */}
+            <div className="relative hidden sm:block">
               <form onSubmit={handleSearch}>
               <motion.div
                 ref={searchContainerRef}
                 initial={false}
                 animate={{ 
-                  width: isSearchFocused ? 280 : 48,
+                  width: isSearchFocused ? (window.innerWidth < 1024 ? 200 : 280) : 48,
                   scale: isSearchFocused ? 1.02 : 1
                 }}
                 className="relative group"
@@ -389,7 +344,7 @@ const Header: React.FC = () => {
                   onBlur={handleSearchBlur}
                   placeholder={isSearchFocused ? "Search products..." : ""}
                   className={`
-                    relative w-full px-5 py-3 rounded-full 
+                    relative w-full px-5 py-2.5 lg:py-3 rounded-full 
                     ${isSearchFocused 
                       ? 'bg-white/25 backdrop-blur-xl border-white/40 shadow-lg shadow-white/10' 
                       : 'bg-black/15 backdrop-blur-md border-white/15 hover:bg-black/20'
@@ -544,12 +499,12 @@ const Header: React.FC = () => {
               onClick={toggleCartPreview}
               aria-label={`Cart with ${cartItemCount} items`}
             >
-              <ShoppingBag size={22} className="[filter:drop-shadow(0px_0px_1px_rgba(255,255,255,0.5))]" />
+              <ShoppingBag size={20} className="sm:w-[22px] sm:h-[22px] [filter:drop-shadow(0px_0px_1px_rgba(255,255,255,0.5))]" />
               <AnimatePresence>
                 {cartItemCount > 0 && (
                   <motion.span 
                     className={`absolute -top-1 -right-1 ${isHeaderDark && !isScrolled ? 'bg-white text-black' : 'bg-black text-white'} 
-                    text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center`}
+                    text-xs font-bold rounded-full w-4 h-4 sm:w-5 sm:h-5 flex items-center justify-center`}
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
                     exit={{ scale: 0 }}
@@ -561,22 +516,22 @@ const Header: React.FC = () => {
               </AnimatePresence>
             </motion.button>
             
-            {/* Wishlist Button */}
+            {/* Wishlist Button - Hidden on mobile */}
             <motion.button 
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               className={`
-                p-2 rounded-full relative transition-all ${textColor} ${hoverBgColor}
+                hidden sm:flex p-2 rounded-full relative transition-all ${textColor} ${hoverBgColor}
               `}
               onClick={() => navigate('/wishlist')}
               aria-label={`Wishlist with ${wishlistCount} items`}
             >
-              <Heart size={22} className="[filter:drop-shadow(0px_0px_1px_rgba(255,255,255,0.5))]" />
+              <Heart size={20} className="sm:w-[22px] sm:h-[22px] [filter:drop-shadow(0px_0px_1px_rgba(255,255,255,0.5))]" />
               <AnimatePresence>
                 {wishlistCount > 0 && (
                   <motion.span 
                     className={`absolute -top-1 -right-1 ${isHeaderDark && !isScrolled ? 'bg-white text-black' : 'bg-black text-white'} 
-                    text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center`}
+                    text-xs font-bold rounded-full w-4 h-4 sm:w-5 sm:h-5 flex items-center justify-center`}
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
                     exit={{ scale: 0 }}
@@ -595,13 +550,13 @@ const Header: React.FC = () => {
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   className={`
-                    flex items-center gap-2 px-3 py-2 rounded-full transition-all ${textColor} ${hoverBgColor}
+                    hidden sm:flex items-center gap-2 px-3 py-2 rounded-full transition-all ${textColor} ${hoverBgColor}
                   `}
                   onClick={toggleUserMenu}
                   aria-label="User menu"
                 >
-                  <User size={18} className="[filter:drop-shadow(0px_0px_1px_rgba(255,255,255,0.5))]" />
-                  <span className="hidden sm:block text-sm font-medium">
+                  <User size={16} className="sm:w-[18px] sm:h-[18px] [filter:drop-shadow(0px_0px_1px_rgba(255,255,255,0.5))]" />
+                  <span className="hidden lg:block text-sm font-medium">
                     {user?.firstName}
                   </span>
                 </motion.button>
@@ -693,13 +648,13 @@ const Header: React.FC = () => {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 className={`
-                  flex items-center gap-2 px-3 py-2 rounded-full transition-all ${textColor} ${hoverBgColor}
+                  hidden sm:flex items-center gap-2 px-3 py-2 rounded-full transition-all ${textColor} ${hoverBgColor}
                 `}
                 onClick={() => navigate('/login')}
                 aria-label="Login"
               >
-                <User size={18} className="[filter:drop-shadow(0px_0px_1px_rgba(255,255,255,0.5))]" />
-                <span className="hidden sm:block text-sm font-medium">
+                <User size={16} className="sm:w-[18px] sm:h-[18px] [filter:drop-shadow(0px_0px_1px_rgba(255,255,255,0.5))]" />
+                <span className="hidden lg:block text-sm font-medium">
                   Sign In
                 </span>
               </motion.button>
@@ -736,65 +691,275 @@ const Header: React.FC = () => {
           </div>
         </div>
         
-        {/* Mobile Menu */}
+        {/* Snazzy Mobile Menu - Dropdown Style */}
         <AnimatePresence>
           {showMobileMenu && (
-            <motion.div 
-              id="mobile-menu"
-              className="md:hidden mt-4 py-4 bg-white rounded-lg shadow-xl overflow-hidden"
-              variants={mobileMenuVariants}
-              initial="hidden"
-              animate="visible"
-              exit="exit"
-              role="navigation"
-              aria-label="Mobile navigation"
-            >
-              <nav className="flex flex-col space-y-1 px-4">
-                {navItems.map((item) => (
-                  <motion.div
-                    key={item.name}
-                    variants={mobileItemVariants}
-                  >
-                    <Link
-                      to={item.path}
-                      className={`
-                        text-gray-800 text-lg font-medium py-3 px-2 rounded-md transition-all
-                        ${location.pathname === item.path ? 'bg-gray-50 font-semibold' : ''}
-                        hover:bg-gray-50
-                      `}
-                      onClick={() => setShowMobileMenu(false)}
-                      aria-label={item.ariaLabel}
-                      aria-current={location.pathname === item.path ? 'page' : undefined}
+            <>
+              {/* Backdrop with blur */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="fixed inset-0 bg-black/60 backdrop-blur-md z-40 md:hidden"
+                onClick={() => setShowMobileMenu(false)}
+              />
+              
+              {/* Mobile Menu Dropdown Panel */}
+              <motion.div 
+                id="mobile-menu"
+                initial={{ opacity: 0, y: -20, scale: 0.95 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -20, scale: 0.95 }}
+                transition={{ 
+                  type: 'spring', 
+                  stiffness: 300, 
+                  damping: 30,
+                  mass: 0.8
+                }}
+                className="absolute top-full left-0 right-0 mx-4 mt-2 bg-gradient-to-br from-gray-900/95 via-black/95 to-purple-900/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/10 z-50 md:hidden overflow-hidden"
+                style={{
+                  boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.05)'
+                }}
+                role="navigation"
+                aria-label="Mobile navigation"
+              >
+                {/* Glowing Header */}
+                <div className="relative p-6 bg-gradient-to-r from-purple-600/20 via-pink-600/20 to-purple-600/20">
+                  {/* Animated background shimmer */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent animate-pulse"></div>
+                  
+                  <div className="relative flex items-center justify-between">
+                    <motion.div 
+                      className="text-xl font-black text-white"
+                      animate={{
+                        textShadow: [
+                          '0 0 20px rgba(168, 85, 247, 0.8)',
+                          '0 0 30px rgba(236, 72, 153, 0.8)',
+                          '0 0 20px rgba(168, 85, 247, 0.8)'
+                        ]
+                      }}
+                      transition={{
+                        duration: 2,
+                        repeat: Infinity,
+                        ease: "easeInOut"
+                      }}
                     >
-                      {item.name}
-                    </Link>
-                  </motion.div>
-                ))}
-                
-                {/* Additional items for mobile */}
-                <motion.div 
-                  className="pt-2 mt-2 border-t border-gray-100"
-                  variants={mobileItemVariants}
-                >
-                  <Link
-                    to="/wishlist"
-                    className="text-gray-800 text-lg font-medium py-3 px-2 rounded-md hover:bg-gray-50 transition-all block"
-                    onClick={() => setShowMobileMenu(false)}
-                    aria-label="View my wishlist"
-                  >
-                    Wishlist {wishlistCount > 0 && `(${wishlistCount})`}
-                  </Link>
-                  <Link
-                    to="/account"
-                    className="text-gray-800 text-lg font-medium py-3 px-2 rounded-md hover:bg-gray-50 transition-all block"
-                    onClick={() => setShowMobileMenu(false)}
-                    aria-label="View my account"
-                  >
-                    My Account
-                  </Link>
-                </motion.div>
-              </nav>
-            </motion.div>
+                      <span className="tracking-tighter bg-gradient-to-r from-purple-300 to-pink-300 bg-clip-text text-transparent">SKIPA</span>
+                      <span className="tracking-tighter bg-gradient-to-r from-pink-300 to-purple-300 bg-clip-text text-transparent">MAN</span>
+                    </motion.div>
+                    <motion.button
+                      whileHover={{ scale: 1.1, rotate: 90 }}
+                      whileTap={{ scale: 0.9 }}
+                      onClick={() => setShowMobileMenu(false)}
+                      className="p-2 rounded-full bg-white/10 text-white hover:bg-white/20 transition-all backdrop-blur-sm border border-white/20"
+                      aria-label="Close menu"
+                    >
+                      <X size={20} />
+                    </motion.button>
+                  </div>
+                </div>
+
+                {/* Compact Search Bar for Mobile */}
+                <div className="px-6 py-4 border-b border-white/5">
+                  <form onSubmit={handleSearch}>
+                    <motion.div 
+                      className="relative"
+                      whileFocus={{ scale: 1.02 }}
+                    >
+                      <input
+                        type="text"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        placeholder="Search products..."
+                        className="w-full px-5 py-3 pl-12 bg-gradient-to-r from-white/10 to-white/5 border border-white/20 rounded-2xl text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-purple-400/60 focus:border-purple-400/60 transition-all backdrop-blur-sm"
+                      />
+                      <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/60" />
+                      <motion.button
+                        type="submit"
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.9 }}
+                        className="absolute right-2 top-1/2 -translate-y-1/2 p-2 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl text-white shadow-lg"
+                      >
+                        <Search size={14} />
+                      </motion.button>
+                    </motion.div>
+                  </form>
+                </div>
+
+                {/* Snazzy Navigation Links */}
+                <nav className="p-6">
+                  <div className="space-y-1">
+                    {navItems.map((item, index) => (
+                      <motion.div
+                        key={item.name}
+                        initial={{ opacity: 0, y: 20, scale: 0.9 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        transition={{ 
+                          delay: index * 0.1,
+                          type: 'spring',
+                          stiffness: 200,
+                          damping: 20
+                        }}
+                      >
+                        <Link
+                          to={item.path}
+                          className={`
+                            group relative flex items-center justify-between py-3 px-4 rounded-2xl text-lg font-semibold transition-all duration-300 overflow-hidden
+                            ${location.pathname === item.path 
+                              ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg shadow-purple-500/30' 
+                              : 'text-white/90 hover:bg-gradient-to-r hover:from-white/10 hover:to-white/5 hover:text-white'
+                            }
+                          `}
+                          onClick={() => setShowMobileMenu(false)}
+                          aria-label={item.ariaLabel}
+                          aria-current={location.pathname === item.path ? 'page' : undefined}
+                        >
+                          {/* Background glow effect */}
+                          <div className={`absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 ${
+                            location.pathname !== item.path ? 'bg-gradient-to-r from-purple-600/20 to-pink-600/20' : ''
+                          }`}></div>
+                          
+                          {/* Shimmer effect */}
+                          <div className="absolute inset-0 opacity-0 group-hover:opacity-100 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+                          
+                          <span className="relative z-10 tracking-wide">{item.name}</span>
+                          
+                          {location.pathname === item.path ? (
+                            <motion.div
+                              initial={{ scale: 0, rotate: 0 }}
+                              animate={{ scale: 1, rotate: 360 }}
+                              transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
+                              className="relative z-10 w-2 h-2 bg-white rounded-full shadow-lg"
+                            />
+                          ) : (
+                            <motion.div
+                              className="relative z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                              animate={{ x: [0, 5, 0] }}
+                              transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                            >
+                              <div className="w-1.5 h-1.5 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full"></div>
+                            </motion.div>
+                          )}
+                        </Link>
+                      </motion.div>
+                    ))}
+                  </div>
+
+                  {/* Compact Additional Links */}
+                  <div className="mt-6 pt-4 border-t border-white/5 space-y-1">
+                    {/* Quick Actions Row */}
+                    <div className="grid grid-cols-2 gap-2 mb-4">
+                      <motion.div
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ delay: 0.4, type: 'spring' }}
+                      >
+                        <Link
+                          to="/wishlist"
+                          className="group relative flex flex-col items-center py-3 px-3 rounded-2xl text-white/90 hover:bg-gradient-to-r hover:from-pink-600/20 hover:to-red-600/20 hover:text-white transition-all duration-300 overflow-hidden"
+                          onClick={() => setShowMobileMenu(false)}
+                          aria-label="View my wishlist"
+                        >
+                          <div className="absolute inset-0 opacity-0 group-hover:opacity-100 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
+                          <div className="relative z-10 flex items-center gap-2">
+                            <Heart size={18} />
+                            <span className="text-sm font-medium">Wishlist</span>
+                          </div>
+                          {wishlistCount > 0 && (
+                            <motion.span 
+                              className="relative z-10 mt-1 bg-gradient-to-r from-pink-500 to-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full shadow-lg"
+                              animate={{ scale: [1, 1.1, 1] }}
+                              transition={{ duration: 2, repeat: Infinity }}
+                            >
+                              {wishlistCount}
+                            </motion.span>
+                          )}
+                        </Link>
+                      </motion.div>
+
+                      <motion.div
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ delay: 0.5, type: 'spring' }}
+                      >
+                        {isAuthenticated ? (
+                          <Link
+                            to="/profile"
+                            className="group relative flex flex-col items-center py-3 px-3 rounded-2xl text-white/90 hover:bg-gradient-to-r hover:from-blue-600/20 hover:to-purple-600/20 hover:text-white transition-all duration-300 overflow-hidden"
+                            onClick={() => setShowMobileMenu(false)}
+                          >
+                            <div className="absolute inset-0 opacity-0 group-hover:opacity-100 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
+                            <div className="relative z-10 flex items-center gap-2">
+                              <User size={18} />
+                              <span className="text-sm font-medium">Profile</span>
+                            </div>
+                          </Link>
+                        ) : (
+                          <Link
+                            to="/login"
+                            className="group relative flex flex-col items-center py-3 px-3 rounded-2xl bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden"
+                            onClick={() => setShowMobileMenu(false)}
+                          >
+                            <div className="absolute inset-0 opacity-0 group-hover:opacity-100 bg-gradient-to-r from-white/10 to-white/5 transition-opacity duration-300"></div>
+                            <div className="relative z-10 flex items-center gap-2">
+                              <User size={18} />
+                              <span className="text-sm font-medium">Sign In</span>
+                            </div>
+                          </Link>
+                        )}
+                      </motion.div>
+                    </div>
+
+                    {/* Sign Out Button (if authenticated) */}
+                    {isAuthenticated && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.6 }}
+                      >
+                        <button
+                          onClick={() => {
+                            handleLogout();
+                            setShowMobileMenu(false);
+                          }}
+                          className="group relative w-full flex items-center justify-center gap-2 py-3 px-4 rounded-2xl text-red-400 hover:bg-gradient-to-r hover:from-red-600/20 hover:to-red-500/20 hover:text-red-300 transition-all duration-300 overflow-hidden"
+                        >
+                          <div className="absolute inset-0 opacity-0 group-hover:opacity-100 bg-gradient-to-r from-transparent via-red-500/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
+                          <LogOut size={16} className="relative z-10" />
+                          <span className="relative z-10 text-sm font-medium">Sign Out</span>
+                        </button>
+                      </motion.div>
+                    )}
+                  </div>
+
+                  {/* Compact User Info (if authenticated) */}
+                  {isAuthenticated && user && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.7 }}
+                      className="mt-4 pt-4 border-t border-white/5"
+                    >
+                      <div className="flex items-center gap-3 p-3 bg-gradient-to-r from-white/5 to-white/10 rounded-2xl backdrop-blur-sm">
+                        <motion.div 
+                          className="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center shadow-lg"
+                          animate={{ rotate: [0, 5, -5, 0] }}
+                          transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                        >
+                          <User size={18} className="text-white" />
+                        </motion.div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-white font-semibold text-sm truncate">
+                            {user.firstName} {user.lastName}
+                          </p>
+                          <p className="text-white/60 text-xs truncate">{user.email}</p>
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+                </nav>
+              </motion.div>
+            </>
           )}
         </AnimatePresence>
       </div>

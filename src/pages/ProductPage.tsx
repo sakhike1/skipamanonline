@@ -51,6 +51,14 @@ const ProductPage: React.FC = () => {
       isMounted = false;
     };
   }, [id]);
+
+  // Scroll to top when component mounts or product ID changes
+  useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+  }, [id]);
   
   const handleGoBack = () => {
     navigate('/shop');

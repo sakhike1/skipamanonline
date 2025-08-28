@@ -389,6 +389,13 @@ const ShopPage: React.FC = () => {
 
   const handleProductClick = (productId: string) => {
     navigate(`/product/${productId}`);
+    // Scroll to top after navigation
+    setTimeout(() => {
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
+    }, 100);
   };
 
   const toggleFilters = () => {

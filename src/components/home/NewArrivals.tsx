@@ -100,6 +100,13 @@ const NewArrivals: React.FC = () => {
   const handleViewProduct = (e: React.MouseEvent, productId: string) => {
     e.stopPropagation();
     navigate(`/product/${productId}`);
+    // Scroll to top after navigation
+    setTimeout(() => {
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
+    }, 100);
   };
 
   // Component for a single product card
