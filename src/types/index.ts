@@ -301,7 +301,7 @@ export interface User {
   email: string;
   firstName: string;
   lastName: string;
-  role: 'user' | 'admin';
+  role: 'buyer' | 'admin';
   createdAt: string;
   updatedAt: string;
   password?: string; // Optional for internal use, never exposed externally

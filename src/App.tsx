@@ -1,11 +1,10 @@
-import React, { Suspense, lazy, useEffect } from 'react';
+import { Suspense, lazy, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { CartProvider } from './context/CartContext';
 import { WishlistProvider } from './context/WishlistContext';
 import { AuthProvider } from './context/AuthContext';
 import { HeaderProvider } from './context/HeaderContext';
-import { ProfileProvider } from './context/ProfileContext';
-import { OrderProvider } from './context/OrderContext';
+import { PaymentProvider } from './context/PaymentContext';
 import Layout from './components/layout/Layout';
 import LoadingSpinner from './components/ui/LoadingSpinner';
 import ProtectedRoute from './components/auth/ProtectedRoute';
@@ -18,12 +17,17 @@ const About = lazy(() => import('./pages/About'));
 const NewArrivalsPage = lazy(() => import('./pages/NewArrivalsPage'));
 const SearchPage = lazy(() => import('./pages/SearchPage'));
 const WishlistPage = lazy(() => import('./pages/WishlistPage'));
-const CheckoutPage = lazy(() => import('./pages/CheckoutPage'));
-const SettingsPage = lazy(() => import('./pages/SettingsPage'));
-const LoginForm = lazy(() => import('./components/auth/LoginForm'));
+const OrdersPage = lazy(() => import('./pages/OrdersPage'));
+const OrderTrackingPage = lazy(() => import('./pages/OrderTrackingPage'));
+const AdminDashboard = lazy(() => import('./pages/AdminDashboard') as Promise<{ default: React.ComponentType<unknown> }>);
+const CheckoutPage = lazy(() => import('./pages/Checkout'));
+const LoginForm = lazy(() => import('./assets/cart/LoginForm'));
 const RegisterForm = lazy(() => import('./components/auth/RegisterForm'));
-const AdminPage = lazy(() => import('./pages/AdminPage'));
-const DemoAuthPage = lazy(() => import('./pages/DemoAuthPage'));
+const ProfilePage = lazy(() => import('./pages/ProfilePage'));
+const SettingsPage = lazy(() => import('./pages/SettingsPage'));
+const CustomDesignPage = lazy(() => import('./pages/EnhancedCustomDesignPage'));
+const PaymentSuccess = lazy(() => import('./pages/PaymentSuccess'));
+const PaymentCancel = lazy(() => import('./pages/PaymentCancel'));
 
 // Loading fallback component
 const PageLoader = () => (
@@ -38,32 +42,28 @@ const PageLoader = () => (
 );
 
 function App() {
-  // Remove HTML loading screen when React app loads
+  // Remove HTML loading screen immediately when React app loads
   useEffect(() => {
     const removeLoadingScreen = () => {
       const loadingScreen = document.getElementById('loading-screen');
       if (loadingScreen) {
-        // Start fade-out animation
-        loadingScreen.style.opacity = '0';
-        loadingScreen.style.transition = 'opacity 0.8s ease-out';
-        
-        // Remove from DOM after animation
-        setTimeout(() => {
-          loadingScreen.remove();
-        }, 800);
+        // Force remove with multiple methods
+        loadingScreen.style.display = 'none';
+        loadingScreen.remove();
       }
+      // Also add CSS class to body as backup
+      document.body.classList.add('app-loaded');
+      // Force hide with CSS
+      const style = document.createElement('style');
+      style.textContent = '#loading-screen { display: none !important; }';
+      document.head.appendChild(style);
     };
 
-    // Remove immediately if DOM is already ready
-    if (document.readyState === 'complete') {
-      removeLoadingScreen();
-    } else {
-      // Wait for page to load
-      window.addEventListener('load', removeLoadingScreen);
-      
-      // Fallback: remove after 3 seconds
-      setTimeout(removeLoadingScreen, 3000);
-    }
+    // Remove immediately - no need to wait
+    removeLoadingScreen();
+
+    // Also remove on window load as backup
+    window.addEventListener('load', removeLoadingScreen);
 
     return () => {
       window.removeEventListener('load', removeLoadingScreen);
@@ -72,15 +72,14 @@ function App() {
 
   return (
     <AuthProvider>
-      <ProfileProvider>
-        <OrderProvider>
-          <CartProvider>
-            <WishlistProvider>
-              <HeaderProvider>
-                <Router>
-                  <Layout>
-                    <Suspense fallback={<PageLoader />}>
-                      <Routes>
+      <CartProvider>
+        <PaymentProvider>
+          <WishlistProvider>
+            <HeaderProvider>
+            <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+              <Layout>
+                <Suspense fallback={<PageLoader />}>
+                  <Routes>
                     {/* Public Routes */}
                     <Route path="/" element={<HomePage />} />
                     <Route path="/shop" element={<ShopPage />} />
@@ -88,11 +87,25 @@ function App() {
                     <Route path="/about" element={<About />} />
                     <Route path="/new-arrivals" element={<NewArrivalsPage />} />
                     <Route path="/search" element={<SearchPage />} />
+                    <Route path="/custom-design" element={<CustomDesignPage />} />
                     
-                                               {/* Auth Routes */}
-                           <Route path="/login" element={<LoginForm />} />
-                           <Route path="/register" element={<RegisterForm />} />
-                           <Route path="/demo-auth" element={<DemoAuthPage />} />
+                    {/* Auth Routes */}
+                    <Route path="/login" element={<LoginForm />} />
+                    <Route path="/register" element={<RegisterForm />} />
+                    
+                    {/* Payment Routes */}
+                    <Route path="/payment/success" element={<PaymentSuccess />} />
+                    <Route path="/payment/cancel" element={<PaymentCancel />} />
+                    
+                    {/* Checkout Route */}
+                    <Route 
+                      path="/checkout" 
+                      element={
+                        <ProtectedRoute>
+                          <CheckoutPage />
+                        </ProtectedRoute>
+                      } 
+                    />
                     
                     {/* Protected Routes */}
                     <Route 
@@ -104,10 +117,26 @@ function App() {
                       } 
                     />
                     <Route 
-                      path="/checkout" 
+                      path="/orders" 
                       element={
                         <ProtectedRoute>
-                          <CheckoutPage />
+                          <OrdersPage />
+                        </ProtectedRoute>
+                      } 
+                    />
+                    <Route 
+                      path="/orders/:orderId" 
+                      element={
+                        <ProtectedRoute>
+                          <OrderTrackingPage />
+                        </ProtectedRoute>
+                      } 
+                    />
+                    <Route 
+                      path="/profile" 
+                      element={
+                        <ProtectedRoute>
+                          <ProfilePage />
                         </ProtectedRoute>
                       } 
                     />
@@ -120,20 +149,10 @@ function App() {
                       } 
                     />
                     <Route 
-                      path="/profile" 
-                      element={
-                        <ProtectedRoute>
-                          <SettingsPage />
-                        </ProtectedRoute>
-                      } 
-                    />
-                    
-                    {/* Admin Routes */}
-                    <Route 
                       path="/admin" 
                       element={
-                        <ProtectedRoute roles={['admin']}>
-                          <AdminPage />
+                        <ProtectedRoute requireAdmin>
+                          <AdminDashboard />
                         </ProtectedRoute>
                       } 
                     />
@@ -141,11 +160,10 @@ function App() {
                 </Suspense>
               </Layout>
             </Router>
-          </HeaderProvider>
-        </WishlistProvider>
+            </HeaderProvider>
+          </WishlistProvider>
+        </PaymentProvider>
       </CartProvider>
-        </OrderProvider>
-      </ProfileProvider>
     </AuthProvider>
   );
 }

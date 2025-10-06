@@ -10,9 +10,15 @@
     "preview": "vite preview",
     "test": "jest",
     "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage"
+    "test:coverage": "jest --coverage",
+    "optimize:images": "node scripts/optimize-images.js",
+    "optimize:images:sharp": "node scripts/optimize-with-sharp.js",
+    "convert:gif": "node scripts/convert-gif-to-mp4.js",
+    "analyze:performance": "node scripts/performance-optimizer.js",
+    "optimize:featured-products": "node scripts/optimize-featured-products.js"
   },
   "dependencies": {
+    "axios": "^1.7.7",
     "firebase": "^12.2.0",
     "fr": "^1.2.2",
     "framer-motion": "^12.23.12",
@@ -21,8 +27,11 @@
     "pg": "^8.16.3",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
+    "react-query": "^3.39.3",
     "react-router-dom": "^6.22.2",
-    "sequelize": "^6.37.7"
+    "sequelize": "^6.37.7",
+    "sharp": "^0.34.4",
+    "socket.io-client": "^4.8.1"
   },
   "devDependencies": {
     "@eslint/js": "^9.9.1",

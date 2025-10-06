@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '../ui/Button';
-import { ArrowRight, ShoppingCart, Loader2, Play } from 'lucide-react';
+import { ArrowRight, ShoppingCart, Loader2 } from 'lucide-react';
 import image4 from '../../assets/image1.jpg';
 import image5 from '../../assets/image6.jpg';
 import video1 from '../../assets/video1.mp4';
@@ -191,7 +191,14 @@ const HeroSection: React.FC = () => {
 
   useEffect(() => {
     startAutoSlide();
-    return () => stopAutoSlide();
+    return () => {
+      stopAutoSlide();
+      // Cleanup video when component unmounts
+      if (videoRef.current) {
+        videoRef.current.pause();
+        videoRef.current.currentTime = 0;
+      }
+    };
   }, [startAutoSlide, stopAutoSlide]);
 
   useEffect(() => {
@@ -219,6 +226,10 @@ const HeroSection: React.FC = () => {
   }, []);
 
   const handleSlideChange = (index: number) => {
+    // Pause current video before changing slides
+    if (videoRef.current) {
+      videoRef.current.pause();
+    }
     setCurrentSlideIndex(index);
     stopAutoSlide();
     startAutoSlide();
@@ -240,17 +251,6 @@ const HeroSection: React.FC = () => {
   const handleMediaError = () => {
     setIsMediaLoading(false);
     setMediaError(true);
-  };
-
-  const togglePlay = () => {
-    if (videoRef.current) {
-      if (isPlaying) {
-        videoRef.current.pause();
-      } else {
-        videoRef.current.play();
-      }
-      setIsPlaying(!isPlaying);
-    }
   };
 
   const currentSlide = SLIDES_DATA[currentSlideIndex];
@@ -278,24 +278,12 @@ const HeroSection: React.FC = () => {
                 muted
                 playsInline
                 autoPlay
-                onLoad={handleMediaLoad}
+                onLoadedData={handleMediaLoad}
                 onError={handleMediaError}
+                onPlay={() => setIsPlaying(true)}
+                onPause={() => setIsPlaying(false)}
+                onAbort={() => console.log('Video playback was aborted')}
               />
-              <button
-                onClick={togglePlay}
-                className="absolute inset-0 w-full h-full flex items-center justify-center bg-black/20 hover:bg-black/30 transition-colors"
-                aria-label={isPlaying ? 'Pause video' : 'Play video'}
-              >
-                {!isPlaying && (
-                  <motion.div
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    className="w-16 h-16 rounded-full bg-white/90 flex items-center justify-center"
-                  >
-                    <Play className="w-8 h-8 text-black" />
-                  </motion.div>
-                )}
-              </button>
             </>
           )}
         </>

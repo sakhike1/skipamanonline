@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Filter, X, Search, ChevronDown, ChevronUp, Sparkles } from 'lucide-react';
+import { Filter, X, Search, ChevronDown, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface SearchFiltersType {

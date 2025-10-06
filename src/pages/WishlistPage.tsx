@@ -1,15 +1,17 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useWishlist } from '../context/WishlistContext';
 import { useCart } from '../context/CartContext';
 import { getProductById } from '../data/products';
 import ProductCard from '../components/product/ProductCard';
-import { Heart, ShoppingBag, ArrowLeft, Sparkles, Star, TrendingUp, Zap } from 'lucide-react';
+import { Heart, ShoppingBag, ArrowLeft, Sparkles, Star, TrendingUp, Zap, CheckCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const WishlistPage: React.FC = () => {
   const { wishlist, removeFromWishlist, clearWishlist } = useWishlist();
   const { addToCart } = useCart();
+  const [addAllSuccess, setAddAllSuccess] = useState(false);
+  const [clearSuccess, setClearSuccess] = useState(false);
 
   const wishlistProducts = wishlist.items
     .map(item => getProductById(item.productId))
@@ -484,40 +486,193 @@ const WishlistPage: React.FC = () => {
             </motion.h2>
             
             <div className="flex flex-wrap gap-6">
+              {/* Add All to Cart Button */}
               <motion.button
                 onClick={() => {
-                  wishlistProducts.forEach(product => {
-                    handleAddToCart(product.id);
-                  });
+                  if (wishlistProducts.length > 0) {
+                    wishlistProducts.forEach(product => {
+                      handleAddToCart(product.id);
+                    });
+                    setAddAllSuccess(true);
+                    setTimeout(() => setAddAllSuccess(false), 3000);
+                  }
                 }}
-                className="flex items-center space-x-3 bg-gradient-to-r from-purple-500 via-purple-600 to-purple-700 text-white px-6 py-4 rounded-full hover:from-purple-600 hover:via-purple-700 hover:to-purple-800 transition-all duration-300 shadow-2xl hover:shadow-purple-500/40 font-semibold group"
-                whileHover={{ scale: 1.05, y: -2 }}
+                className="relative flex items-center space-x-4 bg-gradient-to-r from-purple-500 via-purple-600 to-purple-700 text-white px-8 py-5 rounded-2xl hover:from-purple-600 hover:via-purple-700 hover:to-purple-800 transition-all duration-300 shadow-2xl hover:shadow-purple-500/40 font-bold group overflow-hidden"
+                whileHover={{ scale: 1.05, y: -3 }}
                 whileTap={{ scale: 0.95 }}
+                disabled={wishlistProducts.length === 0}
               >
-                <ShoppingBag size={20} className="group-hover:scale-110 transition-transform duration-300" />
-                <span>Add All to Cart</span>
-                <Zap size={18} className="group-hover:scale-110 transition-transform duration-300" />
-              </motion.button>
-              <motion.button
-                onClick={clearWishlist}
-                className="flex items-center space-x-3 bg-gradient-to-r from-red-500 via-red-600 to-red-700 text-white px-6 py-4 rounded-full hover:from-red-600 hover:via-red-700 hover:to-red-800 transition-all duration-300 shadow-2xl hover:shadow-red-500/40 font-semibold group"
-                whileHover={{ scale: 1.05, y: -2 }}
-                whileTap={{ scale: 0.95 }}
-              >
+                {/* Shimmer Effect */}
                 <motion.div
-                  animate={{ 
-                    scale: [1, 1.2, 1],
-                    rotate: [0, 10, -10, 0]
-                  }}
-                  transition={{ 
-                    duration: 3, 
-                    repeat: Infinity, 
-                    ease: "easeInOut" 
-                  }}
-                >
-                  <Heart size={20} />
-                </motion.div>
-                <span>Clear Wishlist</span>
+                  className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"
+                />
+                
+                {/* Button Content */}
+                <div className="relative z-10 flex items-center space-x-4">
+                  <motion.div
+                    whileHover={{ rotate: 15, scale: 1.1 }}
+                    transition={{ type: "spring", stiffness: 300 }}
+                  >
+                    <AnimatePresence mode="wait">
+                      {addAllSuccess ? (
+                        <motion.div
+                          key="success"
+                          initial={{ scale: 0, rotate: -180 }}
+                          animate={{ scale: 1, rotate: 0 }}
+                          exit={{ scale: 0, rotate: 180 }}
+                          transition={{ type: "spring", stiffness: 300 }}
+                        >
+                          <CheckCircle size={22} className="text-green-300" />
+                        </motion.div>
+                      ) : (
+                        <motion.div
+                          key="bag"
+                          initial={{ scale: 0 }}
+                          animate={{ scale: 1 }}
+                          exit={{ scale: 0 }}
+                          transition={{ type: "spring", stiffness: 300 }}
+                        >
+                          <ShoppingBag size={22} className="group-hover:scale-110 transition-transform duration-300" />
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </motion.div>
+                  <span className="text-lg">
+                    {addAllSuccess ? "Added to Cart!" : "Add All to Cart"}
+                  </span>
+                  <motion.div
+                    animate={{ 
+                      scale: [1, 1.2, 1],
+                      rotate: [0, 5, -5, 0]
+                    }}
+                    transition={{ 
+                      duration: 2, 
+                      repeat: Infinity, 
+                      ease: "easeInOut" 
+                    }}
+                  >
+                    <Zap size={20} className="text-yellow-300 group-hover:scale-110 transition-transform duration-300" />
+                  </motion.div>
+                </div>
+                
+                {/* Product Count Badge */}
+                {wishlistProducts.length > 0 && (
+                  <motion.div
+                    className="absolute -top-2 -right-2 bg-gradient-to-r from-yellow-400 to-orange-400 text-purple-900 text-xs font-bold px-2 py-1 rounded-full shadow-lg"
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ type: "spring", stiffness: 300 }}
+                  >
+                    {wishlistProducts.length}
+                  </motion.div>
+                )}
+              </motion.button>
+
+              {/* Clear Wishlist Button */}
+              <motion.button
+                onClick={() => {
+                  if (wishlistProducts.length > 0) {
+                    clearWishlist();
+                    setClearSuccess(true);
+                    setTimeout(() => setClearSuccess(false), 3000);
+                  }
+                }}
+                className="relative flex items-center space-x-4 bg-gradient-to-r from-red-500 via-red-600 to-red-700 text-white px-8 py-5 rounded-2xl hover:from-red-600 hover:via-red-700 hover:to-red-800 transition-all duration-300 shadow-2xl hover:shadow-red-500/40 font-bold group overflow-hidden"
+                whileHover={{ scale: 1.05, y: -3 }}
+                whileTap={{ scale: 0.95 }}
+                disabled={wishlistProducts.length === 0}
+              >
+                {/* Shimmer Effect */}
+                <motion.div
+                  className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"
+                />
+                
+                {/* Button Content */}
+                <div className="relative z-10 flex items-center space-x-4">
+                  <motion.div
+                    animate={{ 
+                      scale: [1, 1.2, 1],
+                      rotate: [0, 10, -10, 0]
+                    }}
+                    transition={{ 
+                      duration: 3, 
+                      repeat: Infinity, 
+                      ease: "easeInOut" 
+                    }}
+                    whileHover={{ scale: 1.3, rotate: 15 }}
+                  >
+                    <AnimatePresence mode="wait">
+                      {clearSuccess ? (
+                        <motion.div
+                          key="success"
+                          initial={{ scale: 0, rotate: -180 }}
+                          animate={{ scale: 1, rotate: 0 }}
+                          exit={{ scale: 0, rotate: 180 }}
+                          transition={{ type: "spring", stiffness: 300 }}
+                        >
+                          <CheckCircle size={22} className="text-green-300" />
+                        </motion.div>
+                      ) : (
+                        <motion.div
+                          key="heart"
+                          initial={{ scale: 0 }}
+                          animate={{ scale: 1 }}
+                          exit={{ scale: 0 }}
+                          transition={{ type: "spring", stiffness: 300 }}
+                        >
+                          <Heart size={22} className="fill-current group-hover:scale-110 transition-transform duration-300" />
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </motion.div>
+                  <span className="text-lg">
+                    {clearSuccess ? "Wishlist Cleared!" : "Clear Wishlist"}
+                  </span>
+                  <motion.div
+                    whileHover={{ rotate: 180 }}
+                    transition={{ duration: 0.5 }}
+                  >
+                    <AnimatePresence mode="wait">
+                      {clearSuccess ? (
+                        <motion.div
+                          key="success-trash"
+                          initial={{ scale: 0 }}
+                          animate={{ scale: 1 }}
+                          exit={{ scale: 0 }}
+                          transition={{ type: "spring", stiffness: 300 }}
+                        >
+                          <CheckCircle size={20} className="text-green-300" />
+                        </motion.div>
+                      ) : (
+                        <motion.div
+                          key="trash"
+                          initial={{ scale: 0 }}
+                          animate={{ scale: 1 }}
+                          exit={{ scale: 0 }}
+                          transition={{ type: "spring", stiffness: 300 }}
+                        >
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                          </svg>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </motion.div>
+                </div>
+                
+                {/* Empty State Indicator */}
+                {wishlistProducts.length === 0 && (
+                  <motion.div
+                    className="absolute inset-0 bg-gray-400/50 rounded-2xl cursor-not-allowed"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <div className="flex items-center justify-center h-full">
+                      <span className="text-gray-600 font-medium">Wishlist Empty</span>
+                    </div>
+                  </motion.div>
+                )}
               </motion.button>
             </div>
           </div>

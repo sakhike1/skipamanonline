@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { products, getFeaturedProducts } from '../data/products'; // Assuming this path is correct
-import { Filter, X, ArrowRight, ChevronRight } from 'lucide-react';
+import { Filter, X, ArrowRight } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 interface ProductCardProps {
@@ -406,11 +406,31 @@ const ShopPage: React.FC = () => {
     setSelectedCategory(null);
     setPriceRange([0, 50000]);
     setCurrentPage(1); // Reset to first page when clearing filters
+    // Scroll to Shop Collection section when clearing filters
+    setTimeout(() => {
+      const shopCollectionSection = document.getElementById('shop-collection');
+      if (shopCollectionSection) {
+        shopCollectionSection.scrollIntoView({ 
+          behavior: 'smooth', 
+          block: 'start' 
+        });
+      }
+    }, 100);
   };
 
   const handlePageChange = (pageNumber: number) => {
     setCurrentPage(pageNumber);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    // Scroll to the Shop Collection section instead of top of page
+    const shopCollectionSection = document.getElementById('shop-collection');
+    if (shopCollectionSection) {
+      shopCollectionSection.scrollIntoView({ 
+        behavior: 'smooth', 
+        block: 'start' 
+      });
+    } else {
+      // Fallback to top if section not found
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   };
 
   return (
@@ -420,7 +440,7 @@ const ShopPage: React.FC = () => {
 
       {/* Header section with max-width for content */}
       <div className="max-w-7xl mx-auto">
-      <div className="flex justify-between items-center mb-8 border-b border-neutral-300 pb-4">
+      <div id="shop-collection" className="flex justify-between items-center mb-8 border-b border-neutral-300 pb-4">
         <h1 className="text-3xl font-bold text-black">Shop Collection</h1>
         <p className="text-neutral-600">{filteredProducts.length} products</p>
       </div>
@@ -469,6 +489,16 @@ const ShopPage: React.FC = () => {
                         onChange={() => {
                           setSelectedCategory(selectedCategory === category ? null : category);
                           setCurrentPage(1);
+                          // Scroll to Shop Collection section when filter changes
+                          setTimeout(() => {
+                            const shopCollectionSection = document.getElementById('shop-collection');
+                            if (shopCollectionSection) {
+                              shopCollectionSection.scrollIntoView({ 
+                                behavior: 'smooth', 
+                                block: 'start' 
+                              });
+                            }
+                          }, 100);
                         }}
                         className="h-4 w-4 text-black focus:ring-black border-neutral-400 rounded accent-black"
                       />
@@ -499,6 +529,16 @@ const ShopPage: React.FC = () => {
                       onChange={(e) => {
                         setPriceRange([priceRange[0], Number(e.target.value)]);
                         setCurrentPage(1);
+                        // Scroll to Shop Collection section when price filter changes
+                        setTimeout(() => {
+                          const shopCollectionSection = document.getElementById('shop-collection');
+                          if (shopCollectionSection) {
+                            shopCollectionSection.scrollIntoView({ 
+                              behavior: 'smooth', 
+                              block: 'start' 
+                            });
+                          }
+                        }, 100);
                       }}
                       className="w-full h-1 bg-neutral-300 rounded-full appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-black"
                     />

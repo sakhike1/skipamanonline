@@ -1,6 +1,7 @@
-import React, { createContext, useContext, useReducer, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useReducer, useEffect, useCallback, ReactNode, useMemo } from 'react';
 import { User, LoginCredentials, RegisterCredentials } from '../types';
-import firebaseAuthService from '../firebase/authService';
+import { authAPI } from '../services/api';
+import socketService from '../services/socket';
 
 // Auth State Interface
 interface AuthState {
@@ -16,15 +17,40 @@ type AuthAction =
   | { type: 'AUTH_SUCCESS'; payload: User }
   | { type: 'AUTH_FAILURE'; payload: string }
   | { type: 'AUTH_LOGOUT' }
-  | { type: 'CLEAR_ERROR' };
+  | { type: 'CLEAR_ERROR' }
+  | { type: 'AUTH_INIT_COMPLETE' };
 
-// Initial State
-const initialState: AuthState = {
-  user: null,
-  isAuthenticated: false,
-  isLoading: true,
-  error: null,
+// Initial State - Check localStorage first for faster initial load
+const getInitialState = (): AuthState => {
+  const userData = localStorage.getItem('user_data');
+  const authToken = localStorage.getItem('auth_token');
+  
+  if (userData && authToken) {
+    try {
+      const user = JSON.parse(userData);
+      return {
+        user,
+        isAuthenticated: true,
+        isLoading: false, // Start with false since we have cached data
+        error: null,
+      };
+    } catch (error) {
+      // If parsing fails, clear localStorage and start fresh
+      localStorage.removeItem('user_data');
+      localStorage.removeItem('auth_token');
+      localStorage.removeItem('refresh_token');
+    }
+  }
+  
+  return {
+    user: null,
+    isAuthenticated: false,
+    isLoading: true,
+    error: null,
+  };
 };
+
+const initialState: AuthState = getInitialState();
 
 // Auth Reducer
 const authReducer = (state: AuthState, action: AuthAction): AuthState => {
@@ -64,6 +90,11 @@ const authReducer = (state: AuthState, action: AuthAction): AuthState => {
         ...state,
         error: null,
       };
+    case 'AUTH_INIT_COMPLETE':
+      return {
+        ...state,
+        isLoading: false,
+      };
     default:
       return state;
   }
@@ -71,14 +102,34 @@ const authReducer = (state: AuthState, action: AuthAction): AuthState => {
 
 // Auth Context Interface
 interface AuthContextType extends AuthState {
-  login: (credentials: LoginCredentials) => Promise<void>;
+  login: (credentials: LoginCredentials) => Promise<User | undefined>;
   register: (credentials: RegisterCredentials) => Promise<void>;
   logout: () => Promise<void>;
   clearError: () => void;
 }
 
-// Create Context
+// Create Context with HMR stability
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+// Add display name for debugging
+AuthContext.displayName = 'AuthContext';
+
+// Global context reference for HMR stability
+let globalAuthContext: React.Context<AuthContextType | undefined> | null = null;
+
+// Get or create context instance
+const getAuthContext = (): React.Context<AuthContextType | undefined> => {
+  if (!globalAuthContext) {
+    globalAuthContext = createContext<AuthContextType | undefined>(undefined);
+    globalAuthContext.displayName = 'AuthContext';
+  }
+  return globalAuthContext;
+};
+
+// Reset context (useful for testing or HMR issues)
+export const resetAuthContext = (): void => {
+  globalAuthContext = null;
+};
 
 // Auth Provider Props
 interface AuthProviderProps {
@@ -91,32 +142,81 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   // Initialize auth state on app load
   useEffect(() => {
-    const unsubscribe = firebaseAuthService.onAuthStateChanged((user) => {
-      if (user) {
-        dispatch({ type: 'AUTH_SUCCESS', payload: user });
-      } else {
-        dispatch({ type: 'AUTH_FAILURE', payload: 'Not authenticated' });
+    const initializeAuth = async () => {
+      try {
+        const token = localStorage.getItem('auth_token');
+        const userData = localStorage.getItem('user_data');
+        
+        if (token && userData) {
+          try {
+            // Verify token is still valid by getting fresh user data
+            const response = await authAPI.getCurrentUser();
+            if (response.success && response.data) {
+              const freshUser = response.data.user;
+              localStorage.setItem('user_data', JSON.stringify(freshUser));
+              
+              // Connect to Socket.IO
+              socketService.connect(token);
+              
+              dispatch({ type: 'AUTH_SUCCESS', payload: freshUser });
+            } else {
+              // Token is invalid, clear auth
+              localStorage.removeItem('auth_token');
+              localStorage.removeItem('user_data');
+              dispatch({ type: 'AUTH_LOGOUT' });
+            }
+          } catch (error) {
+            // Token is invalid, clear auth
+            localStorage.removeItem('auth_token');
+            localStorage.removeItem('user_data');
+            dispatch({ type: 'AUTH_LOGOUT' });
+          }
+        } else {
+          dispatch({ type: 'AUTH_INIT_COMPLETE' });
+        }
+      } catch (error) {
+        console.error('Auth initialization error:', error);
+        dispatch({ type: 'AUTH_INIT_COMPLETE' });
       }
-    });
+    };
 
-    return () => unsubscribe();
+    initializeAuth();
   }, []);
 
   // Login function
   const login = async (credentials: LoginCredentials) => {
     try {
       dispatch({ type: 'AUTH_START' });
-      const user = await firebaseAuthService.login(credentials.email, credentials.password);
-      dispatch({ type: 'AUTH_SUCCESS', payload: user });
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Login failed';
-      console.log('AuthContext: Setting error:', errorMessage); // Debug log
+      
+      // Use backend authentication
+      console.log('Attempting backend login for:', credentials.email);
+      const response = await authAPI.login(credentials);
+      
+      if (response.success && response.data) {
+        const { user, token } = response.data;
+        
+        // Store token and user data
+        localStorage.setItem('auth_token', token);
+        localStorage.setItem('user_data', JSON.stringify(user));
+        
+        // Connect to Socket.IO
+        socketService.connect(token);
+        
+        console.log('Backend login successful:', user.role);
+        dispatch({ type: 'AUTH_SUCCESS', payload: user });
+        return user; // Return user data for redirect logic
+      } else {
+        throw new Error(response.message || 'Login failed');
+      }
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.message || error.message || 'Login failed';
+      console.log('AuthContext: Backend login failed:', errorMessage);
       dispatch({ 
         type: 'AUTH_FAILURE', 
         payload: errorMessage
       });
       // Re-throw the error so the LoginForm can catch it and prevent navigation
-      throw error;
+      throw new Error(errorMessage);
     }
   };
 
@@ -124,56 +224,84 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const register = async (credentials: RegisterCredentials) => {
     try {
       dispatch({ type: 'AUTH_START' });
-      const user = await firebaseAuthService.register(
-        credentials.email, 
-        credentials.password, 
-        credentials.firstName, 
-        credentials.lastName
-      );
-      dispatch({ type: 'AUTH_SUCCESS', payload: user });
-    } catch (error) {
+      
+      // Use backend registration
+      console.log('Attempting backend registration for:', credentials.email);
+      const response = await authAPI.register(credentials);
+      
+      if (response.success && response.data) {
+        const { user, token } = response.data;
+        
+        // Store token and user data
+        localStorage.setItem('auth_token', token);
+        localStorage.setItem('user_data', JSON.stringify(user));
+        
+        // Connect to Socket.IO
+        socketService.connect(token);
+        
+        console.log('Backend registration successful:', user.role);
+        dispatch({ type: 'AUTH_SUCCESS', payload: user });
+        return;
+      } else {
+        throw new Error(response.message || 'Registration failed');
+      }
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.message || error.message || 'Registration failed';
+      console.log('AuthContext: Backend registration failed:', errorMessage);
       dispatch({ 
         type: 'AUTH_FAILURE', 
-        payload: error instanceof Error ? error.message : 'Registration failed' 
+        payload: errorMessage
       });
+      throw new Error(errorMessage);
     }
   };
 
   // Logout function
   const logout = async () => {
     try {
-      await firebaseAuthService.logout();
-      dispatch({ type: 'AUTH_LOGOUT' });
+      // Use backend logout
+      await authAPI.logout();
     } catch (error) {
-      // Even if logout API fails, clear local state
+      console.log('Logout API call failed:', error);
+    } finally {
+      // Always clear local state and disconnect socket
+      localStorage.removeItem('auth_token');
+      localStorage.removeItem('user_data');
+      localStorage.removeItem('refresh_token');
+      socketService.disconnect();
       dispatch({ type: 'AUTH_LOGOUT' });
     }
   };
 
   // Clear error function
-  const clearError = () => {
+  const clearError = useCallback(() => {
     dispatch({ type: 'CLEAR_ERROR' });
-  };
+  }, []);
 
-  const value: AuthContextType = {
+  // Memoize the context value to prevent unnecessary re-renders
+  const value: AuthContextType = useMemo(() => ({
     ...state,
     login,
     register,
     logout,
     clearError,
-  };
+  }), [state, login, register, logout, clearError]);
+
+  // Use the stable context
+  const StableAuthContext = getAuthContext();
 
   return (
-    <AuthContext.Provider value={value}>
+    <StableAuthContext.Provider value={value}>
       {children}
-    </AuthContext.Provider>
+    </StableAuthContext.Provider>
   );
 };
 
 // Custom hook to use auth context
 export const useAuth = (): AuthContextType => {
-  const context = useContext(AuthContext);
-  if (!context) {
+  const StableAuthContext = getAuthContext();
+  const context = useContext(StableAuthContext);
+  if (context === undefined) {
     throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;

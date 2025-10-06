@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -5,22 +7,6 @@
 /* Prevent initial white flash */
 html {
   background-color: black;
-}
-
-/* Then - Custom styles with font-face alternative */
-@font-face {
-  font-family: 'Syncopate';
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-  src: url(https://fonts.gstatic.com/s/syncopate/v17/pe0sMIuPIYBCpEV5eFdCBfe5.woff2) format('woff2');
-}
-@font-face {
-  font-family: 'Syncopate';
-  font-style: normal;
-  font-weight: 700;
-  font-display: swap;
-  src: url(https://fonts.gstatic.com/s/syncopate/v17/pe0sMIuPIYBCpEV5eFdCBfe5.woff2) format('woff2');
 }
 
 /* Rest of your existing CSS exactly as you had it */

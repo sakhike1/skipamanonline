@@ -6,51 +6,9 @@ import { motion } from 'framer-motion';
 
 const NewArrivals: React.FC = () => {
   const navigate = useNavigate();
-  const [colorIndex, setColorIndex] = useState(0);
-  const [trendingColorIndex, setTrendingColorIndex] = useState(0);
   const [hoveredProductId, setHoveredProductId] = useState<string | null>(null);
   const [currentImageIndex, setCurrentImageIndex] = useState<{ [key: string]: number }>({});
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
-
-  // Color palette for the animation
-  const colors = [
-    '#8B5CF6', // Purple
-    '#A855F7', // Violet
-    '#C084FC', // Light Purple
-    '#E879F9', // Pink Purple
-    '#9333EA', // Dark Purple
-    '#7C3AED', // Purple
-    '#A855F7', // Violet
-    '#8B5CF6', // Purple
-  ];
-
-  // Different color palette for trending section
-  const trendingColors = [
-    '#1a1a1a', // Dark Gray
-    '#2c3e50', // Dark Blue Gray
-    '#34495e', // Darker Blue Gray
-    '#2c3e50', // Dark Blue Gray
-    '#1a1a1a', // Dark Gray
-    '#2c3e50', // Dark Blue Gray
-    '#34495e', // Darker Blue Gray
-    '#1a1a1a', // Dark Gray
-  ];
-
-  // Color animation effects
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setColorIndex((prev) => (prev + 1) % colors.length);
-    }, 5000);
-
-    const trendingInterval = setInterval(() => {
-      setTrendingColorIndex((prev) => (prev + 1) % trendingColors.length);
-    }, 5000);
-
-    return () => {
-      clearInterval(interval);
-      clearInterval(trendingInterval);
-    };
-  }, []);
 
   // Initialize image indices
   useEffect(() => {
@@ -94,8 +52,13 @@ const NewArrivals: React.FC = () => {
   // Get the first 4 products for new arrivals
   const newArrivals = products.slice(0, 4);
   
-  // Get the next 4 products for trending
-  const trendingProducts = products.slice(4, 8);
+  // Get the next 4 products for trending, replacing one with the new hoody, black tee, and purple tee
+  const trendingProducts = [
+    products[4], // Eco-Friendly Organic Tee
+    products[30], // Premium Black Hoody (new hoody product)
+    products[31], // Classic Black T-Shirt (new black tee product)
+    products[32], // Purple Statement T-Shirt (new purple tee product)
+  ];
 
   const handleViewProduct = (e: React.MouseEvent, productId: string) => {
     e.stopPropagation();
@@ -234,287 +197,372 @@ const NewArrivals: React.FC = () => {
 
   return (
     <>
-      {/* New Arrivals Section - Dark Theme */}
-      <div className="py-16 md:py-24 text-white relative overflow-hidden">
-        {/* Sophisticated Black Gradient Background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-black via-gray-900 to-black"></div>
+      {/* New Arrivals Section - Professional Modern Design */}
+      <div className="py-20 md:py-32 text-white relative overflow-hidden">
+        {/* Clean Professional Background */}
+        <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-gray-900 to-black"></div>
         
-        {/* Glitzy Overlay Effect */}
-        <div className="absolute inset-0 bg-gradient-to-t from-purple-900/10 via-transparent to-pink-900/10"></div>
+        {/* Subtle Modern Overlay */}
+        <div className="absolute inset-0 bg-gradient-to-t from-slate-800/20 via-transparent to-slate-800/10"></div>
         
-        {/* Animated Shimmer Effect */}
-        <div 
-          className="absolute inset-0 opacity-20"
-          style={{
-            background: `linear-gradient(105deg, transparent 40%, rgba(255, 255, 255, 0.1) 50%, transparent 60%)`,
-            backgroundSize: '200% 200%',
-            animation: 'shimmer 3s ease-in-out infinite',
-          }}
-        ></div>
-        
-        {/* CSS Animations */}
-        <style>{`
-          @keyframes shimmer {
-            0% {
-              background-position: -200% 0;
-            }
-            100% {
-              background-position: 200% 0;
-            }
-          }
-        `}</style>
-        
-        {/* Floating Particles */}
-        <div className="absolute inset-0 overflow-hidden">
-          {[...Array(30)].map((_, i) => (
-            <motion.div
-              key={i}
-              className="absolute w-1 h-1 bg-white rounded-full"
-              style={{
-                left: `${Math.random() * 100}%`,
-                top: `${Math.random() * 100}%`,
-                filter: 'blur(1px)',
-              }}
-              animate={{
-                y: [-20, -100],
-                opacity: [0, 1, 0],
-                scale: [0, 1.5, 0],
-              }}
-              transition={{
-                duration: Math.random() * 5 + 5,
-                repeat: Infinity,
-                delay: Math.random() * 5,
-                ease: "easeOut",
-              }}
-            />
-          ))}
-        </div>
-        
-        {/* Glittery Sparkles */}
-        <div className="absolute inset-0">
-          {[...Array(20)].map((_, i) => (
-            <motion.div
-              key={`sparkle-${i}`}
-              className="absolute"
-              style={{
-                left: `${Math.random() * 100}%`,
-                top: `${Math.random() * 100}%`,
-              }}
-            >
-              <motion.div
-                className="w-0.5 h-0.5 bg-white rounded-full"
-                animate={{
-                  scale: [0, 1, 0],
-                  opacity: [0, 1, 0],
-                  rotate: [0, 180],
-                }}
-                transition={{
-                  duration: 2,
-                  repeat: Infinity,
-                  delay: Math.random() * 2,
-                  ease: "easeInOut",
-                }}
-                style={{
-                  boxShadow: '0 0 6px rgba(255, 255, 255, 0.8)',
-                }}
-              />
-            </motion.div>
-          ))}
+        {/* Minimal Geometric Pattern */}
+        <div className="absolute inset-0 opacity-[0.03]">
+          <div className="absolute inset-0" style={{
+            backgroundImage: `url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Cpath d='M50 0L100 50L50 100L0 50z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+            backgroundSize: '60px 60px',
+          }}></div>
         </div>
         
         <div className="container mx-auto px-6 sm:px-8 relative z-10">
-          {/* Section Header */}
-          <div className="flex flex-col md:flex-row justify-between items-start mb-12 md:mb-16">
-            <div className="space-y-6">
+          {/* Professional Section Header */}
+          <div className="flex flex-col lg:flex-row justify-between items-start mb-16 md:mb-20">
+            <div className="space-y-8 max-w-4xl">
               <motion.div
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8 }}
-                className="space-y-2"
+                className="space-y-6"
               >
-                <motion.h2 
-                  className="font-sans text-[clamp(2.5rem,6vw,4rem)] md:text-[clamp(4rem,8vw,6rem)] font-bold leading-none tracking-tight relative"
-                  animate={{
-                    color: colors[colorIndex],
-                    textShadow: [
-                      '0 0 30px rgba(139, 92, 246, 0.8)',
-                      '0 0 60px rgba(139, 92, 246, 0.6)',
-                      '0 0 90px rgba(168, 85, 247, 0.4)',
-                      '0 0 120px rgba(168, 85, 247, 0.2)',
-                    ],
-                  }}
-                  transition={{
-                    duration: 4,
-                    ease: "easeInOut",
-                    repeat: Infinity,
-                  }}
-                >
-                  <span className="relative z-10">
-                    NEW
-                  </span>
-                  <br />
-                  <span className="relative inline-block">
-                    <span className="bg-gradient-to-r from-purple-300 via-pink-300 to-purple-300 bg-clip-text text-transparent font-black tracking-wider">
-                      SPORT COLLECTION
-                    </span>
-                    {/* Glowing outline effect */}
-                    <span className="absolute inset-0 bg-gradient-to-r from-purple-400 via-pink-400 to-purple-400 bg-clip-text text-transparent font-black tracking-wider blur-sm opacity-70" aria-hidden="true">
-                      SPORT COLLECTION
-                    </span>
-                  </span>
-                </motion.h2>
-                <motion.p 
-                  className="font-light text-white/90 tracking-[0.2em] text-sm uppercase max-w-md relative"
+                {/* Professional Badge */}
+                <motion.div 
+                  className="inline-flex items-center gap-3 px-6 py-3 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full"
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.8, delay: 0.2 }}
+                  transition={{ duration: 0.6, delay: 0.1 }}
                 >
-                  <span className="relative z-10 inline-block">
-                    Redefining modern aesthetics with premium craftsmanship
-                  </span>
+                  <div className="w-2 h-2 bg-gradient-to-r from-blue-400 to-purple-400 rounded-full"></div>
+                  <span className="text-sm font-medium text-white/90 tracking-wider uppercase">New Collection</span>
+                </motion.div>
+
+                {/* Epic Typography */}
+                <div className="space-y-6">
+                  <motion.h2 
+                    className="font-sans text-[clamp(3.5rem,9vw,6rem)] md:text-[clamp(5rem,12vw,8rem)] font-black leading-[0.8] tracking-tight"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.8, delay: 0.2 }}
+                  >
+                    <motion.span 
+                      className="block text-white relative"
+                      initial={{ opacity: 0, x: -30 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ duration: 0.6, delay: 0.3 }}
+                    >
+                      NEW
+                      <motion.div 
+                        className="absolute -top-2 -right-2 w-3 h-3 bg-gradient-to-r from-blue-400 to-purple-400 rounded-full"
+                        animate={{ 
+                          scale: [1, 1.2, 1],
+                          opacity: [0.7, 1, 0.7]
+                        }}
+                        transition={{ 
+                          duration: 2,
+                          repeat: Infinity,
+                          ease: "easeInOut"
+                        }}
+                      />
+                    </motion.span>
+                    
+                    <motion.span 
+                      className="block bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent relative"
+                      initial={{ opacity: 0, x: 30 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ duration: 0.6, delay: 0.4 }}
+                      whileHover={{ 
+                        textShadow: "0 0 30px rgba(147, 51, 234, 0.6)",
+                      }}
+                    >
+                      SPORT
+                      <motion.div 
+                        className="absolute -bottom-2 -left-2 w-3 h-3 bg-gradient-to-r from-pink-400 to-blue-400 rounded-full"
+                        animate={{ 
+                          scale: [1, 1.2, 1],
+                          opacity: [0.7, 1, 0.7]
+                        }}
+                        transition={{ 
+                          duration: 2,
+                          repeat: Infinity,
+                          ease: "easeInOut",
+                          delay: 1
+                        }}
+                      />
+                    </motion.span>
+                    
+                    <motion.span 
+                      className="block text-white relative"
+                      initial={{ opacity: 0, x: -30 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ duration: 0.6, delay: 0.5 }}
+                    >
+                      COLLECTION
+                      <motion.div 
+                        className="absolute -top-2 -left-2 w-3 h-3 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full"
+                        animate={{ 
+                          scale: [1, 1.2, 1],
+                          opacity: [0.7, 1, 0.7]
+                        }}
+                        transition={{ 
+                          duration: 2,
+                          repeat: Infinity,
+                          ease: "easeInOut",
+                          delay: 2
+                        }}
+                      />
+                    </motion.span>
+                  </motion.h2>
+                  
                   <motion.div
-                    className="absolute -bottom-2 left-0 h-px bg-gradient-to-r from-transparent via-purple-400 to-transparent"
-                    animate={{
-                      width: ["0%", "100%", "0%"],
-                      opacity: [0, 1, 0],
-                    }}
-                    transition={{
-                      duration: 3,
-                      repeat: Infinity,
-                      ease: "easeInOut",
-                    }}
-                  />
-                </motion.p>
+                    className="relative"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.8, delay: 0.6 }}
+                  >
+                    <motion.p 
+                      className="text-xl md:text-2xl text-white/90 leading-relaxed max-w-3xl font-light relative z-10"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ duration: 0.8, delay: 0.7 }}
+                    >
+                      The brand was originally aimed at men's fashion. Starting in 1995 women's fashion was launched in all its dimensions: from the most urban lines to the more casual.
+                    </motion.p>
+                    
+                    {/* Decorative Quote Marks */}
+                    <motion.div
+                      className="absolute -top-4 -left-4 text-6xl text-white/20 font-serif"
+                      initial={{ opacity: 0, scale: 0 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ duration: 0.5, delay: 0.8 }}
+                    >
+                      "
+                    </motion.div>
+                    <motion.div
+                      className="absolute -bottom-6 -right-4 text-6xl text-white/20 font-serif"
+                      initial={{ opacity: 0, scale: 0 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ duration: 0.5, delay: 0.9 }}
+                    >
+                      "
+                    </motion.div>
+                  </motion.div>
+                </div>
+
+                {/* Enhanced Stats */}
+                <motion.div 
+                  className="grid grid-cols-2 md:grid-cols-4 gap-6 pt-6"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.8, delay: 0.4 }}
+                >
+                  <div className="flex flex-col items-start gap-2">
+                    <div className="w-8 h-1 bg-gradient-to-r from-blue-400 to-purple-400 rounded-full"></div>
+                    <div>
+                      <p className="text-lg font-bold text-white">Premium</p>
+                      <p className="text-sm text-white/60 uppercase tracking-wider">Quality</p>
+                    </div>
+                  </div>
+                  <div className="flex flex-col items-start gap-2">
+                    <div className="w-8 h-1 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full"></div>
+                    <div>
+                      <p className="text-lg font-bold text-white">Urban</p>
+                      <p className="text-sm text-white/60 uppercase tracking-wider">Style</p>
+                    </div>
+                  </div>
+                  <div className="flex flex-col items-start gap-2">
+                    <div className="w-8 h-1 bg-gradient-to-r from-pink-400 to-blue-400 rounded-full"></div>
+                    <div>
+                      <p className="text-lg font-bold text-white">Casual</p>
+                      <p className="text-sm text-white/60 uppercase tracking-wider">Comfort</p>
+                    </div>
+                  </div>
+                  <div className="flex flex-col items-start gap-2">
+                    <div className="w-8 h-1 bg-gradient-to-r from-cyan-400 to-emerald-400 rounded-full"></div>
+                    <div>
+                      <p className="text-lg font-bold text-white">200</p>
+                      <p className="text-sm text-white/60 uppercase tracking-wider">Products</p>
+                    </div>
+                  </div>
+                </motion.div>
               </motion.div>
             </div>
             <motion.div 
-              className="mt-8 md:mt-0 pt-4 md:pt-0"
+              className="mt-12 lg:mt-0 lg:ml-8 flex flex-col gap-4"
               initial={{ opacity: 0, x: 30 }}
               animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.8, delay: 0.3 }}
+              transition={{ duration: 0.8, delay: 0.5 }}
             >
-              <button 
+              {/* Shop Collection Button */}
+              <motion.button 
                 onClick={() => navigate('/new-arrivals')}
-                className="group relative overflow-hidden flex items-center gap-3 hover:gap-4 transition-all duration-300 text-sm tracking-widest uppercase text-white border border-white/20 px-8 py-4 rounded-full hover:border-purple-400 hover:shadow-2xl hover:shadow-purple-400/30 backdrop-blur-sm bg-white/5"
-                aria-label="View all new arrivals"
+                className="group relative overflow-hidden flex items-center gap-4 px-10 py-5 bg-white text-black rounded-2xl hover:bg-gray-100 transition-all duration-300 text-lg font-semibold shadow-lg hover:shadow-xl hover:scale-105"
+                aria-label="Shop collection"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
               >
-                <span className="relative z-10 transition-all duration-300 group-hover:text-transparent group-hover:bg-gradient-to-r group-hover:from-purple-300 group-hover:to-pink-300 group-hover:bg-clip-text font-medium">View all</span> 
-                <ArrowRight size={18} className="relative z-10 transition-all duration-300 group-hover:translate-x-1 group-hover:text-purple-300" />
-                <div className="absolute inset-0 bg-gradient-to-r from-purple-400/20 to-pink-400/20 transform -translate-x-full group-hover:translate-x-0 transition-transform duration-300 ease-out"></div>
-                
-                {/* Glowing border effect on hover */}
-                <div className="absolute inset-0 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                  <div className="absolute inset-0 rounded-full border border-purple-400/50 animate-pulse"></div>
-                  <div className="absolute inset-0 rounded-full border border-pink-400/50 animate-pulse" style={{ animationDelay: '150ms' }}></div>
-                </div>
-              </button>
+                <span className="relative z-10">Shop Collection</span> 
+                <ArrowRight size={20} className="relative z-10 transition-transform duration-300 group-hover:translate-x-1" />
+                <div className="absolute inset-0 bg-gradient-to-r from-gray-100 to-gray-200 transform -translate-x-full group-hover:translate-x-0 transition-transform duration-300 ease-out"></div>
+              </motion.button>
+
+              {/* View Lookbook Button */}
+              <motion.button 
+                onClick={() => navigate('/lookbook')}
+                className="group relative overflow-hidden flex items-center gap-4 px-10 py-5 bg-transparent text-white border-2 border-white/30 rounded-2xl hover:bg-white hover:text-black transition-all duration-300 text-lg font-semibold hover:scale-105"
+                aria-label="View lookbook"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <span className="relative z-10">View Lookbook</span> 
+                <ArrowRight size={20} className="relative z-10 transition-transform duration-300 group-hover:translate-x-1" />
+                <div className="absolute inset-0 bg-white transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 ease-out origin-left"></div>
+              </motion.button>
             </motion.div>
           </div>
 
-          {/* Product Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-10">
+          {/* Modern Product Grid */}
+          <motion.div 
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-12"
+            initial={{ opacity: 0, y: 40 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.6 }}
+          >
             {newArrivals.slice(0, 4).map((product, index) => (
               <motion.div
                 key={product.id}
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: index * 0.1 }}
+                transition={{ duration: 0.6, delay: 0.7 + (index * 0.1) }}
               >
                 <ProductCard product={product} theme="dark" />
               </motion.div>
             ))}
-          </div>
+          </motion.div>
+
         </div>
       </div>
 
-      {/* Trending Section - Light Theme */}
-      <div className="bg-white py-20 md:py-32 relative overflow-hidden">
-        {/* Subtle Background Pattern */}
+      {/* Trending Section - Professional Modern Design */}
+      <div className="bg-gradient-to-br from-gray-50 via-white to-gray-100 py-20 md:py-32 relative overflow-hidden">
+        {/* Professional Background Pattern */}
         <div className="absolute inset-0 opacity-[0.02]">
           <div className="absolute inset-0" style={{
-            backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23000000' fill-opacity='0.1'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+            backgroundImage: `url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23000000' fill-opacity='0.1'%3E%3Cpath d='M40 0L80 40L40 80L0 40z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+            backgroundSize: '80px 80px',
           }}></div>
         </div>
         
         <div className="container mx-auto px-6 sm:px-8">
-          {/* Section Header */}
-          <div className="flex flex-col md:flex-row justify-between items-start mb-16 md:mb-20">
-            <div className="space-y-6">
-              {/* Badge */}
-              <motion.div 
-                className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-50 to-pink-50 border border-purple-200/50 rounded-full"
-                initial={{ opacity: 0, y: 20 }}
+          {/* Professional Section Header */}
+          <div className="flex flex-col lg:flex-row justify-between items-start mb-16 md:mb-20">
+            <div className="space-y-8 max-w-4xl">
+              <motion.div
+                initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6 }}
+                transition={{ duration: 0.8 }}
+                className="space-y-6"
               >
-                <div className="w-2 h-2 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full animate-pulse"></div>
-                <span className="text-xs font-medium text-purple-700 tracking-wider uppercase">Hot Right Now</span>
-              </motion.div>
-              
-              <div className="space-y-4">
-                <motion.h2 
-                  className="font-sans text-[clamp(2.5rem,6vw,4rem)] md:text-[clamp(3.5rem,8vw,6rem)] font-black leading-[0.9] tracking-tight"
-                  animate={{
-                    color: trendingColors[trendingColorIndex],
-                    textShadow: [
-                      '0 0 20px rgba(139, 92, 246, 0.1)',
-                      '0 0 40px rgba(139, 92, 246, 0.2)',
-                      '0 0 20px rgba(139, 92, 246, 0.1)',
-                    ],
-                  }}
-                  transition={{
-                    duration: 2.5,
-                    ease: "easeInOut",
-                    repeat: Infinity,
-                  }}
-                >
-                  TRENDING<br />
-                  <span className="bg-gradient-to-r from-purple-600 via-pink-600 to-purple-600 bg-clip-text text-transparent">
-                    NOW
-                  </span>
-                </motion.h2>
-                <motion.p 
-                  className="font-medium text-gray-700 tracking-[0.15em] text-sm uppercase max-w-md"
+                {/* Professional Badge */}
+                <motion.div 
+                  className="inline-flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-orange-50 to-red-50 border border-orange-200/50 rounded-full"
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6, delay: 0.2 }}
+                  transition={{ duration: 0.6, delay: 0.1 }}
                 >
-                  Discover the latest trends that are making waves in fashion
-                </motion.p>
-              </div>
+                  <div className="w-2 h-2 bg-gradient-to-r from-orange-500 to-red-500 rounded-full animate-pulse"></div>
+                  <span className="text-sm font-medium text-orange-700 tracking-wider uppercase">Trending Now</span>
+                </motion.div>
+
+                {/* Modern Typography */}
+                <div className="space-y-4">
+                  <motion.h2 
+                    className="font-sans text-[clamp(3rem,8vw,5rem)] md:text-[clamp(4rem,10vw,7rem)] font-black leading-[0.85] tracking-tight"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.8, delay: 0.2 }}
+                  >
+                    <span className="block text-gray-900">TRENDING</span>
+                    <span className="block bg-gradient-to-r from-orange-500 via-red-500 to-pink-500 bg-clip-text text-transparent">
+                      NOW
+                    </span>
+                  </motion.h2>
+                  
+                  <motion.p 
+                    className="text-lg md:text-xl text-gray-600 leading-relaxed max-w-2xl font-light"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.8, delay: 0.3 }}
+                  >
+                    Discover the latest trends that are making waves in fashion and setting new standards for style.
+                  </motion.p>
+                </div>
+
+                {/* Professional Stats */}
+                <motion.div 
+                  className="flex flex-wrap gap-8 pt-4"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.8, delay: 0.4 }}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-1 h-8 bg-gradient-to-b from-orange-500 to-red-500 rounded-full"></div>
+                    <div>
+                      <p className="text-2xl font-bold text-gray-900">Latest</p>
+                      <p className="text-sm text-gray-500 uppercase tracking-wider">Trends</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="w-1 h-8 bg-gradient-to-b from-red-500 to-pink-500 rounded-full"></div>
+                    <div>
+                      <p className="text-2xl font-bold text-gray-900">Fashion</p>
+                      <p className="text-sm text-gray-500 uppercase tracking-wider">Forward</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="w-1 h-8 bg-gradient-to-b from-pink-500 to-orange-500 rounded-full"></div>
+                    <div>
+                      <p className="text-2xl font-bold text-gray-900">Style</p>
+                      <p className="text-sm text-gray-500 uppercase tracking-wider">Innovation</p>
+                    </div>
+                  </div>
+                </motion.div>
+              </motion.div>
             </div>
             
             <motion.div 
-              className="mt-8 md:mt-0 pt-4 md:pt-0"
+              className="mt-12 lg:mt-0 lg:ml-8"
               initial={{ opacity: 0, x: 30 }}
               animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6, delay: 0.3 }}
+              transition={{ duration: 0.8, delay: 0.5 }}
             >
               <button 
                 onClick={() => navigate('/shop')}
-                className="group relative overflow-hidden flex items-center gap-3 hover:gap-4 px-8 py-4 transition-all duration-300 text-sm tracking-widest uppercase text-white bg-gradient-to-r from-purple-600 to-pink-600 border border-purple-600 rounded-full hover:shadow-xl hover:shadow-purple-500/25 hover:scale-105"
+                className="group relative overflow-hidden flex items-center gap-4 px-10 py-5 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-2xl hover:from-orange-600 hover:to-red-600 transition-all duration-300 text-lg font-semibold shadow-lg hover:shadow-xl hover:scale-105"
                 aria-label="View all trending products"
               >
-                <span className="relative z-10 transition-colors duration-300">Explore Trends</span>
-                <ArrowRight size={16} className="relative z-10 transition-transform duration-300 group-hover:translate-x-1" />
-                <div className="absolute inset-0 bg-gradient-to-r from-purple-700 to-pink-700 transform translate-x-full group-hover:translate-x-0 transition-transform duration-300 ease-out"></div>
+                <span className="relative z-10">Explore Trends</span>
+                <ArrowRight size={20} className="relative z-10 transition-transform duration-300 group-hover:translate-x-1" />
+                <div className="absolute inset-0 bg-gradient-to-r from-orange-600 to-red-600 transform -translate-x-full group-hover:translate-x-0 transition-transform duration-300 ease-out"></div>
               </button>
             </motion.div>
           </div>
 
-          {/* Product Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-10">
+          {/* Modern Product Grid */}
+          <motion.div 
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-12"
+            initial={{ opacity: 0, y: 40 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.6 }}
+          >
             {trendingProducts.slice(0, 4).map((product, index) => (
               <motion.div
                 key={product.id}
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: index * 0.1 }}
+                transition={{ duration: 0.6, delay: 0.7 + (index * 0.1) }}
               >
                 <ProductCard product={product} theme="light" />
               </motion.div>
             ))}
-          </div>
+          </motion.div>
         </div>
       </div>
     </>

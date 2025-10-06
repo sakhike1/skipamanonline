@@ -1,5 +1,4 @@
-import React from 'react';
-import { ArrowRight, Info, Shirt, MapPin, Users, Leaf, Camera, Star, ChevronDown, Sparkles, TrendingUp, Award, Heart } from 'lucide-react';
+import { ArrowRight, Shirt, MapPin, Users, Leaf, Camera, Star, ChevronDown, Sparkles, TrendingUp, Award, Heart } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 export default function TshirtStoreAboutUsV2() {
@@ -357,7 +356,7 @@ export default function TshirtStoreAboutUsV2() {
               { year: 2019, text: "Founded in Munich with just 5 designs and a dream.", color: "from-purple-500/20 to-pink-500/20" },
               { year: 2021, text: "Expanded to 10 team members and 30+ retail partners.", color: "from-blue-500/20 to-cyan-500/20" },
               { year: 2023, text: "Launched our sustainability initiative and online store.", color: "from-green-500/20 to-emerald-500/20" }
-            ].map((item, index) => (
+            ].map((item) => (
               <motion.div 
                 key={item.year} 
                 whileHover={{ y: -10, scale: 1.05 }}

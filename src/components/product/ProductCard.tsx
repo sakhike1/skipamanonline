@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Product } from '../../types';
-import { ShoppingBag, Heart } from 'lucide-react';
+import { Heart } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { useWishlist } from '../../context/WishlistContext';
 
@@ -10,7 +10,7 @@ interface ProductCardProps {
 }
 
 const ProductCard: React.FC<ProductCardProps> = ({ product, onClick }) => {
-  const [isHovered, setIsHovered] = useState(false);
+  const [, setIsHovered] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const { isInWishlist, addToWishlist, removeFromWishlist } = useWishlist();
   const isFavorite = isInWishlist(product.id);
@@ -56,7 +56,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onClick }) => {
         <img
           src={product.images[currentImageIndex]}
           alt={product.name}
-          className="h-full w-full object-cover object-center grayscale transition-transform duration-700 group-hover:scale-105"
+          className="h-full w-full object-cover object-center transition-transform duration-700 group-hover:scale-105"
         />
         
         <button 

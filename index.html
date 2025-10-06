@@ -37,6 +37,23 @@
         overflow: hidden;
       }
       
+      /* Hide loading screen once React app loads */
+      .app-loaded #loading-screen {
+        display: none !important;
+      }
+      
+      /* Additional safety - hide loading screen after a short delay */
+      #loading-screen {
+        animation: fadeOut 0.1s ease-out 2s forwards;
+      }
+      
+      @keyframes fadeOut {
+        to {
+          opacity: 0;
+          visibility: hidden;
+        }
+      }
+      
       /* Animated background elements */
       #loading-screen::before {
         content: '';
@@ -246,7 +263,7 @@
     </style>
   </head>
   <body class="font-['Inter',sans-serif] text-gray-800 bg-gray-50">
-    <div id="loading-screen">
+    <div id="loading-screen" style="display: none;">
       <!-- Particle effects -->
       <div class="particles">
         <div class="particle" style="left: 10%; top: 20%; animation-delay: 0s;"></div>

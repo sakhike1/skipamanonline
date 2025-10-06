@@ -5,7 +5,8 @@ import { useCart } from '../../context/CartContext';
 import { useWishlist } from '../../context/WishlistContext';
 import { useAuth } from '../../context/AuthContext';
 import { useHeader } from '../../context/HeaderContext';
-import CartPreview from '../cart/CartPreview';
+import CartPreview from '../../assets/cart/CartPreview';
+import NotificationBell from '../notifications/NotificationBell';
 import { motion, AnimatePresence } from 'framer-motion';
 import { debounce } from 'lodash';
 import { products } from '../../data/products';
@@ -41,10 +42,11 @@ const Header: React.FC = () => {
   const isCheckoutPage = location.pathname === '/checkout';
   const isWishlistPage = location.pathname === '/wishlist';
   const isLoginPage = location.pathname === '/login';
+  const isRegisterPage = location.pathname === '/register';
   
   // Optimized scroll handler with debounce
-  const handleScroll = useCallback(
-    debounce(() => {
+  const handleScroll = useCallback(() => {
+    const debouncedHandler = debounce(() => {
       setIsScrolled(window.scrollY > 20);
       
       // Only check section colors if we're not in ProductDetail (which controls its own header)
@@ -60,9 +62,10 @@ const Header: React.FC = () => {
           }
         }
       }
-    }, 100),
-    [location.pathname]
-  );
+    }, 100);
+    
+    return debouncedHandler();
+  }, [location.pathname]);
   
   useEffect(() => {
     window.addEventListener('scroll', handleScroll);
@@ -70,7 +73,6 @@ const Header: React.FC = () => {
     
     return () => {
       window.removeEventListener('scroll', handleScroll);
-      handleScroll.cancel();
     };
   }, [handleScroll]);
 
@@ -95,8 +97,11 @@ const Header: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    document.addEventListener('keydown', handleKeyDown as any);
-    return () => document.removeEventListener('keydown', handleKeyDown as any);
+    const handleKeyDownEvent = (e: KeyboardEvent) => {
+      handleKeyDown(e as unknown as React.KeyboardEvent);
+    };
+    document.addEventListener('keydown', handleKeyDownEvent);
+    return () => document.removeEventListener('keydown', handleKeyDownEvent);
   }, [handleKeyDown]);
 
   // Handle click outside user menu
@@ -150,28 +155,56 @@ const Header: React.FC = () => {
   
   // Determine text and icon colors based on scroll state and background
   const getTextColor = useCallback(() => {
-    if (location.pathname.includes('/product/') || isShopPage || isAboutPage || isCheckoutPage || isWishlistPage) {
+    // Admin users always get white text
+    if (isAuthenticated && user?.role === 'admin') {
+      return 'text-white';
+    }
+    if (location.pathname.includes('/product/') || isShopPage || isAboutPage || isCheckoutPage || isWishlistPage || isLoginPage || isRegisterPage) {
       return 'text-white';
     }
     if (isScrolled) {
       return 'text-gray-800';
     }
     return 'text-white';
-  }, [isScrolled, location.pathname, isShopPage, isAboutPage, isCheckoutPage, isWishlistPage]);
+  }, [isAuthenticated, user?.role, isScrolled, location.pathname, isShopPage, isAboutPage, isCheckoutPage, isWishlistPage, isLoginPage, isRegisterPage]);
 
   const getHoverBgColor = useCallback(() => {
     if (isScrolled) return 'hover:bg-gray-100';
     return 'hover:bg-white/20';
   }, [isScrolled]);
 
+  // Determine dropdown text colors based on background
+  const getDropdownTextColor = useCallback(() => {
+    // Admin users or dark backgrounds get white text
+    if ((isAuthenticated && user?.role === 'admin') || isHeaderDark || isShopPage || isWishlistPage || isLoginPage || isRegisterPage || isAboutPage || isCheckoutPage) {
+      return {
+        primary: 'text-white',
+        secondary: 'text-white/70',
+        muted: 'text-white/60',
+        hover: 'hover:bg-white/20',
+        border: 'border-white/10'
+      };
+    }
+    // Light backgrounds get dark text
+    return {
+      primary: 'text-gray-900',
+      secondary: 'text-gray-600',
+      muted: 'text-gray-500',
+      hover: 'hover:bg-gray-100',
+      border: 'border-gray-200'
+    };
+  }, [isAuthenticated, user?.role, isHeaderDark, isShopPage, isWishlistPage, isLoginPage, isRegisterPage, isAboutPage, isCheckoutPage]);
+
   const textColor = getTextColor();
   const hoverBgColor = getHoverBgColor();
+  const dropdownColors = getDropdownTextColor();
   
   // Navigation items with correct paths and aria labels
   const navItems = useMemo<NavItem[]>(() => [
     { name: 'Home', path: '/', ariaLabel: 'Go to homepage' },
     { name: 'Shop', path: '/shop', ariaLabel: 'Browse our shop' },
     { name: 'New Arrivals', path: '/new-arrivals', ariaLabel: 'View new arrivals' },
+    { name: 'Custom Design', path: '/custom-design', ariaLabel: 'Request custom design' },
     { name: 'About', path: '/about', ariaLabel: 'Learn more about us' }
   ], []);
   
@@ -196,7 +229,7 @@ const Header: React.FC = () => {
       setIsSearchFocused(false);
       setIsInteracting(false);
     }
-  }, [location.pathname]);
+  }, [location.pathname, showSearchDropdown]);
 
   // Removed resetInactivityTimer as it's not being used
 
@@ -233,9 +266,10 @@ const Header: React.FC = () => {
 
   // Cleanup timer on unmount
   useEffect(() => {
+    const timer = inactivityTimerRef.current;
     return () => {
-      if (inactivityTimerRef.current) {
-        clearTimeout(inactivityTimerRef.current);
+      if (timer) {
+        clearTimeout(timer);
       }
     };
   }, []);
@@ -243,13 +277,16 @@ const Header: React.FC = () => {
   return (
     <header 
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        isAboutPage || isCheckoutPage
-          ? 'bg-gradient-to-r from-purple-900/95 via-black/90 to-black/95 backdrop-blur-sm shadow-md py-2'
-          : isHeaderDark || isShopPage || isWishlistPage || isLoginPage
-            ? 'bg-black/95 backdrop-blur-sm shadow-md py-2'
-            : isScrolled
-              ? 'bg-white/95 backdrop-blur-sm shadow-md py-2'
-              : 'py-4 backdrop-blur-[2px] bg-gradient-to-b from-black/30 to-transparent'
+        // All logged-in users get black header
+        isAuthenticated
+          ? 'bg-black/95 backdrop-blur-sm shadow-md py-2'
+          : isAboutPage || isCheckoutPage
+            ? 'bg-gradient-to-r from-purple-900/95 via-black/90 to-black/95 backdrop-blur-sm shadow-md py-2'
+            : isHeaderDark || isShopPage || isWishlistPage || isLoginPage || isRegisterPage
+              ? 'bg-black/95 backdrop-blur-sm shadow-md py-2'
+              : isScrolled
+                ? 'bg-white/95 backdrop-blur-sm shadow-md py-2'
+                : 'py-4 backdrop-blur-[2px] bg-gradient-to-b from-black/30 to-transparent'
       }`}
       role="banner"
     >
@@ -281,39 +318,42 @@ const Header: React.FC = () => {
             </Link>
           </motion.div>
           
-          {/* Desktop Navigation */}
-          <nav className="hidden md:flex space-x-8" role="navigation" aria-label="Main navigation">
-            {navItems.map((item) => (
-              <motion.div
-                key={item.name}
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.1 * navItems.indexOf(item) }}
-                whileHover={{ scale: 1.05 }}
-              >
-                <Link
-                  to={item.path}
-                  className={`
-                    font-medium text-lg tracking-tight ${textColor}
-                    relative group [text-shadow:0px_0px_1px_rgba(255,255,255,0.5)]
-                  `}
-                  aria-label={item.ariaLabel}
-                  aria-current={location.pathname === item.path ? 'page' : undefined}
+          {/* Desktop Navigation - Hidden when logged in */}
+          {!isAuthenticated && (
+            <nav className="hidden md:flex space-x-8" role="navigation" aria-label="Main navigation">
+              {navItems.map((item) => (
+                <motion.div
+                  key={item.name}
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: 0.1 * navItems.indexOf(item) }}
+                  whileHover={{ scale: 1.05 }}
                 >
-                  {item.name}
-                  <span 
-                    className={`absolute left-0 -bottom-1 h-0.5 ${isScrolled ? 'bg-gray-800' : 'bg-white'}
-                    ${location.pathname === item.path ? 'w-full' : 'w-0 group-hover:w-full'} transition-all duration-300`}
-                  ></span>
-                </Link>
-              </motion.div>
-            ))}
-          </nav>
+                  <Link
+                    to={item.path}
+                    className={`
+                      font-medium text-lg tracking-tight ${textColor}
+                      relative group [text-shadow:0px_0px_1px_rgba(255,255,255,0.5)]
+                    `}
+                    aria-label={item.ariaLabel}
+                    aria-current={location.pathname === item.path ? 'page' : undefined}
+                  >
+                    {item.name}
+                    <span 
+                      className={`absolute left-0 -bottom-1 h-0.5 ${isScrolled ? 'bg-gray-800' : 'bg-white'}
+                      ${location.pathname === item.path ? 'w-full' : 'w-0 group-hover:w-full'} transition-all duration-300`}
+                    ></span>
+                  </Link>
+                </motion.div>
+              ))}
+            </nav>
+          )}
           
           {/* Action Buttons */}
           <div className="flex items-center space-x-2 sm:space-x-4 lg:space-x-6">
-            {/* Search Form with Dropdown - Hidden on mobile, shown on larger screens */}
-            <div className="relative hidden sm:block">
+            {/* Search Form with Dropdown - Hidden when logged in and on mobile */}
+            {!isAuthenticated && (
+              <div className="relative hidden sm:block">
               <form onSubmit={handleSearch}>
               <motion.div
                 ref={searchContainerRef}
@@ -465,7 +505,7 @@ const Header: React.FC = () => {
                                     {product.name}
                                   </h4>
                                   <div className="flex items-center gap-2">
-                                    <p className={`text-sm font-semibold ${isScrolled ? 'text-black/90' : 'text-white/90'}`}>R{product.price}</p>
+                                    <p className={`text-sm font-semibold ${isScrolled ? 'text-black/90' : 'text-white/90'}`}>R{(product.price / 100).toFixed(2)}</p>
                                     <span className={`text-xs font-medium bg-gradient-to-r from-amber-400 to-yellow-500 text-amber-900 px-2 py-0.5 rounded-full shadow-sm`}>
                                       Hot Deal
                                     </span>
@@ -488,8 +528,9 @@ const Header: React.FC = () => {
                 )}
               </AnimatePresence>
             </div>
+            )}
             
-            {/* Cart Button */}
+            {/* Cart Button - Always visible */}
             <motion.button 
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
@@ -516,7 +557,7 @@ const Header: React.FC = () => {
               </AnimatePresence>
             </motion.button>
             
-            {/* Wishlist Button - Hidden on mobile */}
+            {/* Wishlist Button - Always visible */}
             <motion.button 
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
@@ -543,6 +584,9 @@ const Header: React.FC = () => {
               </AnimatePresence>
             </motion.button>
             
+            {/* Notification Bell - Only for authenticated users */}
+            {isAuthenticated && <NotificationBell />}
+            
             {/* User Menu / Login Button */}
             {isAuthenticated ? (
               <div className="relative" ref={userMenuRef}>
@@ -568,26 +612,35 @@ const Header: React.FC = () => {
                       initial={{ opacity: 0, y: -10, scale: 0.95 }}
                       animate={{ opacity: 1, y: 0, scale: 1 }}
                       exit={{ opacity: 0, y: -10, scale: 0.95 }}
-                      className="absolute right-0 mt-2 w-64 bg-white/10 backdrop-blur-xl rounded-lg overflow-hidden z-[100] border border-white/20 shadow-[0_8px_32px_0_rgba(31,38,135,0.15)]"
+                      className={`absolute right-0 mt-2 w-64 backdrop-blur-xl rounded-lg overflow-hidden z-[100] shadow-[0_8px_32px_0_rgba(31,38,135,0.15)] ${
+                        // Admin users or dark backgrounds get dark dropdown
+                        (isAuthenticated && user?.role === 'admin') || isHeaderDark || isShopPage || isWishlistPage || isLoginPage || isRegisterPage || isAboutPage || isCheckoutPage
+                          ? 'bg-gray-900/95 border border-gray-700/50'
+                          : 'bg-white/95 border border-gray-200/50'
+                      }`}
                     >
                       <div className="p-4">
                         {/* Welcome Message */}
                         <div className="mb-3">
-                          <p className="text-white/60 text-xs uppercase tracking-wider">
+                          <p className={`${dropdownColors.muted} text-xs uppercase tracking-wider`}>
                             Welcome back
                           </p>
                         </div>
                         
                         {/* User Info */}
-                        <div className="px-3 py-3 border-b border-white/10 mb-3">
-                          <p className="text-white font-semibold text-lg">
+                        <div className={`px-3 py-3 border-b ${dropdownColors.border} mb-3`}>
+                          <p className={`${dropdownColors.primary} font-semibold text-lg`}>
                             {user?.firstName} {user?.lastName}
                           </p>
-                          <p className="text-white/70 text-sm">
+                          <p className={`${dropdownColors.secondary} text-sm`}>
                             {user?.email}
                           </p>
                           <div className="mt-2">
-                            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-500/20 text-purple-300 border border-purple-500/30">
+                            <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                              user?.role === 'admin' 
+                                ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30'
+                                : 'bg-blue-500/20 text-blue-300 border border-blue-500/30'
+                            }`}>
                               {user?.role === 'admin' ? 'Administrator' : 'Customer'}
                             </span>
                           </div>
@@ -597,7 +650,7 @@ const Header: React.FC = () => {
                         <div className="space-y-1">
                           <Link
                             to="/profile"
-                            className="flex items-center px-3 py-2 text-sm text-white hover:bg-white/20 rounded-md transition-colors"
+                            className={`flex items-center px-3 py-2 text-sm ${dropdownColors.primary} ${dropdownColors.hover} rounded-md transition-colors`}
                             onClick={() => setShowUserMenu(false)}
                           >
                             <User size={16} className="mr-3" />
@@ -605,15 +658,25 @@ const Header: React.FC = () => {
                           </Link>
                           <Link
                             to="/wishlist"
-                            className="flex items-center px-3 py-2 text-sm text-white hover:bg-white/20 rounded-md transition-colors"
+                            className={`flex items-center px-3 py-2 text-sm ${dropdownColors.primary} ${dropdownColors.hover} rounded-md transition-colors`}
                             onClick={() => setShowUserMenu(false)}
                           >
                             <Heart size={16} className="mr-3" />
                             My Wishlist
                           </Link>
+                          {cartItemCount > 0 && (
+                            <Link
+                              to="/checkout"
+                              className={`flex items-center px-3 py-2 text-sm ${dropdownColors.primary} ${dropdownColors.hover} rounded-md transition-colors`}
+                              onClick={() => setShowUserMenu(false)}
+                            >
+                              <ShoppingBag size={16} className="mr-3" />
+                              Checkout ({cartItemCount} items)
+                            </Link>
+                          )}
                           <Link
                             to="/settings"
-                            className="flex items-center px-3 py-2 text-sm text-white hover:bg-white/20 rounded-md transition-colors"
+                            className={`flex items-center px-3 py-2 text-sm ${dropdownColors.primary} ${dropdownColors.hover} rounded-md transition-colors`}
                             onClick={() => setShowUserMenu(false)}
                           >
                             <Settings size={16} className="mr-3" />
@@ -622,17 +685,25 @@ const Header: React.FC = () => {
                           {user?.role === 'admin' && (
                             <Link
                               to="/admin"
-                              className="flex items-center px-3 py-2 text-sm text-purple-300 hover:bg-purple-500/20 rounded-md transition-colors"
+                              className={`flex items-center px-3 py-2 text-sm ${
+                                (isAuthenticated && user?.role === 'admin') || isHeaderDark || isShopPage || isWishlistPage || isLoginPage || isRegisterPage || isAboutPage || isCheckoutPage
+                                  ? 'text-purple-300 hover:bg-purple-500/20'
+                                  : 'text-purple-600 hover:bg-purple-100'
+                              } rounded-md transition-colors`}
                               onClick={() => setShowUserMenu(false)}
                             >
                               <Shield size={16} className="mr-3" />
                               Admin Dashboard
                             </Link>
                           )}
-                          <div className="border-t border-white/10 my-2"></div>
+                          <div className={`border-t ${dropdownColors.border} my-2`}></div>
                           <button
                             onClick={handleLogout}
-                            className="flex items-center w-full px-3 py-2 text-sm text-red-400 hover:bg-red-500/20 rounded-md transition-colors"
+                            className={`flex items-center w-full px-3 py-2 text-sm ${
+                              (isAuthenticated && user?.role === 'admin') || isHeaderDark || isShopPage || isWishlistPage || isLoginPage || isRegisterPage || isAboutPage || isCheckoutPage
+                                ? 'text-red-400 hover:bg-red-500/20'
+                                : 'text-red-600 hover:bg-red-50'
+                            } rounded-md transition-colors`}
                           >
                             <LogOut size={16} className="mr-3" />
                             Sign Out
@@ -660,34 +731,36 @@ const Header: React.FC = () => {
               </motion.button>
             )}
             
-            {/* Mobile Menu Button */}
-            <motion.button 
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className={`
-                p-2 rounded-md md:hidden transition-all
-                ${textColor} ${hoverBgColor}
-              `}
-              onClick={toggleMobileMenu}
-              aria-label={showMobileMenu ? "Close menu" : "Open menu"}
-              aria-expanded={showMobileMenu}
-              aria-controls="mobile-menu"
-            >
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={showMobileMenu ? 'close' : 'menu'}
-                  initial={{ opacity: 0, rotate: showMobileMenu ? 0 : -90 }}
-                  animate={{ opacity: 1, rotate: 0 }}
-                  exit={{ opacity: 0, rotate: showMobileMenu ? 90 : -90 }}
-                  transition={{ duration: 0.2 }}
-                >
-                  {showMobileMenu ? 
-                    <X size={24} className="[filter:drop-shadow(0px_0px_1px_rgba(255,255,255,0.5))]" /> : 
-                    <Menu size={24} className="[filter:drop-shadow(0px_0px_1px_rgba(255,255,255,0.5))]" />
-                  }
-                </motion.div>
-              </AnimatePresence>
-            </motion.button>
+            {/* Mobile Menu Button - Hidden when logged in */}
+            {!isAuthenticated && (
+              <motion.button 
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className={`
+                  p-2 rounded-md md:hidden transition-all
+                  ${textColor} ${hoverBgColor}
+                `}
+                onClick={toggleMobileMenu}
+                aria-label={showMobileMenu ? "Close menu" : "Open menu"}
+                aria-expanded={showMobileMenu}
+                aria-controls="mobile-menu"
+              >
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={showMobileMenu ? 'close' : 'menu'}
+                    initial={{ opacity: 0, rotate: showMobileMenu ? 0 : -90 }}
+                    animate={{ opacity: 1, rotate: 0 }}
+                    exit={{ opacity: 0, rotate: showMobileMenu ? 90 : -90 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    {showMobileMenu ? 
+                      <X size={24} className="[filter:drop-shadow(0px_0px_1px_rgba(255,255,255,0.5))]" /> : 
+                      <Menu size={24} className="[filter:drop-shadow(0px_0px_1px_rgba(255,255,255,0.5))]" />
+                    }
+                  </motion.div>
+                </AnimatePresence>
+              </motion.button>
+            )}
           </div>
         </div>
         
@@ -848,7 +921,7 @@ const Header: React.FC = () => {
                   {/* Compact Additional Links */}
                   <div className="mt-6 pt-4 border-t border-white/5 space-y-1">
                     {/* Quick Actions Row */}
-                    <div className="grid grid-cols-2 gap-2 mb-4">
+                    <div className={`grid ${cartItemCount > 0 ? 'grid-cols-3' : 'grid-cols-2'} gap-2 mb-4`}>
                       <motion.div
                         initial={{ opacity: 0, scale: 0.8 }}
                         animate={{ opacity: 1, scale: 1 }}
@@ -876,6 +949,34 @@ const Header: React.FC = () => {
                           )}
                         </Link>
                       </motion.div>
+
+                      {cartItemCount > 0 && (
+                        <motion.div
+                          initial={{ opacity: 0, scale: 0.8 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          transition={{ delay: 0.45, type: 'spring' }}
+                        >
+                          <Link
+                            to="/checkout"
+                            className="group relative flex flex-col items-center py-3 px-3 rounded-2xl bg-gradient-to-r from-green-600 to-emerald-600 text-white shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden"
+                            onClick={() => setShowMobileMenu(false)}
+                            aria-label="Proceed to checkout"
+                          >
+                            <div className="absolute inset-0 opacity-0 group-hover:opacity-100 bg-gradient-to-r from-white/10 to-white/5 transition-opacity duration-300"></div>
+                            <div className="relative z-10 flex items-center gap-2">
+                              <ShoppingBag size={18} />
+                              <span className="text-sm font-medium">Checkout</span>
+                            </div>
+                            <motion.span 
+                              className="relative z-10 mt-1 bg-white/20 text-white text-xs font-bold px-2 py-0.5 rounded-full shadow-lg"
+                              animate={{ scale: [1, 1.1, 1] }}
+                              transition={{ duration: 2, repeat: Infinity }}
+                            >
+                              {cartItemCount}
+                            </motion.span>
+                          </Link>
+                        </motion.div>
+                      )}
 
                       <motion.div
                         initial={{ opacity: 0, scale: 0.8 }}

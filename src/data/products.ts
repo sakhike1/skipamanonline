@@ -7,9 +7,9 @@ export const products: Product[] = [
     description: 'Our signature classic tee in sleek black. Made from 100% organic cotton for ultimate comfort and durability. Features a relaxed fit and soft-touch finish.',
     price: 50000,
     images: [
-      '/images/1.png',
-      '/images/2.png',
-      '/images/3.png',
+      '/src/assets/black1.png',
+      '/src/assets/blackPurpleTwo.png',
+      '/src/assets/blackPurple.png',
     ],
     sizes: ['S', 'M', 'L', 'XL', 'XXL'],
     colors: [
@@ -21,6 +21,12 @@ export const products: Product[] = [
     featured: true,
     rating: 4.8,
     reviewCount: 127,
+    stock: 50,
+    sku: 'CBT-001',
+    weight: 200,
+    dimensions: { length: 70, width: 50, height: 1 },
+    tags: ['basic', 'cotton', 'comfortable'],
+    isActive: true,
   },
   {
     id: '2',
@@ -28,9 +34,9 @@ export const products: Product[] = [
     description: 'Express your love for technology with our AI Future graphic tee. Features a unique AI-inspired design on premium cotton fabric.',
     price: 50000,
     images: [
-      '/images/1.png',
-      '/images/2.png',
-      '/images/3.png',
+      '/src/assets/black1.png',
+      '/src/assets/blackPurpleTwo.png',
+      '/src/assets/blackPurple.png',
     ],
     sizes: ['S', 'M', 'L', 'XL'],
     colors: [
@@ -41,6 +47,12 @@ export const products: Product[] = [
     featured: true,
     rating: 4.9,
     reviewCount: 89,
+    stock: 35,
+    sku: 'AFGT-002',
+    weight: 210,
+    dimensions: { length: 72, width: 52, height: 1 },
+    tags: ['graphic', 'ai', 'tech'],
+    isActive: true,
   },
   {
     id: '3',
@@ -48,186 +60,868 @@ export const products: Product[] = [
     description: 'Clean, simple, elegant. Our minimalist logo tee speaks volumes with its understated design and premium quality construction.',
     price: 50000,
     images: [
-      '/images/1.png',
-      '/images/2.png',
-      '/images/3.png',
+      '/src/assets/black1.png',
+      '/src/assets/blackPurpleTwo.png',
+      '/src/assets/blackPurple.png',
     ],
     sizes: ['S', 'M', 'L', 'XL', 'XXL'],
     colors: [
       { name: 'White', value: '#FFFFFF' },
-      { name: 'Sky Blue', value: '#87CEEB' },
-      { name: 'Mint Green', value: '#98FB98' },
+      { name: 'Light Gray', value: '#D3D3D3' },
+      { name: 'Cream', value: '#F5F5DC' },
     ],
-    category: 'essentials',
+    category: 'minimalist',
     featured: true,
     rating: 4.7,
     reviewCount: 156,
+    stock: 75,
+    sku: 'MLT-003',
+    weight: 195,
+    dimensions: { length: 69, width: 49, height: 1 },
+    tags: ['minimalist', 'logo', 'clean'],
+    isActive: true,
   },
   {
     id: '4',
-    name: 'Gradient Wave Pattern',
-    description: 'Make a statement with our eye-catching gradient wave pattern tee. Features a modern design with vibrant color transitions.',
+    name: 'Vintage Band Tee',
+    description: 'Rock your style with our vintage band tee collection. Featuring distressed prints and that perfect broken-in feel.',
     price: 50000,
     images: [
-      '/images/1.png',
-      '/images/2.png',
-      '/images/3.png',
+      '/src/assets/black1.png',
+      '/src/assets/blackPurpleTwo.png',
+      '/src/assets/blackPurple.png',
     ],
     sizes: ['M', 'L', 'XL'],
     colors: [
-      { name: 'Ocean Blue', value: '#4B9CD3' },
-      { name: 'Sunset Orange', value: '#FD5E53' },
+      { name: 'Charcoal', value: '#36454F' },
+      { name: 'Faded Black', value: '#2F2F2F' },
     ],
-    category: 'graphic',
+    category: 'vintage',
     featured: true,
     rating: 4.6,
     reviewCount: 73,
+    stock: 25,
+    sku: 'VBT-004',
+    weight: 220,
+    dimensions: { length: 71, width: 51, height: 1 },
+    tags: ['vintage', 'band', 'retro'],
+    isActive: true,
   },
   {
     id: '5',
-    name: 'Vintage Wash',
-    description: 'Our vintage wash crew neck offers that perfectly broken-in feel from day one. Garment dyed and washed for a unique, lived-in appearance.',
+    name: 'Eco-Friendly Organic Tee',
+    description: 'Sustainable fashion meets style. Made from 100% organic cotton with eco-friendly dyes. Perfect for the environmentally conscious.',
+    price: 50000,
+    images: [
+      '/images/5.jpg',
+      '/images/6.jpg',
+    ],
+    sizes: ['S', 'M', 'L', 'XL'],
+    colors: [
+      { name: 'Earth Green', value: '#228B22' },
+      { name: 'Natural Beige', value: '#F5F5DC' },
+      { name: 'Ocean Blue', value: '#4682B4' },
+    ],
+    category: 'eco',
+    featured: true,
+    rating: 4.8,
+    reviewCount: 94,
+    stock: 60,
+    sku: 'EFOT-005',
+    weight: 185,
+    dimensions: { length: 68, width: 48, height: 1 },
+    tags: ['eco', 'organic', 'sustainable'],
+    isActive: true,
+  },
+  {
+    id: '6',
+    name: 'Premium Pocket Tee',
+    description: 'Elevated basics with a modern twist. Features a subtle chest pocket and superior fabric blend for lasting comfort and style.',
+    price: 50000,
+    images: [
+      '/images/6.jpg',
+      '/images/7.jpg',
+    ],
+    sizes: ['S', 'M', 'L', 'XL', 'XXL'],
+    colors: [
+      { name: 'Heather Gray', value: '#D3D3D3' },
+      { name: 'Navy', value: '#000080' },
+      { name: 'Burgundy', value: '#800020' },
+    ],
+    category: 'premium',
+    featured: true,
+    rating: 4.7,
+    reviewCount: 67,
+    stock: 40,
+    sku: 'PPT-006',
+    weight: 205,
+    dimensions: { length: 70, width: 50, height: 1 },
+    tags: ['premium', 'pocket', 'comfort'],
+    isActive: true,
+  },
+  {
+    id: '7',
+    name: 'Sport Performance Tee',
+    description: 'Engineered for active lifestyles. Moisture-wicking technology and athletic fit make this perfect for workouts and casual wear.',
+    price: 50000,
+    images: [
+      '/images/7.jpg',
+      '/images/8.jpg',
+    ],
+    sizes: ['S', 'M', 'L', 'XL'],
+    colors: [
+      { name: 'Athletic Gray', value: '#808080' },
+      { name: 'Sport Blue', value: '#1E90FF' },
+      { name: 'Energy Red', value: '#FF4500' },
+    ],
+    category: 'athletic',
+    featured: true,
+    rating: 4.5,
+    reviewCount: 82,
+    stock: 65,
+    sku: 'SPT-007',
+    weight: 175,
+    dimensions: { length: 67, width: 47, height: 1 },
+    tags: ['sport', 'performance', 'athletic'],
+    isActive: true,
+  },
+  {
+    id: '8',
+    name: 'Limited Edition Artist Tee',
+    description: 'Collaboration with local artists brings you unique, limited-edition designs. Only 100 pieces available - collect them all!',
+    price: 50000,
+    images: [
+      '/images/8.jpg',
+      '/images/1.png',
+    ],
+    sizes: ['S', 'M', 'L', 'XL'],
+    colors: [
+      { name: 'Artist Black', value: '#000000' },
+      { name: 'Gallery White', value: '#FFFFFF' },
+    ],
+    category: 'limited',
+    featured: true,
+    rating: 4.9,
+    reviewCount: 45,
+    stock: 15,
+    sku: 'LEAT-008',
+    weight: 200,
+    dimensions: { length: 70, width: 50, height: 1 },
+    tags: ['limited', 'artist', 'exclusive'],
+    isActive: true,
+  },
+  {
+    id: '9',
+    name: 'Urban Street Style Tee',
+    description: 'Bold streetwear design with urban graphics. Perfect for making a statement in the city.',
     price: 50000,
     images: [
       '/images/1.png',
       '/images/2.png',
+    ],
+    sizes: ['S', 'M', 'L', 'XL', 'XXL'],
+    colors: [
+      { name: 'Street Black', value: '#000000' },
+      { name: 'Concrete Gray', value: '#696969' },
+    ],
+    category: 'streetwear',
+    featured: true,
+    rating: 4.6,
+    reviewCount: 78,
+    stock: 45,
+    sku: 'UST-009',
+    weight: 210,
+    dimensions: { length: 72, width: 52, height: 1 },
+    tags: ['streetwear', 'urban', 'bold'],
+    isActive: true,
+  },
+  {
+    id: '10',
+    name: 'Comfort Fit Long Sleeve',
+    description: 'Extended comfort with our premium long sleeve tee. Perfect for layering or wearing solo.',
+    price: 50000,
+    images: [
+      '/images/3.png',
+      '/images/4.jpg',
+    ],
+    sizes: ['S', 'M', 'L', 'XL'],
+    colors: [
+      { name: 'Navy Blue', value: '#000080' },
+      { name: 'Charcoal', value: '#36454F' },
+      { name: 'Olive Green', value: '#808000' },
+    ],
+    category: 'basics',
+    featured: true,
+    rating: 4.7,
+    reviewCount: 92,
+    stock: 55,
+    sku: 'CFLS-010',
+    weight: 225,
+    dimensions: { length: 74, width: 54, height: 1 },
+    tags: ['longsleeve', 'comfort', 'layering'],
+    isActive: true,
+  },
+  {
+    id: '11',
+    name: 'Retro Gaming Tee',
+    description: 'Nostalgic gaming graphics meet modern comfort. Show your love for classic games.',
+    price: 50000,
+    images: [
+      '/images/5.jpg',
+      '/images/6.jpg',
+    ],
+    sizes: ['S', 'M', 'L', 'XL', 'XXL'],
+    colors: [
+      { name: 'Pixel Black', value: '#000000' },
+      { name: 'Arcade Blue', value: '#0000FF' },
+    ],
+    category: 'graphic',
+    featured: true,
+    rating: 4.8,
+    reviewCount: 156,
+    stock: 30,
+    sku: 'RGT-011',
+    weight: 200,
+    dimensions: { length: 70, width: 50, height: 1 },
+    tags: ['gaming', 'retro', 'nostalgic'],
+    isActive: true,
+  },
+  {
+    id: '12',
+    name: 'Summer Breeze Tank Top',
+    description: 'Lightweight and breathable tank top perfect for warm weather. Stay cool and stylish.',
+    price: 50000,
+    images: [
+      '/images/7.jpg',
+      '/images/8.jpg',
+    ],
+    sizes: ['S', 'M', 'L', 'XL'],
+    colors: [
+      { name: 'Summer White', value: '#FFFFFF' },
+      { name: 'Sky Blue', value: '#87CEEB' },
+      { name: 'Coral Pink', value: '#FF7F50' },
+    ],
+    category: 'summer',
+    featured: true,
+    rating: 4.5,
+    reviewCount: 67,
+    stock: 80,
+    sku: 'SBT-012',
+    weight: 150,
+    dimensions: { length: 65, width: 45, height: 1 },
+    tags: ['tank', 'summer', 'breathable'],
+    isActive: true,
+  },
+  {
+    id: '13',
+    name: 'Workout Essentials Tee',
+    description: 'Designed for active lifestyles with moisture-wicking technology and comfortable fit.',
+    price: 50000,
+    images: [
+      '/images/1.png',
       '/images/3.png',
     ],
     sizes: ['S', 'M', 'L', 'XL'],
     colors: [
-      { name: 'Faded Olive', value: '#6B8E23' },
-      { name: 'Washed Black', value: '#333333' },
-      { name: 'Vintage Red', value: '#B22222' },
+      { name: 'Athletic Black', value: '#000000' },
+      { name: 'Gym Gray', value: '#808080' },
+      { name: 'Energy Orange', value: '#FFA500' },
     ],
-    category: 'vintage',
+    category: 'athletic',
     featured: true,
-    rating: 4.5,
-    reviewCount: 94,
+    rating: 4.6,
+    reviewCount: 89,
+    stock: 70,
+    sku: 'WET-013',
+    weight: 180,
+    dimensions: { length: 68, width: 48, height: 1 },
+    tags: ['workout', 'athletic', 'performance'],
+    isActive: true,
   },
   {
-    id: '6',
-    name: 'Tech Mesh ',
-    description: 'Engineered for movement and comfort, our Tech Mesh tee features breathable fabric and moisture-wicking technology for your active lifestyle.',
+    id: '14',
+    name: 'Cozy Winter Flannel',
+    description: 'Warm and comfortable flannel shirt perfect for cold weather. Soft brushed interior.',
     price: 50000,
     images: [
+      '/images/4.jpg',
+      '/images/5.jpg',
+    ],
+    sizes: ['S', 'M', 'L', 'XL', 'XXL'],
+    colors: [
+      { name: 'Red Plaid', value: '#8B0000' },
+      { name: 'Blue Plaid', value: '#000080' },
+      { name: 'Green Plaid', value: '#006400' },
+    ],
+    category: 'winter',
+    featured: true,
+    rating: 4.8,
+    reviewCount: 124,
+    stock: 35,
+    sku: 'CWF-014',
+    weight: 280,
+    dimensions: { length: 76, width: 56, height: 1 },
+    tags: ['flannel', 'winter', 'cozy'],
+    isActive: true,
+  },
+  {
+    id: '15',
+    name: 'Business Casual Polo',
+    description: 'Professional polo shirt perfect for business casual settings. Classic collar and button placket.',
+    price: 50000,
+    images: [
+      '/images/6.jpg',
+      '/images/7.jpg',
+    ],
+    sizes: ['S', 'M', 'L', 'XL'],
+    colors: [
+      { name: 'Business Navy', value: '#000080' },
+      { name: 'Corporate White', value: '#FFFFFF' },
+      { name: 'Executive Gray', value: '#696969' },
+    ],
+    category: 'business',
+    featured: true,
+    rating: 4.7,
+    reviewCount: 98,
+    stock: 50,
+    sku: 'BCP-015',
+    weight: 220,
+    dimensions: { length: 72, width: 52, height: 1 },
+    tags: ['polo', 'business', 'professional'],
+    isActive: true,
+  },
+  {
+    id: '16',
+    name: 'Artistic Abstract Tee',
+    description: 'Unique abstract design that stands out. Perfect for creative individuals who love art.',
+    price: 50000,
+    images: [
+      '/images/8.jpg',
       '/images/1.png',
+    ],
+    sizes: ['S', 'M', 'L', 'XL', 'XXL'],
+    colors: [
+      { name: 'Canvas White', value: '#FFFFFF' },
+      { name: 'Artist Black', value: '#000000' },
+    ],
+    category: 'artistic',
+    featured: true,
+    rating: 4.9,
+    reviewCount: 76,
+    stock: 25,
+    sku: 'AAT-016',
+    weight: 200,
+    dimensions: { length: 70, width: 50, height: 1 },
+    tags: ['artistic', 'abstract', 'creative'],
+    isActive: true,
+  },
+  {
+    id: '17',
+    name: 'Hoodie Essential',
+    description: 'Comfortable hoodie with kangaroo pocket and drawstring hood. Perfect for casual wear.',
+    price: 50000,
+    images: [
       '/images/2.png',
       '/images/3.png',
     ],
     sizes: ['S', 'M', 'L', 'XL', 'XXL'],
     colors: [
-      { name: 'Electric Blue', value: '#0892D0' },
-      { name: 'Neon Green', value: '#39FF14' },
+      { name: 'Hoodie Black', value: '#000000' },
+      { name: 'Hoodie Gray', value: '#808080' },
+      { name: 'Hoodie Navy', value: '#000080' },
     ],
-    category: 'performance',
+    category: 'hoodies',
     featured: true,
-    rating: 4.4,
+    rating: 4.8,
+    reviewCount: 145,
+    stock: 40,
+    sku: 'HE-017',
+    weight: 350,
+    dimensions: { length: 78, width: 58, height: 2 },
+    tags: ['hoodie', 'casual', 'comfortable'],
+    isActive: true,
+  },
+  {
+    id: '18',
+    name: 'Music Festival Tee',
+    description: 'Vibrant festival-themed design perfect for music lovers and festival-goers.',
+    price: 50000,
+    images: [
+      '/images/4.jpg',
+      '/images/5.jpg',
+    ],
+    sizes: ['S', 'M', 'L', 'XL'],
+    colors: [
+      { name: 'Festival Black', value: '#000000' },
+      { name: 'Neon Pink', value: '#FF69B4' },
+      { name: 'Electric Blue', value: '#00BFFF' },
+    ],
+    category: 'festival',
+    featured: true,
+    rating: 4.6,
+    reviewCount: 83,
+    stock: 60,
+    sku: 'MFT-018',
+    weight: 200,
+    dimensions: { length: 70, width: 50, height: 1 },
+    tags: ['festival', 'music', 'vibrant'],
+    isActive: true,
+  },
+  {
+    id: '19',
+    name: 'Travel Adventure Tee',
+    description: 'Inspire wanderlust with our travel-themed tee. Perfect for adventurers and explorers.',
+    price: 50000,
+    images: [
+      '/images/6.jpg',
+      '/images/7.jpg',
+    ],
+    sizes: ['S', 'M', 'L', 'XL', 'XXL'],
+    colors: [
+      { name: 'Adventure Green', value: '#228B22' },
+      { name: 'Explorer Brown', value: '#8B4513' },
+    ],
+    category: 'travel',
+    featured: true,
+    rating: 4.7,
+    reviewCount: 112,
+    stock: 45,
+    sku: 'TAT-019',
+    weight: 200,
+    dimensions: { length: 70, width: 50, height: 1 },
+    tags: ['travel', 'adventure', 'explore'],
+    isActive: true,
+  },
+  {
+    id: '20',
+    name: 'Minimalist Typography Tee',
+    description: 'Clean typography design with inspiring quotes. Perfect for those who love simple, meaningful designs.',
+    price: 50000,
+    images: [
+      '/images/8.jpg',
+      '/images/1.png',
+    ],
+    sizes: ['S', 'M', 'L', 'XL'],
+    colors: [
+      { name: 'Quote Black', value: '#000000' },
+      { name: 'Text White', value: '#FFFFFF' },
+      { name: 'Minimal Gray', value: '#D3D3D3' },
+    ],
+    category: 'minimalist',
+    featured: true,
+    rating: 4.8,
+    reviewCount: 94,
+    stock: 55,
+    sku: 'MTT-020',
+    weight: 195,
+    dimensions: { length: 69, width: 49, height: 1 },
+    tags: ['typography', 'minimalist', 'quotes'],
+    isActive: true,
+  },
+  {
+    id: '21',
+    name: 'Sports Team Pride Tee',
+    description: 'Show your team spirit with our sports-themed collection. Support your favorite teams in style.',
+    price: 50000,
+    images: [
+      '/images/2.png',
+      '/images/3.png',
+    ],
+    sizes: ['S', 'M', 'L', 'XL', 'XXL'],
+    colors: [
+      { name: 'Team Red', value: '#DC143C' },
+      { name: 'Team Blue', value: '#0000FF' },
+      { name: 'Team Green', value: '#008000' },
+    ],
+    category: 'sports',
+    featured: true,
+    rating: 4.5,
     reviewCount: 67,
+    stock: 75,
+    sku: 'STPT-021',
+    weight: 200,
+    dimensions: { length: 70, width: 50, height: 1 },
+    tags: ['sports', 'team', 'pride'],
+    isActive: true,
   },
   {
-    id: '7',
-    name: 'Urban Street  Tee',
-    description: 'Contemporary streetwear with an oversized silhouette. Features dropped shoulders and an extended hem for a modern urban look.',
+    id: '22',
+    name: 'Nature Lover Tee',
+    description: 'Celebrate nature with beautiful botanical designs. Perfect for outdoor enthusiasts.',
     price: 50000,
     images: [
-      '/images/1.png',
-      '/images/2.png',
-      '/images/3.png',
+      '/images/4.jpg',
+      '/images/5.jpg',
     ],
     sizes: ['S', 'M', 'L', 'XL'],
     colors: [
+      { name: 'Forest Green', value: '#228B22' },
+      { name: 'Earth Brown', value: '#8B4513' },
+      { name: 'Sky Blue', value: '#87CEEB' },
+    ],
+    category: 'nature',
+    featured: true,
+    rating: 4.7,
+    reviewCount: 89,
+    stock: 50,
+    sku: 'NLT-022',
+    weight: 200,
+    dimensions: { length: 70, width: 50, height: 1 },
+    tags: ['nature', 'botanical', 'outdoor'],
+    isActive: true,
+  },
+  {
+    id: '23',
+    name: 'Tech Innovation Tee',
+    description: 'Embrace the future with our tech-inspired designs. Perfect for tech enthusiasts and innovators.',
+    price: 50000,
+    images: [
+      '/images/6.jpg',
+      '/images/7.jpg',
+    ],
+    sizes: ['S', 'M', 'L', 'XL', 'XXL'],
+    colors: [
+      { name: 'Tech Black', value: '#000000' },
+      { name: 'Digital Blue', value: '#0000FF' },
+      { name: 'Circuit Green', value: '#00FF00' },
+    ],
+    category: 'tech',
+    featured: true,
+    rating: 4.8,
+    reviewCount: 103,
+    stock: 35,
+    sku: 'TIT-023',
+    weight: 200,
+    dimensions: { length: 70, width: 50, height: 1 },
+    tags: ['tech', 'innovation', 'digital'],
+    isActive: true,
+  },
+  {
+    id: '24',
+    name: 'Vintage Denim Jacket',
+    description: 'Classic denim jacket with vintage wash. Timeless style that never goes out of fashion.',
+    price: 50000,
+    images: [
+      '/images/8.jpg',
+      '/images/1.png',
+    ],
+    sizes: ['S', 'M', 'L', 'XL'],
+    colors: [
+      { name: 'Classic Blue', value: '#0000FF' },
+      { name: 'Vintage Black', value: '#000000' },
+    ],
+    category: 'jackets',
+    featured: true,
+    rating: 4.9,
+    reviewCount: 156,
+    stock: 25,
+    sku: 'VDJ-024',
+    weight: 450,
+    dimensions: { length: 80, width: 60, height: 2 },
+    tags: ['denim', 'vintage', 'jacket'],
+    isActive: true,
+  },
+  {
+    id: '25',
+    name: 'Cozy Sweater',
+    description: 'Warm and comfortable sweater perfect for cold weather. Soft knit fabric with relaxed fit.',
+    price: 50000,
+    images: [
+      '/images/2.png',
+      '/images/3.png',
+    ],
+    sizes: ['S', 'M', 'L', 'XL', 'XXL'],
+    colors: [
+      { name: 'Cream', value: '#F5F5DC' },
       { name: 'Charcoal', value: '#36454F' },
-      { name: 'Sand', value: '#C2B280' },
+      { name: 'Navy', value: '#000080' },
     ],
-    category: 'streetwear',
+    category: 'sweaters',
     featured: true,
-    rating: 4.3,
-    reviewCount: 82,
+    rating: 4.7,
+    reviewCount: 128,
+    stock: 40,
+    sku: 'CS-025',
+    weight: 320,
+    dimensions: { length: 75, width: 55, height: 2 },
+    tags: ['sweater', 'cozy', 'warm'],
+    isActive: true,
   },
   {
-    id: '8',
-    name: 'Avant-Garde Cut Tee',
-    description: 'Push boundaries with our avant-garde cut tee. Features asymmetrical hemlines and innovative fabric combinations.',
+    id: '26',
+    name: 'Beach Vacation Tee',
+    description: 'Tropical vibes with beach-themed graphics. Perfect for vacation and summer fun.',
     price: 50000,
     images: [
-      '/images/1.png',
-      '/images/2.png',
-      '/images/3.png',
+      '/images/4.jpg',
+      '/images/5.jpg',
     ],
     sizes: ['S', 'M', 'L', 'XL'],
     colors: [
-      { name: 'Slate', value: '#708090' },
-      { name: 'Ivory', value: '#FFFFF0' },
+      { name: 'Ocean Blue', value: '#4682B4' },
+      { name: 'Sunset Orange', value: '#FF4500' },
+      { name: 'Palm Green', value: '#228B22' },
     ],
-    category: 'designer',
+    category: 'summer',
     featured: true,
-    rating: 4.2,
-    reviewCount: 45,
+    rating: 4.6,
+    reviewCount: 71,
+    stock: 65,
+    sku: 'BVT-026',
+    weight: 200,
+    dimensions: { length: 70, width: 50, height: 1 },
+    tags: ['beach', 'vacation', 'tropical'],
+    isActive: true,
   },
+  {
+    id: '27',
+    name: 'Fitness Motivation Tee',
+    description: 'Stay motivated with inspiring fitness quotes and designs. Perfect for gym sessions.',
+    price: 50000,
+    images: [
+      '/images/6.jpg',
+      '/images/7.jpg',
+    ],
+    sizes: ['S', 'M', 'L', 'XL', 'XXL'],
+    colors: [
+      { name: 'Gym Black', value: '#000000' },
+      { name: 'Energy Red', value: '#DC143C' },
+      { name: 'Power Blue', value: '#0000FF' },
+    ],
+    category: 'fitness',
+    featured: true,
+    rating: 4.7,
+    reviewCount: 95,
+    stock: 55,
+    sku: 'FMT-027',
+    weight: 200,
+    dimensions: { length: 70, width: 50, height: 1 },
+    tags: ['fitness', 'motivation', 'gym'],
+    isActive: true,
+  },
+  {
+    id: '28',
+    name: 'Coffee Lover Tee',
+    description: 'Celebrate your love for coffee with our caffeine-inspired designs. Perfect for coffee enthusiasts.',
+    price: 50000,
+    images: [
+      '/images/8.jpg',
+      '/images/1.png',
+    ],
+    sizes: ['S', 'M', 'L', 'XL'],
+    colors: [
+      { name: 'Coffee Brown', value: '#8B4513' },
+      { name: 'Cream', value: '#F5F5DC' },
+      { name: 'Espresso Black', value: '#000000' },
+    ],
+    category: 'lifestyle',
+    featured: true,
+    rating: 4.8,
+    reviewCount: 87,
+    stock: 60,
+    sku: 'CLT-028',
+    weight: 200,
+    dimensions: { length: 70, width: 50, height: 1 },
+    tags: ['coffee', 'lifestyle', 'caffeine'],
+    isActive: true,
+  },
+  {
+    id: '29',
+    name: 'Space Explorer Tee',
+    description: 'Journey to the stars with our space-themed collection. Perfect for astronomy enthusiasts.',
+    price: 50000,
+    images: [
+      '/images/2.png',
+      '/images/3.png',
+    ],
+    sizes: ['S', 'M', 'L', 'XL', 'XXL'],
+    colors: [
+      { name: 'Space Black', value: '#000000' },
+      { name: 'Galaxy Purple', value: '#800080' },
+      { name: 'Star Silver', value: '#C0C0C0' },
+    ],
+    category: 'space',
+    featured: true,
+    rating: 4.9,
+    reviewCount: 134,
+    stock: 30,
+    sku: 'SET-029',
+    weight: 200,
+    dimensions: { length: 70, width: 50, height: 1 },
+    tags: ['space', 'astronomy', 'galaxy'],
+    isActive: true,
+  },
+  {
+    id: '30',
+    name: 'Pet Lover Tee',
+    description: 'Show your love for pets with adorable animal designs. Perfect for pet owners and animal lovers.',
+    price: 50000,
+    images: [
+      '/images/4.jpg',
+      '/images/5.jpg',
+    ],
+    sizes: ['S', 'M', 'L', 'XL'],
+    colors: [
+      { name: 'Pet Pink', value: '#FFC0CB' },
+      { name: 'Animal Brown', value: '#8B4513' },
+      { name: 'Fur Gray', value: '#808080' },
+    ],
+    category: 'pets',
+    featured: true,
+    rating: 4.7,
+    reviewCount: 102,
+    stock: 70,
+    sku: 'PLT-030',
+    weight: 200,
+    dimensions: { length: 70, width: 50, height: 1 },
+    tags: ['pets', 'animals', 'cute'],
+    isActive: true,
+  },
+  {
+    id: '31',
+    name: 'Premium Black Hoody',
+    description: 'Ultimate comfort meets street style. Our premium black hoody features front, back, and lifestyle views showcasing the perfect fit and quality craftsmanship.',
+    price: 75000,
+    images: [
+      '/src/assets/hoodyBlack.png',
+      '/src/assets/hoodyBlackTwo.png',
+      '/src/assets/hoodyBlackThree.png',
+    ],
+    sizes: ['S', 'M', 'L', 'XL', 'XXL'],
+    colors: [
+      { name: 'Classic Black', value: '#000000' },
+      { name: 'Charcoal', value: '#36454F' },
+    ],
+    category: 'hoodies',
+    featured: true,
+    rating: 4.9,
+    reviewCount: 156,
+    stock: 35,
+    sku: 'PBH-031',
+    weight: 400,
+    dimensions: { length: 80, width: 60, height: 3 },
+    tags: ['hoody', 'premium', 'streetwear', 'comfort'],
+    isActive: true,
+  },
+  {
+    id: '32',
+    name: 'Classic Black T-Shirt',
+    description: 'The perfect black tee with front, back, and lifestyle views. Premium cotton blend with modern fit and timeless style that works for any occasion.',
+    price: 45000,
+    images: [
+      '/src/assets/blacktFront.png',
+      '/src/assets/blacktback.png',
+      '/src/assets/blackTOne.png',
+    ],
+    sizes: ['S', 'M', 'L', 'XL', 'XXL'],
+    colors: [
+      { name: 'Classic Black', value: '#000000' },
+      { name: 'Jet Black', value: '#1C1C1C' },
+    ],
+    category: 'basics',
+    featured: true,
+    rating: 4.8,
+    reviewCount: 142,
+    stock: 50,
+    sku: 'CBT-032',
+    weight: 200,
+    dimensions: { length: 70, width: 50, height: 1 },
+    tags: ['basic', 'black', 'classic', 'cotton'],
+    isActive: true,
+  },
+  {
+    id: '33',
+    name: 'Purple Statement T-Shirt',
+    description: 'Bold and vibrant purple tee that makes a statement. Features front, back, and lifestyle views showcasing the rich purple color and modern design.',
+    price: 55000,
+    images: [
+      '/src/assets/blackPurpleTwo.png',
+      '/src/assets/black1.png',
+      '/src/assets/blackPurpleTwo.png',
+    ],
+    sizes: ['S', 'M', 'L', 'XL', 'XXL'],
+    colors: [
+      { name: 'Royal Purple', value: '#6B46C1' },
+      { name: 'Deep Purple', value: '#4C1D95' },
+      { name: 'Vibrant Purple', value: '#8B5CF6' },
+    ],
+    category: 'statement',
+    featured: true,
+    rating: 4.9,
+    reviewCount: 98,
+    stock: 40,
+    sku: 'PST-033',
+    weight: 210,
+    dimensions: { length: 72, width: 52, height: 1 },
+    tags: ['purple', 'statement', 'vibrant', 'bold'],
+    isActive: true,
+  }
 ];
 
-export const getProductById = (id: string): Product | undefined => {
-  // First check in the original products
-  const originalProduct = products.find(product => product.id === id);
-  if (originalProduct) return originalProduct;
-  
-  // If not found, check in the generated products
-  const allProducts = getFeaturedProducts();
-  return allProducts.find(product => product.id === id);
-};
-
+// Helper functions
 export const getFeaturedProducts = (): Product[] => {
-  // Get the original 8 products
-  const originalProducts = products.filter(product => product.featured);
-  
-  // Generate additional products to reach 200 total
-  const additionalProducts: Product[] = [];
-  
-  for (let i = 9; i <= 200; i++) {
-    const categories = ['basics', 'graphic', 'essentials', 'vintage', 'performance', 'streetwear', 'designer'];
-    const category = categories[i % categories.length];
-    
-    const productNames = [
-      'Classic Crew Neck',
-      'Modern Fit Tee',
-      'Premium Cotton',
-      'Street Style',
-      'Urban Collection',
-      'Designer Series',
-      'Limited Edition',
-      'Signature Line',
-      'Exclusive Drop',
-      'Seasonal Collection'
-    ];
-    
-    const name = `${productNames[i % productNames.length]} #${i}`;
-    
-    additionalProducts.push({
-      id: i.toString(),
-      name,
-      description: `High-quality t-shirt with premium materials and modern design. Part of our ${category} collection.`,
-      price: 45000 + (i * 100), // Varying prices
-      images: [
-        '/images/1.png',
-        '/images/2.png',
-        '/images/3.png',
-      ],
-      sizes: ['S', 'M', 'L', 'XL', 'XXL'],
-      colors: [
-        { name: 'Black', value: '#000000' },
-        { name: 'White', value: '#FFFFFF' },
-        { name: 'Gray', value: '#808080' },
-      ],
-      category,
-      featured: true,
-      rating: 4.0 + (i % 10) * 0.1, // Varying ratings
-      reviewCount: 50 + (i % 100),
-    });
-  }
-  
-  return [...originalProducts, ...additionalProducts];
+  return products.filter(product => product.featured);
 };
 
 export const getProductsByCategory = (category: string): Product[] => {
   return products.filter(product => product.category === category);
 };
+
+export const getProductById = (id: string): Product | undefined => {
+  return products.find(product => product.id === id);
+};
+
+export const searchProducts = (query: string): Product[] => {
+  const lowercaseQuery = query.toLowerCase();
+  return products.filter(product =>
+    product.name.toLowerCase().includes(lowercaseQuery) ||
+    product.description.toLowerCase().includes(lowercaseQuery) ||
+    product.tags.some(tag => tag.toLowerCase().includes(lowercaseQuery))
+  );
+};
+
+export const getAvailableSizes = (): string[] => {
+  const sizes = new Set<string>();
+  products.forEach(product => {
+    product.sizes.forEach(size => sizes.add(size));
+  });
+  return Array.from(sizes).sort();
+};
+
+export const getAvailableColors = (): { name: string; value: string }[] => {
+  const colors = new Map<string, string>();
+  products.forEach(product => {
+    product.colors.forEach(color => {
+      colors.set(color.name, color.value);
+    });
+  });
+  return Array.from(colors.entries()).map(([name, value]) => ({ name, value }));
+};
+
+export const getProductsByPriceRange = (minPrice: number, maxPrice: number): Product[] => {
+  return products.filter(product => product.price >= minPrice && product.price <= maxPrice);
+};
+
+export const sortProducts = (products: Product[], sortBy: 'price' | 'rating' | 'name', order: 'asc' | 'desc' = 'asc'): Product[] => {
+  const sorted = [...products].sort((a, b) => {
+    let comparison = 0;
+    
+    switch (sortBy) {
+      case 'price':
+        comparison = a.price - b.price;
+        break;
+      case 'rating':
+        comparison = (a.rating || 0) - (b.rating || 0);
+        break;
+      case 'name':
+        comparison = a.name.localeCompare(b.name);
+        break;
+    }
+    
+    return order === 'desc' ? -comparison : comparison;
+  });
+  
+  return sorted;
+};
+
+export default products;

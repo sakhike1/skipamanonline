@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Product, Size, Color } from '../../types';
-import { Button } from '../ui/Button';
-import { Check, ChevronLeft, ChevronRight, Expand, ShoppingBag, X, Heart, ChevronDown, Plus, Minus, Sparkles, Ruler } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Expand, ShoppingBag, X, Heart, ChevronDown, Sparkles, Ruler, Palette, CheckCircle } from 'lucide-react';
 import { useCart } from '../../context/CartContext';
 import { useWishlist } from '../../context/WishlistContext';
 import { useHeader } from '../../context/HeaderContext';
+import { motion } from 'framer-motion';
 import SizeGuide from './SizeGuide';
 
 interface ProductDetailProps {
@@ -15,11 +15,11 @@ interface ProductDetailProps {
 const ProductDetail: React.FC<ProductDetailProps> = ({ product, onGoBack }) => {
   const [selectedSize, setSelectedSize] = useState<Size | null>(null);
   const [selectedColor, setSelectedColor] = useState<Color | null>(product.colors[0] || null);
-  const [quantity, setQuantity] = useState(1);
+  const [, setQuantity] = useState(1);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [showSizeGuide, setShowSizeGuide] = useState(false);
   const [showZoomModal, setShowZoomModal] = useState(false);
-  const [isWishlistActive, setIsWishlistActive] = useState(false);
+  const [, setIsWishlistActive] = useState(false);
   const [showAddedToCart, setShowAddedToCart] = useState(false);
   const [isHoveringImage, setIsHoveringImage] = useState(false);
   
@@ -339,28 +339,102 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, onGoBack }) => {
 
             </div>
             
-            {/* Enhanced color selection */}
+            {/* Enhanced Color Selection */}
             <div className="mb-8">
-              <h2 className="text-lg font-bold text-gray-900 mb-4">Choose Color</h2>
-              <div className="flex space-x-4">
-                {product.colors.map(color => (
-                  <button
-                    key={color.name}
-                    onClick={() => setSelectedColor(color)}
-                    className={`w-12 h-12 rounded-full border-3 flex items-center justify-center transition-all duration-300 hover:scale-110 focus:outline-none shadow-lg ${
-                      selectedColor?.name === color.name
-                        ? 'border-black ring-2 ring-black ring-offset-2'
-                        : 'border-gray-300 hover:border-gray-400'
-                    }`}
-                    style={{ backgroundColor: color.value }}
-                    title={color.name}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6 }}
+              >
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg flex items-center justify-center">
+                    <Palette className="w-4 h-4 text-white" />
+                  </div>
+                  <h2 className="text-xl font-bold text-gray-900">Choose Color</h2>
+                </div>
+                
+                <div className="grid grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-3">
+                  {product.colors.map((color, index) => (
+                    <motion.button
+                      key={color.name}
+                      onClick={() => setSelectedColor(color)}
+                      className={`relative group w-16 h-16 rounded-2xl border-2 flex flex-col items-center justify-center transition-all duration-300 hover:scale-110 focus:outline-none shadow-lg overflow-hidden ${
+                        selectedColor?.name === color.name
+                          ? 'border-purple-500 ring-4 ring-purple-500 ring-opacity-30 shadow-2xl scale-105'
+                          : 'border-gray-200 hover:border-purple-300 hover:shadow-xl'
+                      }`}
+                      style={{ backgroundColor: color.value }}
+                      title={color.name}
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ duration: 0.4, delay: index * 0.05 }}
+                      whileHover={{ scale: 1.1, y: -2 }}
+                      whileTap={{ scale: 0.95 }}
+                    >
+                      {/* Shimmer Effect */}
+                      <motion.div
+                        className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
+                        animate={{
+                          x: ['-100%', '100%']
+                        }}
+                        transition={{
+                          duration: 2,
+                          repeat: Infinity,
+                          repeatDelay: 3,
+                          ease: "easeInOut"
+                        }}
+                      />
+                      
+                      {/* Color Circle */}
+                      <div className="relative z-10 w-8 h-8 rounded-full border-2 border-white/30 shadow-inner"></div>
+                      
+                      {/* Selection Indicator */}
+                      {selectedColor?.name === color.name && (
+                        <motion.div
+                          initial={{ scale: 0, rotate: -180 }}
+                          animate={{ scale: 1, rotate: 0 }}
+                          transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                          className="absolute inset-0 flex items-center justify-center"
+                        >
+                          <div className="w-6 h-6 bg-white/90 rounded-full flex items-center justify-center shadow-lg">
+                            <CheckCircle className="w-4 h-4 text-purple-600" />
+                          </div>
+                        </motion.div>
+                      )}
+                      
+                      {/* Color Name Tooltip */}
+                      <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap pointer-events-none z-20">
+                        {color.name}
+                      </div>
+                    </motion.button>
+                  ))}
+                </div>
+                
+                {/* Selected Color Info */}
+                {selectedColor && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.4 }}
+                    className="mt-4 p-4 bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl border border-purple-200"
                   >
-                    {selectedColor?.name === color.name && (
-                      <span className="block w-3 h-3 bg-white rounded-full shadow-inner"></span>
-                    )}
-                  </button>
-                ))}
-              </div>
+                    <div className="flex items-center gap-3">
+                      <div 
+                        className="w-6 h-6 rounded-full border-2 border-white shadow-lg"
+                        style={{ backgroundColor: selectedColor.value }}
+                      ></div>
+                      <div>
+                        <p className="font-semibold text-gray-800">
+                          Selected: <span className="text-purple-600">{selectedColor.name}</span>
+                        </p>
+                        <p className="text-sm text-gray-600">
+                          Perfect choice! This color will complement your style.
+                        </p>
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+              </motion.div>
             </div>
             
             {/* Enhanced disclaimer and checkout */}

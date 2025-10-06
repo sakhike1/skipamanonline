@@ -1,7 +1,8 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { products, getFeaturedProducts } from '../data/products';
-import { Filter, X, ArrowRight, ShoppingBag, Tag, Sparkles, Search } from 'lucide-react';
+import { getFeaturedProducts } from '../data/products';
+import { Product } from '../types';
+import { Filter, X, ArrowRight, Sparkles, Search } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Skeleton from '../components/ui/LoadingSkeleton';
 import SearchBar from '../components/ui/SearchBar';
@@ -91,71 +92,6 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onClick }) => {
   );
 };
 
-const PromoCard: React.FC<{ onClick: () => void }> = ({ onClick }) => {
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="group relative overflow-hidden rounded-2xl hover:shadow-xl transition-all duration-300"
-      onClick={onClick}
-    >
-      <div className="relative aspect-square overflow-hidden cursor-pointer">
-        {/* Gradient Background - Different colors for promo card */}
-        <div className="absolute inset-0 bg-gradient-to-br from-yellow-500/10 via-orange-500/15 to-red-500/10 backdrop-blur-sm"></div>
-        
-        {/* Glassmorphism Overlay */}
-        <div className="absolute inset-0 bg-white/5 backdrop-blur-md border border-white/20 rounded-2xl"></div>
-        
-        {/* Image Container */}
-        <div className="relative z-10 h-full">
-        <img
-          src="https://images.pexels.com/photos/3965557/pexels-photo-3965557.jpeg"
-          alt="Special Promotion"
-            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 absolute inset-0 filter grayscale hover:grayscale-0 rounded-2xl"
-          />
-          
-          {/* Always Visible Overlay with Glassmorphism */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-transparent rounded-2xl">
-            <div className="absolute bottom-0 left-0 right-0 p-4">
-              {/* Glassmorphism Content Card */}
-              <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-3">
-        <div className="flex justify-between items-start mb-1">
-                  <h3 className="text-white text-lg font-medium mb-1 drop-shadow-lg line-clamp-1 uppercase tracking-wide">Summer Sale Collection</h3>
-          <div>
-                    <span className="text-white/60 font-medium line-through mr-2">R500</span>
-                    <span className="text-white/90 font-semibold">R500</span>
-          </div>
-        </div>
-                <p className="text-white/80 text-sm mb-3">Up to 40% Off Selected Items</p>
-        <button
-          onClick={(e) => { e.stopPropagation(); onClick(); }}
-                  className="w-full flex items-center justify-center gap-2 py-2 px-4 rounded-full text-sm font-medium bg-white/20 backdrop-blur-sm text-white border border-white/30 hover:bg-white hover:text-black transition-all duration-300"
-        >
-          View Offer
-          <ArrowRight
-            size={16}
-            className="group-hover:translate-x-1 transition-transform duration-300"
-          />
-        </button>
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        {/* Limited Time Badge */}
-        <div className="absolute top-3 left-3 bg-red-600/80 backdrop-blur-sm text-white text-xs px-2 py-1 rounded-full border border-white/20 flex items-center gap-1">
-          <Tag size={12} />
-          <span>LIMITED TIME</span>
-        </div>
-        
-        {/* Floating Sparkle Effect */}
-        <div className="absolute top-3 right-3 w-6 h-6 bg-white/20 backdrop-blur-sm rounded-full border border-white/30 flex items-center justify-center">
-          <div className="w-1.5 h-1.5 bg-white rounded-full animate-pulse"></div>
-        </div>
-      </div>
-    </motion.div>
-  );
-};
 
 const NewArrivalsPage: React.FC = () => {
   const navigate = useNavigate();
@@ -163,14 +99,13 @@ const NewArrivalsPage: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 50000]);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
-  const [isLoading, setIsLoading] = useState(false);
   const [isInitialLoading, setIsInitialLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
-  const [displayedProducts, setDisplayedProducts] = useState<any[]>([]);
+  const [displayedProducts, setDisplayedProducts] = useState<Product[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [colorIndex, setColorIndex] = useState(0);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const productsPerPage = 9; // Show 9 products per page
+  const productsPerPage = 12; // Show 12 products per page
   const maxProducts = 200; // Limit to 200 products
   
   // Gold glitz color palette
@@ -206,9 +141,8 @@ const NewArrivalsPage: React.FC = () => {
   }, []);
 
   // Pagination logic
-  const totalPages = Math.ceil(displayedProducts.length / productsPerPage);
-  const startIndex = currentPage === 1 ? 0 : (currentPage - 1) * productsPerPage - 1;
-  const endIndex = currentPage === 1 ? 8 : startIndex + productsPerPage;
+  const startIndex = (currentPage - 1) * productsPerPage;
+  const endIndex = startIndex + productsPerPage;
 
   // Remove infinite scroll related code
   // const loadMoreProducts = useCallback(async () => {
@@ -614,7 +548,6 @@ const NewArrivalsPage: React.FC = () => {
             <div className="flex items-center gap-4">
               <p className="text-gray-600">
                 Showing {startIndex + 1}-{Math.min(endIndex, filteredProducts.length)} of {filteredProducts.length} product{filteredProducts.length !== 1 ? 's' : ''}
-                {currentPage === 1 && <span className="ml-2 text-xs text-gray-400">(8 + 1 promo)</span>}
                 {filteredProducts.length >= maxProducts && (
                   <span className="ml-2 text-xs text-gray-400">
                     (Limit reached)
@@ -788,7 +721,6 @@ const NewArrivalsPage: React.FC = () => {
                   transition={{ duration: 0.3 }}
                   className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"
                 >
-                  {currentPage === 1 && <PromoCard onClick={() => navigate('/summer-sale')} />}
                   {paginatedProducts.map(product => (
                     <ProductCard key={product.id} product={product} onClick={handleProductClick} />
                   ))}
