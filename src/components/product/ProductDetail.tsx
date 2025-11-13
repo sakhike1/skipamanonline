@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Product, Size, Color } from '../../types';
-import { ChevronLeft, ChevronRight, Expand, ShoppingBag, X, Heart, ChevronDown, Sparkles, Ruler, Palette, CheckCircle } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Expand, ShoppingBag, X, ChevronDown, Sparkles, Ruler, Palette, CheckCircle, Truck, RotateCcw, LifeBuoy } from 'lucide-react';
 import { useCart } from '../../context/CartContext';
-import { useWishlist } from '../../context/WishlistContext';
 import { useHeader } from '../../context/HeaderContext';
 import { motion } from 'framer-motion';
 import SizeGuide from './SizeGuide';
+import WishlistButton from './WishlistButton';
 
 interface ProductDetailProps {
   product: Product;
@@ -19,12 +19,10 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, onGoBack }) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [showSizeGuide, setShowSizeGuide] = useState(false);
   const [showZoomModal, setShowZoomModal] = useState(false);
-  const [, setIsWishlistActive] = useState(false);
   const [showAddedToCart, setShowAddedToCart] = useState(false);
   const [isHoveringImage, setIsHoveringImage] = useState(false);
   
   const { addToCart, isInCart, cart } = useCart();
-  const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
   const { setIsHeaderDark } = useHeader();
   
   // Control header background when component mounts/unmounts
@@ -45,7 +43,6 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, onGoBack }) => {
     setQuantity(1);
     setCurrentImageIndex(0);
     setShowAddedToCart(false);
-    setIsWishlistActive(false);
   }, [product.id]); // Only depend on product.id, not product.colors
   
   // Handle image navigation
@@ -91,14 +88,6 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, onGoBack }) => {
     ? isInCart(product.id, selectedSize, selectedColor)
     : false;
     
-  // Toggle wishlist
-  const toggleWishlist = useCallback(() => {
-    if (isInWishlist(product.id)) {
-      removeFromWishlist(product.id);
-    } else {
-      addToWishlist(product.id);
-    }
-  }, [isInWishlist, removeFromWishlist, addToWishlist, product.id]);
   
   return (
     <div className="w-full min-h-screen bg-gradient-to-br from-slate-50 via-white to-gray-100 relative overflow-hidden">
@@ -211,15 +200,92 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, onGoBack }) => {
               
               <details className="group border border-gray-200/50 rounded-xl overflow-hidden backdrop-blur-sm bg-white/50">
                 <summary className="flex justify-between items-center cursor-pointer p-4 hover:bg-gray-50/50 transition-colors">
-                  <span className="text-sm font-semibold text-gray-900">Delivery & Returns</span>
+                  <span className="text-sm font-semibold text-gray-900">Delivery, Returns & Support</span>
                   <span className="transition-transform group-open:rotate-180">
                     <ChevronDown size={16} />
                   </span>
                 </summary>
-                <div className="p-4 text-sm text-gray-600 bg-white/30 space-y-2">
-                  <p>Free shipping on orders over €50</p>
-                  <p>Delivery within 3-5 business days</p>
-                  <p>Easy returns within 30 days</p>
+                <div className="p-6 bg-white/40 border-t border-gray-200/60">
+                  <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+                    <div className="group/card relative overflow-hidden rounded-2xl border border-slate-200/60 bg-white/80 p-5 shadow-[0_20px_60px_-40px_rgba(15,23,42,0.25)] transition-all duration-300 hover:-translate-y-1.5 hover:border-slate-200 hover:shadow-[0_30px_90px_-40px_rgba(59,130,246,0.35)]">
+                      <div className="pointer-events-none absolute inset-0">
+                        <div className="absolute -top-16 -right-10 h-32 w-32 rounded-full bg-blue-400/20 blur-3xl opacity-0 transition-opacity duration-500 group-hover/card:opacity-100" />
+                        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.4),_transparent_70%)]" />
+                      </div>
+                      <div className="relative z-10 space-y-4">
+                        <div className="flex items-center gap-3">
+                          <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 text-white shadow-lg shadow-blue-500/30">
+                            <Truck size={20} />
+                          </span>
+                          <div>
+                            <p className="text-xs font-semibold uppercase tracking-[0.35em] text-slate-500">Shipping</p>
+                            <p className="text-base font-semibold text-slate-900">Delivered in 2-5 business days.</p>
+                          </div>
+                        </div>
+                        <p className="text-sm leading-relaxed text-slate-600">
+                          R90 nationwide courier. Complimentary shipping automatically applies on orders over R900.
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="group/card relative overflow-hidden rounded-2xl border border-slate-200/60 bg-white/80 p-5 shadow-[0_20px_60px_-40px_rgba(15,23,42,0.25)] transition-all duration-300 hover:-translate-y-1.5 hover:border-slate-200 hover:shadow-[0_30px_90px_-40px_rgba(236,72,153,0.3)]">
+                      <div className="pointer-events-none absolute inset-0">
+                        <div className="absolute -bottom-16 -left-12 h-36 w-36 rounded-full bg-pink-400/20 blur-3xl opacity-0 transition-opacity duration-500 group-hover/card:opacity-100" />
+                        <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom,_rgba(255,255,255,0.4),_transparent_70%)]" />
+                      </div>
+                      <div className="relative z-10 space-y-4">
+                        <div className="flex items-center gap-3">
+                          <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 text-white shadow-lg shadow-pink-500/30">
+                            <RotateCcw size={20} />
+                          </span>
+                          <div>
+                            <p className="text-xs font-semibold uppercase tracking-[0.35em] text-slate-500">Returns</p>
+                            <p className="text-base font-semibold text-slate-900">Return online orders in-store or online.</p>
+                          </div>
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                          <a
+                            href="/faq"
+                            className="inline-flex items-center rounded-full border border-purple-200/60 bg-purple-50/60 px-4 py-2 text-xs font-semibold uppercase tracking-[0.3em] text-purple-600 transition-all duration-300 hover:border-purple-300 hover:text-purple-700"
+                          >
+                            FAQ&apos;s
+                          </a>
+                          <a
+                            href="/returns"
+                            className="inline-flex items-center rounded-full border border-purple-200/60 bg-white/70 px-4 py-2 text-xs font-semibold uppercase tracking-[0.3em] text-purple-600 transition-all duration-300 hover:border-purple-300 hover:text-purple-700"
+                          >
+                            Log a Return
+                          </a>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="group/card relative overflow-hidden rounded-2xl border border-slate-200/60 bg-white/80 p-5 shadow-[0_20px_60px_-40px_rgba(15,23,42,0.25)] transition-all duration-300 hover:-translate-y-1.5 hover:border-slate-200 hover:shadow-[0_30px_90px_-40px_rgba(34,197,94,0.32)]">
+                      <div className="pointer-events-none absolute inset-0">
+                        <div className="absolute -top-12 -left-12 h-32 w-32 rounded-full bg-emerald-400/20 blur-3xl opacity-0 transition-opacity duration-500 group-hover/card:opacity-100" />
+                        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.4),_transparent_70%)]" />
+                      </div>
+                      <div className="relative z-10 space-y-4">
+                        <div className="flex items-center gap-3">
+                          <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 text-white shadow-lg shadow-emerald-500/30">
+                            <LifeBuoy size={20} />
+                          </span>
+                          <div>
+                            <p className="text-xs font-semibold uppercase tracking-[0.35em] text-slate-500">Support</p>
+                            <p className="text-base font-semibold text-slate-900">We uphold the Consumer Goods & Services Code.</p>
+                          </div>
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                          <a
+                            href="/faq"
+                            className="inline-flex items-center rounded-full border border-emerald-200/60 bg-emerald-50/60 px-4 py-2 text-xs font-semibold uppercase tracking-[0.3em] text-emerald-600 transition-all duration-300 hover:border-emerald-300 hover:text-emerald-700"
+                          >
+                            FAQ&apos;s
+                          </a>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </details>
             </div>
@@ -443,7 +509,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, onGoBack }) => {
                 All contents of this website are the property of A-COLD-WALL*
               </p>
               
-              <div className="flex mb-6">
+              <div className="flex gap-3 mb-6">
                 <button
                   className={`flex-grow py-4 text-sm font-bold shadow-lg transition-all duration-500 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl transform hover:scale-[1.02] active:scale-[0.98] ${
                     showAddedToCart 
@@ -462,27 +528,15 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, onGoBack }) => {
                       : 'ADD TO CART'
                   }
                 </button>
+                <WishlistButton 
+                  product={product} 
+                  size="lg" 
+                  variant="button"
+                  showText={false}
+                  className="px-4 py-4 shadow-lg"
+                />
               </div>
               
-              <div className="flex justify-center">
-                <button
-                  className="text-black flex items-center justify-center hover:scale-105 transition-all duration-300 group"
-                  onClick={toggleWishlist}
-                  type="button"
-                >
-                  <Heart 
-                    size={24} 
-                    className={`mr-3 transition-all duration-300 ${
-                      isInWishlist(product.id)
-                        ? "fill-purple-500 text-purple-500 animate-pulse" 
-                        : "group-hover:text-purple-500 group-hover:scale-110"
-                    }`} 
-                  />
-                  <span className="text-sm font-semibold">
-                    {isInWishlist(product.id) ? 'Remove from Wishlist' : 'Save to Wishlist'}
-                  </span>
-                </button>
-              </div>
               
               {(!selectedSize || !selectedColor) && !showAddedToCart && (
                 <div className="mt-6 p-4 bg-gradient-to-r from-red-50 to-pink-50 rounded-xl border border-red-200/50 backdrop-blur-sm">

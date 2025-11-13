@@ -1,42 +1,54 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import SearchBar from '../components/ui/SearchBar';
 import ProductGrid from '../components/product/ProductGrid';
-import { products } from '../data/products';
+import { searchProducts, products } from '../data/products';
+import { Product } from '../types';
 
 const SearchPage: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
-  const [searchResults, setSearchResults] = useState(products);
   const [isSearching, setIsSearching] = useState(false);
   const query = searchParams.get('q') || '';
   const navigate = useNavigate();
 
-  // Handle search
-  const handleSearch = (searchQuery: string) => {
+  // Initialize search results
+  const [searchResults, setSearchResults] = useState<Product[]>(
+    query ? searchProducts(query) : products.filter(p => p.isActive)
+  );
+
+  // Perform search with improved algorithm
+  const performSearch = useCallback((searchQuery: string) => {
     setIsSearching(true);
     
-    // Update URL
-    setSearchParams({ q: searchQuery });
-    
-    // Simulate search delay
-    setTimeout(() => {
-      if (searchQuery.trim()) {
-        const filtered = products.filter(product =>
-          product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          product.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          product.description.toLowerCase().includes(searchQuery.toLowerCase())
-        );
-        setSearchResults(filtered);
-      } else {
-        setSearchResults(products);
-      }
+    // Use requestAnimationFrame for smoother UI updates
+    requestAnimationFrame(() => {
+      const results = searchQuery.trim() 
+        ? searchProducts(searchQuery.trim())
+        : products.filter(p => p.isActive);
+      
+      setSearchResults(results);
       setIsSearching(false);
-    }, 300);
-  };
+    });
+  }, []);
+
+  // Handle search - updates URL and performs search
+  const handleSearch = useCallback((searchQuery: string) => {
+    // Update URL
+    if (searchQuery.trim()) {
+      setSearchParams({ q: searchQuery.trim() });
+    } else {
+      setSearchParams({});
+    }
+  }, [setSearchParams]);
+
+  // Perform search when query changes (from URL)
+  useEffect(() => {
+    performSearch(query);
+  }, [query, performSearch]);
 
   // Handle product click with scroll to top
-  const handleProductClick = (productId: string) => {
+  const handleProductClick = useCallback((productId: string) => {
     navigate(`/product/${productId}`);
     // Scroll to top after navigation
     setTimeout(() => {
@@ -45,13 +57,14 @@ const SearchPage: React.FC = () => {
         behavior: 'smooth'
       });
     }, 100);
-  };
+  }, [navigate]);
 
-  // Initial search on component mount
-  useEffect(() => {
-    if (query) {
-      handleSearch(query);
-    }
+  // Get popular searches from actual products
+  const popularSearches = useMemo(() => {
+    const categories = [...new Set(products.map(p => p.category))];
+    const tags = products.flatMap(p => p.tags);
+    const popularTags = [...new Set(tags)].slice(0, 4);
+    return [...categories.slice(0, 2), ...popularTags.slice(0, 2)];
   }, []);
 
   return (
@@ -77,6 +90,7 @@ const SearchPage: React.FC = () => {
             <div className="max-w-4xl mx-auto">
               <SearchBar 
                 onSearch={handleSearch}
+                initialValue={query}
                 placeholder="Search for products, categories, or styles..."
                 className="mx-auto"
               />
@@ -130,7 +144,7 @@ const SearchPage: React.FC = () => {
               <div className="space-y-4">
                 <h4 className="font-semibold text-lg">Popular searches:</h4>
                 <div className="flex flex-wrap gap-2 justify-center">
-                  {['Sport Collection', 'Urban Style', 'Premium Quality', 'New Arrivals'].map((term) => (
+                  {popularSearches.map((term) => (
                     <button
                       key={term}
                       onClick={() => handleSearch(term)}
@@ -145,17 +159,17 @@ const SearchPage: React.FC = () => {
           </motion.div>
         ) : (
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="text-center py-20"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
           >
-            <div className="max-w-md mx-auto">
-              <div className="text-6xl mb-4">✨</div>
-              <h3 className="text-2xl font-bold mb-4">Start exploring</h3>
+            <div className="mb-8">
+              <h2 className="text-2xl font-bold mb-2">All Products</h2>
               <p className="text-gray-400">
-                Use the search bar above to find products, or browse our featured collections.
+                {searchResults.length} products available
               </p>
             </div>
+            <ProductGrid products={searchResults} onProductClick={handleProductClick} />
           </motion.div>
         )}
       </div>

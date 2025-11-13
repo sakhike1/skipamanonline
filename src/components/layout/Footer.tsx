@@ -13,8 +13,10 @@ const Footer: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {/* Company Info */}
             <div>
-              <h3 className="text-xl font-bold text-white mb-4">THREAD<span className="text-white">AI</span></h3>
-              <p className="mb-4">
+              <div className="space-y-1 mb-4">
+                <h3 className="text-2xl font-black text-white tracking-wide">Skipaman</h3>
+              </div>
+              <p className="mb-4 leading-relaxed">
                 Elevating your style with AI-inspired designs and premium quality t-shirts.
                 Sustainable fashion for the modern age.
               </p>
@@ -40,13 +42,7 @@ const Footer: React.FC = () => {
                 <li><a href="/new" className="hover:text-white transition-colors">New Arrivals</a></li>
                 <li><a href="/about" className="hover:text-white transition-colors">About Us</a></li>
                 <li><a href="/sustainability" className="hover:text-white transition-colors">Sustainability</a></li>
-              </ul>
-            </div>
-
-            {/* Customer Service */}
-            <div>
-              <h3 className="text-lg font-semibold text-white mb-4">Customer Service</h3>
-              <ul className="space-y-2">
+                <li><a href="/customer-service" className="hover:text-white transition-colors">Customer Service</a></li>
                 <li><a href="/contact" className="hover:text-white transition-colors">Contact Us</a></li>
                 <li><a href="/faq" className="hover:text-white transition-colors">FAQs</a></li>
                 <li><a href="/shipping" className="hover:text-white transition-colors">Shipping & Returns</a></li>
@@ -69,9 +65,32 @@ const Footer: React.FC = () => {
                 </li>
                 <li className="flex items-center">
                   <Mail size={20} className="mr-2 text-white/70 flex-shrink-0" />
-                  <span>hello@threadai.com</span>
+                  <span>admin@skipaman.co.za</span>
                 </li>
               </ul>
+            </div>
+
+            {/* Stay Connected */}
+            <div>
+              <h3 className="text-lg font-semibold text-white mb-4">Stay Connected</h3>
+              <p className="text-sm text-white/80 leading-relaxed">
+                Join the Skipaman community for exclusive drops, design inspiration, and sustainability updates.
+              </p>
+              <div className="mt-4 space-y-3">
+                <a
+                  href="mailto:admin@skipaman.co.za"
+                  className="flex items-center rounded-2xl border border-white/20 bg-white/10 px-4 py-3 text-sm font-medium text-white/80 transition-colors hover:border-white/40 hover:text-white"
+                >
+                  <Mail size={18} className="mr-3" />
+                  admin@skipaman.co.za
+                </a>
+                <a
+                  href="/shop"
+                  className="inline-flex items-center rounded-full border border-white/20 bg-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.35em] text-white/80 transition-all hover:border-white/40 hover:bg-white/10 hover:text-white"
+                >
+                  Explore Collections
+                </a>
+              </div>
             </div>
           </div>
 

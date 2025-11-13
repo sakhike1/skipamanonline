@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowRight, ShoppingBag, Plus, Star, Crown, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ArrowRight, ShoppingBag, Plus, Star, Crown, ChevronLeft, ChevronRight, Sparkles, Zap } from 'lucide-react';
 import { products } from '../../data/products';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -89,7 +89,7 @@ const FeaturedProducts: React.FC<FeaturedProductsProps> = ({ onProductClick }) =
   };
 
   return (
-    <section className="relative py-20 md:py-32 bg-gradient-to-br from-slate-900 via-gray-900 to-black overflow-hidden">
+    <section className="relative py-20 md:py-32 bg-white overflow-hidden">
       {/* Professional Background */}
       <div className="absolute inset-0">
         {/* Subtle gradient orbs */}
@@ -97,7 +97,7 @@ const FeaturedProducts: React.FC<FeaturedProductsProps> = ({ onProductClick }) =
         <div className="absolute bottom-20 right-10 w-80 h-80 bg-gradient-to-r from-blue-500/5 to-cyan-500/5 rounded-full blur-3xl"></div>
         
         {/* Minimal grid pattern */}
-        <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.01)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.01)_1px,transparent_1px)] bg-[size:60px_60px]"></div>
+        <div className="absolute inset-0 bg-[linear-gradient(rgba(0,0,0,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(0,0,0,0.02)_1px,transparent_1px)] bg-[size:60px_60px]"></div>
       </div>
 
       <div className="relative z-10 px-4 sm:px-6 lg:px-8">
@@ -142,23 +142,23 @@ const FeaturedProducts: React.FC<FeaturedProductsProps> = ({ onProductClick }) =
 
             {/* Glowing Badge */}
             <motion.div 
-              className="inline-flex items-center gap-4 px-8 py-4 bg-gradient-to-r from-purple-600/20 via-pink-600/20 to-orange-600/20 backdrop-blur-md border border-purple-400/30 rounded-2xl mb-10 shadow-2xl shadow-purple-500/10"
+              className="inline-flex items-center gap-4 px-8 py-4 bg-black/10 backdrop-blur-md border border-black/20 rounded-2xl mb-10 shadow-lg"
               initial={{ opacity: 0, y: 20, scale: 0.9 }}
               whileInView={{ opacity: 1, y: 0, scale: 1 }}
               transition={{ duration: 0.6, delay: 0.1 }}
               viewport={{ once: true }}
               whileHover={{ 
                 scale: 1.05,
-                boxShadow: "0 20px 40px rgba(168, 85, 247, 0.3)"
+                boxShadow: "0 20px 40px rgba(0, 0, 0, 0.1)"
               }}
             >
               <motion.div
                 animate={{ rotate: 360 }}
                 transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
               >
-                <Crown className="w-6 h-6 text-yellow-400" />
+                <Crown className="w-6 h-6 text-yellow-500" />
               </motion.div>
-              <span className="text-base font-bold text-white tracking-wider uppercase bg-gradient-to-r from-yellow-400 to-orange-400 bg-clip-text text-transparent">
+              <span className="text-base font-bold text-black tracking-wider uppercase">
                 Curated Selection
               </span>
             </motion.div>
@@ -178,9 +178,9 @@ const FeaturedProducts: React.FC<FeaturedProductsProps> = ({ onProductClick }) =
               </div>
               
               <motion.span 
-                className="block text-white relative z-10"
+                className="block text-black relative z-10"
                 whileHover={{ 
-                  textShadow: "0 0 30px rgba(255,255,255,0.8)",
+                  textShadow: "0 0 30px rgba(0,0,0,0.3)",
                   scale: 1.02
                 }}
               >
@@ -217,14 +217,14 @@ const FeaturedProducts: React.FC<FeaturedProductsProps> = ({ onProductClick }) =
               viewport={{ once: true }}
             >
               <motion.p 
-                className="text-xl md:text-2xl leading-relaxed text-white/90 font-medium relative z-10"
+                className="text-xl md:text-2xl leading-relaxed text-gray-700 font-medium relative z-10"
                 initial={{ opacity: 0 }}
                 whileInView={{ opacity: 1 }}
                 transition={{ duration: 1, delay: 0.5 }}
                 viewport={{ once: true }}
               >
                 <motion.span
-                  className="bg-gradient-to-r from-white via-gray-200 to-white bg-clip-text text-transparent"
+                  className="bg-gradient-to-r from-gray-800 via-gray-600 to-gray-800 bg-clip-text text-transparent"
                   animate={{
                     backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"]
                   }}
@@ -247,7 +247,7 @@ const FeaturedProducts: React.FC<FeaturedProductsProps> = ({ onProductClick }) =
             </motion.div>
           </motion.div>
 
-          {/* Epic Browse Button */}
+          {/* Epic Browse Button - Mind-Blowing Hover Animation */}
           <motion.div 
             className="flex justify-center mb-20"
             initial={{ opacity: 0, y: 20 }}
@@ -257,16 +257,18 @@ const FeaturedProducts: React.FC<FeaturedProductsProps> = ({ onProductClick }) =
           >
             <motion.button
               onClick={handleViewMore}
-              className="group relative overflow-hidden flex items-center gap-6 px-12 py-6 bg-gradient-to-r from-purple-600 via-pink-600 to-orange-500 text-white rounded-3xl transition-all duration-500 text-xl font-bold shadow-2xl hover:shadow-purple-500/25"
+              className="group relative overflow-visible flex items-center gap-4 px-12 py-6 bg-gradient-to-r from-white via-gray-50 to-white text-black border-2 border-gray-300 rounded-2xl text-lg font-black tracking-wide shadow-2xl uppercase"
               whileHover={{ 
-                scale: 1.05,
-                boxShadow: "0 25px 50px rgba(168, 85, 247, 0.4)"
+                scale: 1.1,
+                y: -5,
+                rotate: [0, -1, 1, -1, 0],
+                boxShadow: "0 30px 60px rgba(139, 92, 246, 0.4), 0 0 100px rgba(236, 72, 153, 0.3)"
               }}
               whileTap={{ scale: 0.95 }}
             >
-              {/* Animated background */}
-              <motion.div 
-                className="absolute inset-0 bg-gradient-to-r from-orange-500 via-pink-600 to-purple-600 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+              {/* Animated gradient background on hover */}
+              <motion.div
+                className="absolute inset-0 rounded-2xl bg-gradient-to-r from-purple-600 via-pink-600 via-orange-500 to-yellow-500 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
                 animate={{
                   backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"]
                 }}
@@ -281,29 +283,224 @@ const FeaturedProducts: React.FC<FeaturedProductsProps> = ({ onProductClick }) =
               />
               
               {/* Shimmer effect */}
-              <motion.div 
-                className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent transform -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out"
-                initial={{ x: "-100%" }}
-                whileHover={{ x: "100%" }}
-              />
-              
-              <motion.span 
-                className="relative z-10"
-                whileHover={{ x: 5 }}
-                transition={{ type: "spring", stiffness: 400, damping: 17 }}
-              >
-                Browse Collection
-              </motion.span>
-              
               <motion.div
-                whileHover={{ x: 5, rotate: 15 }}
-                transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 overflow-hidden"
               >
-                <ArrowRight size={24} className="relative z-10" />
+                <motion.div
+                  className="absolute inset-0 w-1/3 bg-gradient-to-r from-transparent via-white/40 to-transparent"
+                  animate={{
+                    x: ["-100%", "400%"]
+                  }}
+                  transition={{
+                    duration: 1.5,
+                    repeat: Infinity,
+                    repeatDelay: 2,
+                    ease: "easeInOut"
+                  }}
+                  style={{
+                    transform: "skewX(-20deg)"
+                  }}
+                />
               </motion.div>
               
-              {/* Glow effect */}
-              <div className="absolute inset-0 rounded-3xl bg-gradient-to-r from-purple-600 via-pink-600 to-orange-500 blur-xl opacity-0 group-hover:opacity-50 transition-opacity duration-500 -z-10"></div>
+              {/* Pulsing glow rings */}
+              <motion.div
+                className="absolute inset-0 rounded-2xl border-2 border-purple-400 opacity-0 group-hover:opacity-100"
+                animate={{
+                  scale: [1, 1.2, 1],
+                  opacity: [0, 0.6, 0]
+                }}
+                transition={{
+                  duration: 2,
+                  repeat: Infinity,
+                  ease: "easeOut"
+                }}
+              />
+              <motion.div
+                className="absolute inset-0 rounded-2xl border-2 border-pink-400 opacity-0 group-hover:opacity-100"
+                animate={{
+                  scale: [1, 1.3, 1],
+                  opacity: [0, 0.4, 0]
+                }}
+                transition={{
+                  duration: 2,
+                  repeat: Infinity,
+                  delay: 0.3,
+                  ease: "easeOut"
+                }}
+              />
+              
+              {/* Sparkle icons */}
+              <motion.div
+                className="absolute -top-2 -left-2 opacity-0 group-hover:opacity-100"
+                animate={{
+                  rotate: [0, 180, 360],
+                  scale: [1, 1.2, 1]
+                }}
+                transition={{
+                  duration: 1.5,
+                  repeat: Infinity,
+                  ease: "linear"
+                }}
+              >
+                <Sparkles size={20} className="text-yellow-400" />
+              </motion.div>
+              <motion.div
+                className="absolute -top-2 -right-2 opacity-0 group-hover:opacity-100"
+                animate={{
+                  rotate: [360, 180, 0],
+                  scale: [1, 1.2, 1]
+                }}
+                transition={{
+                  duration: 1.5,
+                  repeat: Infinity,
+                  delay: 0.5,
+                  ease: "linear"
+                }}
+              >
+                <Zap size={20} className="text-purple-400" />
+              </motion.div>
+              <motion.div
+                className="absolute -bottom-2 -left-4 opacity-0 group-hover:opacity-100"
+                animate={{
+                  rotate: [0, -180, -360],
+                  scale: [1, 1.2, 1]
+                }}
+                transition={{
+                  duration: 1.5,
+                  repeat: Infinity,
+                  delay: 0.25,
+                  ease: "linear"
+                }}
+              >
+                <Star size={18} className="text-pink-400 fill-pink-400" />
+              </motion.div>
+              <motion.div
+                className="absolute -bottom-2 -right-4 opacity-0 group-hover:opacity-100"
+                animate={{
+                  rotate: [360, 0, -360],
+                  scale: [1, 1.2, 1]
+                }}
+                transition={{
+                  duration: 1.5,
+                  repeat: Infinity,
+                  delay: 0.75,
+                  ease: "linear"
+                }}
+              >
+                <Sparkles size={18} className="text-orange-400" />
+              </motion.div>
+              
+              {/* Text content */}
+              <motion.span 
+                className="relative z-10 group-hover:text-white transition-colors duration-300 flex items-center gap-3"
+                whileHover={{ x: 3 }}
+                transition={{ type: "spring", stiffness: 400, damping: 17 }}
+              >
+                <motion.span
+                  animate={{
+                    textShadow: [
+                      "0 0 0px rgba(139, 92, 246, 0)",
+                      "0 0 20px rgba(139, 92, 246, 0.8)",
+                      "0 0 0px rgba(139, 92, 246, 0)"
+                    ]
+                  }}
+                  transition={{
+                    duration: 2,
+                    repeat: Infinity,
+                    ease: "easeInOut"
+                  }}
+                >
+                  Browse Collection
+                </motion.span>
+              </motion.span>
+              
+              {/* Arrow with bounce animation */}
+              <motion.div
+                className="relative z-10 group-hover:text-white transition-colors duration-300"
+                animate={{
+                  x: [0, 5, 0]
+                }}
+                transition={{
+                  duration: 1.5,
+                  repeat: Infinity,
+                  ease: "easeInOut"
+                }}
+                whileHover={{
+                  x: 10,
+                  rotate: [0, 15, -15, 15, 0],
+                  scale: 1.2
+                }}
+              >
+                <ArrowRight size={24} />
+              </motion.div>
+              
+              {/* Outer glow effect - subtle pulse to grab attention */}
+              <motion.div
+                className="absolute -inset-4 rounded-3xl bg-gradient-to-r from-purple-600 via-pink-600 to-orange-500 blur-2xl opacity-20 -z-10 group-hover:opacity-60 transition-opacity duration-500"
+                animate={{
+                  scale: [1, 1.15, 1],
+                  opacity: [0.15, 0.25, 0.15]
+                }}
+                transition={{
+                  duration: 3,
+                  repeat: Infinity,
+                  ease: "easeInOut"
+                }}
+              />
+              <motion.div
+                className="absolute -inset-6 rounded-3xl bg-gradient-to-r from-purple-600/50 via-pink-600/50 to-orange-500/50 blur-3xl opacity-0 group-hover:opacity-40 -z-20 transition-opacity duration-500"
+                animate={{
+                  scale: [1, 1.2, 1],
+                  opacity: [0, 0.3, 0]
+                }}
+                transition={{
+                  duration: 2.5,
+                  repeat: Infinity,
+                  delay: 0.5,
+                  ease: "easeInOut"
+                }}
+              />
+              
+              {/* Ripple effect on click */}
+              <motion.div
+                className="absolute inset-0 rounded-2xl bg-white/30"
+                initial={{ scale: 0, opacity: 0.8 }}
+                whileTap={{
+                  scale: 2,
+                  opacity: 0
+                }}
+                transition={{ duration: 0.6 }}
+              />
+              
+              {/* Floating particles background */}
+              {[
+                { left: "10%", top: "20%", delay: 0 },
+                { left: "90%", top: "15%", delay: 0.3 },
+                { left: "5%", top: "80%", delay: 0.6 },
+                { left: "95%", top: "85%", delay: 0.9 },
+                { left: "50%", top: "5%", delay: 1.2 },
+                { left: "48%", top: "95%", delay: 1.5 }
+              ].map((particle, i) => (
+                <motion.div
+                  key={i}
+                  className="absolute pointer-events-none opacity-0 group-hover:opacity-100"
+                  style={{ left: particle.left, top: particle.top }}
+                  animate={{
+                    scale: [0, 1.5, 0],
+                    opacity: [0, 0.8, 0],
+                    y: [-10, 10, -10]
+                  }}
+                  transition={{
+                    duration: 2.5,
+                    repeat: Infinity,
+                    delay: particle.delay,
+                    ease: "easeInOut"
+                  }}
+                >
+                  <div className="w-2 h-2 bg-white rounded-full blur-sm shadow-lg" />
+                </motion.div>
+              ))}
             </motion.button>
           </motion.div>
           
@@ -360,7 +557,7 @@ const FeaturedProducts: React.FC<FeaturedProductsProps> = ({ onProductClick }) =
                       animate={{ scale: 1 }}
                       transition={{ delay: index * 0.1 }}
                     >
-                      <div className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-3 py-1 text-xs font-bold tracking-widest rounded-full flex items-center gap-1">
+                      <div className="bg-black text-white px-3 py-1 text-xs font-bold tracking-widest rounded-full flex items-center gap-1">
                         <Star size={12} />
                         NEW
                       </div>
@@ -410,19 +607,19 @@ const FeaturedProducts: React.FC<FeaturedProductsProps> = ({ onProductClick }) =
                 {/* Product Info */}
                 <div className="mt-6 space-y-3">
                   <div className="flex justify-between items-start">
-                    <h3 className="text-white text-lg font-semibold tracking-wider">{product.name}</h3>
+                    <h3 className="text-black text-lg font-semibold tracking-wider">{product.name}</h3>
                     <motion.p 
-                      className="text-white/90 font-bold text-lg"
-                      animate={{ color: hoveredProduct === product.id ? '#fbbf24' : 'rgba(255, 255, 255, 0.9)' }}
+                      className="text-black font-bold text-lg"
+                      animate={{ color: hoveredProduct === product.id ? '#f59e0b' : 'rgba(0, 0, 0, 1)' }}
                     >
                       R500
                     </motion.p>
                   </div>
-                  <p className="text-white/50 text-sm uppercase tracking-wider">{product.category}</p>
+                  <p className="text-gray-600 text-sm uppercase tracking-wider">{product.category}</p>
                   
                   <motion.button
                     onClick={(e) => handleViewProduct(e, product.id)}
-                    className="mt-4 w-full bg-gradient-to-r from-purple-600/20 to-pink-600/20 border border-purple-400/30 text-white py-4 text-sm tracking-widest hover:from-purple-600 hover:to-pink-600 hover:border-purple-400 transition-all duration-300 flex items-center justify-center gap-2 rounded-xl backdrop-blur-sm group"
+                    className="mt-4 w-full bg-white text-black border border-gray-400 py-4 text-sm tracking-widest hover:bg-gray-100 transition-all duration-300 flex items-center justify-center gap-2 rounded-xl group"
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                   >
@@ -457,7 +654,7 @@ const FeaturedProducts: React.FC<FeaturedProductsProps> = ({ onProductClick }) =
                   }, 100);
                 }}
                 disabled={currentPage === 0}
-                className="flex items-center justify-center w-12 h-12 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-white hover:bg-white/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
+                className="flex items-center justify-center w-12 h-12 rounded-full bg-black/10 backdrop-blur-sm border border-black/20 text-black hover:bg-black/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
                 aria-label="Previous page"
               >
                 <ChevronLeft size={20} />
@@ -481,7 +678,7 @@ const FeaturedProducts: React.FC<FeaturedProductsProps> = ({ onProductClick }) =
                     className={`w-12 h-12 rounded-full transition-all duration-300 ${
                       currentPage === i
                         ? 'bg-white text-black font-semibold'
-                        : 'bg-white/10 backdrop-blur-sm border border-white/20 text-white hover:bg-white/20'
+                        : 'bg-black/10 backdrop-blur-sm border border-black/20 text-black hover:bg-black/20'
                     }`}
                     aria-label={`Go to page ${i + 1}`}
                   >
@@ -503,7 +700,7 @@ const FeaturedProducts: React.FC<FeaturedProductsProps> = ({ onProductClick }) =
                   }, 100);
                 }}
                 disabled={currentPage === totalPages - 1}
-                className="flex items-center justify-center w-12 h-12 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-white hover:bg-white/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
+                className="flex items-center justify-center w-12 h-12 rounded-full bg-black/10 backdrop-blur-sm border border-black/20 text-black hover:bg-black/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
                 aria-label="Next page"
               >
                 <ChevronRight size={20} />

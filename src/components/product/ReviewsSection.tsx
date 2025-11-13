@@ -2,23 +2,37 @@ import React, { useState, useMemo } from 'react';
 import { Review, ReviewStats } from '../../types';
 import ReviewSummary from './ReviewSummary';
 import ReviewCard from './ReviewCard';
+import ReviewForm from './ReviewForm';
+import AuthPrompt from '../auth/AuthPrompt';
+import { reviewService } from '../../services/reviewService';
+import { useAuth } from '../../context/AuthContext';
+import { usePoints } from '../../context/PointsContext';
 
 interface ReviewsSectionProps {
   productId: string;
   reviews: Review[];
   stats: ReviewStats;
   onWriteReview?: () => void;
+  productName?: string;
+  onReviewSubmitted?: (newReview: Review) => void;
 }
 
 const ReviewsSection: React.FC<ReviewsSectionProps> = ({
   productId,
   reviews,
   stats,
-  onWriteReview
+  onWriteReview,
+  productName = 'this product',
+  onReviewSubmitted
 }) => {
+  const { user, isAuthenticated } = useAuth();
+  const { addPoints, getPointsForReview } = usePoints();
   const [filterRating, setFilterRating] = useState<number | null>(null);
   const [sortBy, setSortBy] = useState<'date' | 'rating' | 'helpful'>('date');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+  const [showReviewForm, setShowReviewForm] = useState(false);
+  const [isSubmittingReview, setIsSubmittingReview] = useState(false);
+  const [showAuthPrompt, setShowAuthPrompt] = useState(false);
 
   const filteredAndSortedReviews = useMemo(() => {
     let filtered = reviews;
@@ -63,6 +77,52 @@ const ReviewsSection: React.FC<ReviewsSectionProps> = ({
     }
   };
 
+  const handleWriteReview = () => {
+    if (!isAuthenticated) {
+      setShowAuthPrompt(true);
+      return;
+    }
+    setShowReviewForm(true);
+  };
+
+  const handleReviewSubmit = async (reviewData: any) => {
+    if (!user) return;
+
+    setIsSubmittingReview(true);
+    
+    try {
+      // Submit the review
+      const newReview = await reviewService.submitReview({
+        productId,
+        userId: user.id,
+        userName: `${user.firstName} ${user.lastName}`,
+        userInitials: `${user.firstName[0]}${user.lastName[0]}`,
+        ...reviewData
+      });
+
+      // Calculate and add points
+      const pointsEarned = getPointsForReview(reviewData);
+      addPoints(pointsEarned, 'review', `Review for ${productName}`, {
+        productId,
+        reviewId: newReview.id
+      });
+
+      // Notify parent component
+      if (onReviewSubmitted) {
+        onReviewSubmitted(newReview);
+      }
+
+      // Hide the form
+      setShowReviewForm(false);
+      
+    } catch (error) {
+      console.error('Error submitting review:', error);
+      throw error;
+    } finally {
+      setIsSubmittingReview(false);
+    }
+  };
+
   return (
     <div className="space-y-8">
       {/* Reviews Header */}
@@ -73,10 +133,22 @@ const ReviewsSection: React.FC<ReviewsSectionProps> = ({
         </p>
       </div>
 
+      {/* Review Form */}
+      {showReviewForm && (
+        <div className="mb-8">
+          <ReviewForm
+            productId={productId}
+            productName={productName}
+            onSubmit={handleReviewSubmit}
+            isSubmitting={isSubmittingReview}
+          />
+        </div>
+      )}
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Review Summary */}
         <div className="lg:col-span-1">
-          <ReviewSummary stats={stats} onWriteReview={onWriteReview} />
+          <ReviewSummary stats={stats} onWriteReview={handleWriteReview} />
         </div>
 
         {/* Reviews List */}
@@ -167,6 +239,15 @@ const ReviewsSection: React.FC<ReviewsSectionProps> = ({
           </div>
         </div>
       </div>
+
+      {/* Auth Prompt */}
+      <AuthPrompt
+        isOpen={showAuthPrompt}
+        onClose={() => setShowAuthPrompt(false)}
+        action="write_review"
+        title="Write a Review"
+        description="Log in to share your experience and help other customers"
+      />
     </div>
   );
 };

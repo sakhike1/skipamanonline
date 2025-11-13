@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getFeaturedProducts } from '../data/products';
 import { Product } from '../types';
-import { Filter, X, ArrowRight, Sparkles, Search } from 'lucide-react';
+import { Filter, X, ArrowRight, Sparkles, Search, TrendingUp, Users, ShoppingBag, Star, Zap, Award, Clock } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Skeleton from '../components/ui/LoadingSkeleton';
 import SearchBar from '../components/ui/SearchBar';
@@ -33,59 +33,75 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onClick }) => {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="group relative overflow-hidden rounded-2xl hover:shadow-xl transition-all duration-300"
+      className="group relative flex flex-col overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-slate-900/80 via-slate-900/60 to-slate-950/80 text-white backdrop-blur-2xl shadow-[0_18px_45px_-25px_rgba(15,23,42,0.85)] transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_30px_70px_-25px_rgba(37,99,235,0.55)]"
       onClick={() => onClick(product.id)}
       onMouseEnter={handleImageHover}
       onMouseLeave={() => setCurrentImageIndex(0)}
     >
-      <div className="relative aspect-square overflow-hidden cursor-pointer">
-        {/* Gradient Background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 via-pink-500/15 to-red-500/10 backdrop-blur-sm"></div>
-        
-        {/* Glassmorphism Overlay */}
-        <div className="absolute inset-0 bg-white/5 backdrop-blur-md border border-white/20 rounded-2xl"></div>
-        
-        {/* Image Container */}
-        <div className="relative z-10 h-full">
+      <div className="pointer-events-none absolute inset-0">
+        <div className="absolute -top-24 -right-12 h-52 w-52 rounded-full bg-blue-500/20 blur-3xl opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+        <div className="absolute -bottom-28 -left-14 h-56 w-56 rounded-full bg-purple-500/20 blur-3xl opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.08),_transparent_60%)]" />
+      </div>
+
+      <div className="relative aspect-[4/5] overflow-hidden">
         <img
           src={product.images[currentImageIndex]}
           alt={product.name}
-            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 absolute inset-0 filter grayscale hover:grayscale-0 rounded-2xl"
-          />
-          
-          {/* Always Visible Overlay with Glassmorphism */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-transparent rounded-2xl">
-            <div className="absolute bottom-0 left-0 right-0 p-4">
-              {/* Glassmorphism Content Card */}
-              <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-3">
-                <h3 className="text-white text-lg font-medium mb-1 drop-shadow-lg line-clamp-1 uppercase tracking-wide">{product.name}</h3>
-                <p className="text-white/90 mb-2 font-semibold">R{(product.price / 100).toFixed(2)}</p>
-                <p className="text-white/80 text-sm capitalize mb-3">{product.category}</p>
-        <button
-          onClick={(e) => { e.stopPropagation(); onClick(product.id); }}
-                  className="w-full flex items-center justify-center gap-2 py-2 px-4 rounded-full text-sm font-medium bg-white/20 backdrop-blur-sm text-white border border-white/30 hover:bg-white hover:text-black transition-all duration-300"
+          className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-white/10 via-transparent to-slate-950/80" />
+
+        <motion.div
+          className="absolute top-5 left-5 flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.3em] backdrop-blur-xl"
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
         >
-          View Product
-          <ArrowRight
-            size={16}
-            className="group-hover:translate-x-1 transition-transform duration-300"
-          />
-        </button>
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        {/* Image Counter */}
+          Drop
+          <Sparkles size={14} className="text-white/60" />
+        </motion.div>
+
         {product.images.length > 1 && (
-          <div className="absolute top-3 right-3 bg-black/70 backdrop-blur-sm text-white text-xs px-2 py-1 rounded-full border border-white/20">
+          <div className="absolute top-5 right-5 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-semibold tracking-wide text-white/80 backdrop-blur-xl">
             {currentImageIndex + 1}/{product.images.length}
           </div>
         )}
-        
-        {/* Floating Sparkle Effect */}
-        <div className="absolute top-3 left-3 w-6 h-6 bg-white/20 backdrop-blur-sm rounded-full border border-white/30 flex items-center justify-center">
-          <div className="w-1.5 h-1.5 bg-white rounded-full animate-pulse"></div>
+      </div>
+
+      <div className="relative z-10 -mt-12 px-6 pb-6">
+        <div className="rounded-2xl border border-white/15 bg-white/15 p-6 backdrop-blur-2xl shadow-[0_18px_50px_-35px_rgba(37,99,235,0.65)] transition-colors duration-500 group-hover:border-white/20 group-hover:bg-white/20">
+          <div className="mb-4 flex items-center justify-between text-xs font-semibold uppercase tracking-[0.35em] text-white/60">
+            <span>New Arrival</span>
+            <span className="text-white/40">{product.category}</span>
+          </div>
+
+          <h3 className="text-2xl font-black uppercase tracking-tight text-white drop-shadow-[0_10px_30px_rgba(0,0,0,0.35)]">
+            {product.name}
+          </h3>
+
+          <p className="mt-3 text-sm font-medium text-white/70">
+            Discover elevated streetwear with sculpted silhouettes, premium fabrics, and a finish built for the now.
+          </p>
+
+          <div className="mt-6 flex items-center justify-between">
+            <span className="text-lg font-semibold text-white/90">
+              R{(product.price / 100).toFixed(2)}
+            </span>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onClick(product.id);
+              }}
+              className="group/button relative flex items-center gap-3 overflow-hidden rounded-full border border-white/20 bg-gradient-to-r from-white/30 via-white/20 to-white/10 py-2.5 px-5 text-sm font-semibold uppercase tracking-widest text-white/80 backdrop-blur-xl transition-all duration-500 hover:border-white/40 hover:text-white"
+            >
+              <span className="relative z-10">View Product</span>
+              <span className="relative z-10 flex h-8 w-8 items-center justify-center rounded-full bg-white/20 transition-transform duration-300 group-hover/button:translate-x-1 group-hover/button:bg-white/30">
+                <ArrowRight size={16} />
+              </span>
+              <span className="pointer-events-none absolute inset-0 translate-x-[-110%] bg-gradient-to-r from-white/40 to-white/0 transition-transform duration-500 group-hover/button:translate-x-[10%]" />
+            </button>
+          </div>
         </div>
       </div>
     </motion.div>
@@ -103,22 +119,12 @@ const NewArrivalsPage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [displayedProducts, setDisplayedProducts] = useState<Product[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const [colorIndex, setColorIndex] = useState(0);
+  // Removed colorIndex for black and white theme
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const productsPerPage = 12; // Show 12 products per page
   const maxProducts = 200; // Limit to 200 products
   
-  // Gold glitz color palette
-  const colors = [
-    '#FFD700', // Gold
-    '#FFA500', // Orange
-    '#FFC0CB', // Pink
-    '#FF69B4', // Hot Pink
-    '#DAA520', // Goldenrod
-    '#B8860B', // Dark Goldenrod
-    '#FFB6C1', // Light Pink
-    '#FFDAB9', // Peach
-  ];
+  // Black and white theme - no color animation needed
 
   // Hero images array
   const heroImages = [
@@ -165,13 +171,7 @@ const NewArrivalsPage: React.FC = () => {
   // // Infinite scroll hook
   // const { observerRef, loading: infiniteScrollLoading } = useInfiniteScroll(loadMoreProducts, hasMore);
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setColorIndex((prev) => (prev + 1) % colors.length);
-    }, 2000);
-
-    return () => clearInterval(interval);
-  }, []);
+  // Removed color animation for black and white theme
 
   // Image rotation effect
   useEffect(() => {
@@ -338,13 +338,13 @@ const NewArrivalsPage: React.FC = () => {
 
   return (
     <div>
-      {/* Hero Section: full black bg with padding-top */}
-      <div className="bg-black text-white pt-28 md:pt-32 px-6 md:px-20 pb-20 relative overflow-hidden">
+      {/* Hero Section: gradient bg with padding-top */}
+      <div className="bg-gradient-to-br from-gray-900 via-black to-gray-800 text-white pt-28 md:pt-32 px-6 md:px-20 pb-20 relative overflow-hidden">
         {/* Animated background elements */}
         <div className="absolute inset-0">
-          <div className="absolute top-20 left-10 w-96 h-96 bg-gradient-to-r from-purple-500/20 to-purple-600/20 rounded-full blur-3xl animate-pulse"></div>
-          <div className="absolute bottom-20 right-10 w-80 h-80 bg-gradient-to-r from-purple-400/20 to-purple-500/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
-          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-72 h-72 bg-gradient-to-r from-purple-600/15 to-purple-700/15 rounded-full blur-3xl animate-pulse delay-500"></div>
+          <div className="absolute top-20 left-10 w-96 h-96 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-full blur-3xl animate-pulse"></div>
+          <div className="absolute bottom-20 right-10 w-80 h-80 bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-72 h-72 bg-gradient-to-r from-pink-500/20 to-blue-500/20 rounded-full blur-3xl animate-pulse delay-500"></div>
         </div>
         
         <div className="md:flex md:items-center md:justify-between gap-12 relative z-10">
@@ -355,8 +355,8 @@ const NewArrivalsPage: React.FC = () => {
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.8, ease: "easeOut" }}
             >
-              {/* Enhanced Purple Gradient Overlay */}
-              <div className="absolute inset-0 bg-gradient-to-br from-purple-900/70 via-purple-800/50 to-black/60 z-10"></div>
+              {/* Enhanced Black & White Gradient Overlay */}
+              <div className="absolute inset-0 bg-gradient-to-br from-black/70 via-black/50 to-black/60 z-10"></div>
               
               {/* Rotating Images */}
               <AnimatePresence mode="wait">
@@ -375,12 +375,12 @@ const NewArrivalsPage: React.FC = () => {
               
               {/* Floating badge */}
               <motion.div 
-                className="absolute top-6 left-6 bg-white/10 backdrop-blur-md border border-white/20 rounded-full px-4 py-2 z-20"
+                className="absolute top-6 left-6 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-full px-4 py-2 z-20 shadow-lg"
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.5, duration: 0.6 }}
               >
-                <span className="text-sm font-medium text-white uppercase tracking-wider">New Arrivals</span>
+                <span className="text-sm font-bold text-white uppercase tracking-wider">NEW</span>
               </motion.div>
             </motion.div>
           </div>
@@ -396,25 +396,15 @@ const NewArrivalsPage: React.FC = () => {
               <div className="space-y-4">
                 <motion.h1 
                   className="text-4xl md:text-5xl lg:text-6xl font-black uppercase tracking-tight leading-none"
-                  animate={{
-                    color: colors[colorIndex],
-                    textShadow: [
-                      '0 0 20px rgba(139, 92, 246, 0.6)',
-                      '0 0 40px rgba(139, 92, 246, 0.8)',
-                      '0 0 20px rgba(139, 92, 246, 0.6)',
-                    ],
-                  }}
-                  transition={{
-                    duration: 2,
-                    ease: "easeInOut",
-                    repeat: Infinity,
-                  }}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.8, delay: 0.2 }}
                 >
-                  <span className="block">NEW</span>
-                  <span className="block bg-gradient-to-r from-purple-400 via-purple-500 to-purple-600 bg-clip-text text-transparent">
+                  <span className="block text-white">NEW</span>
+                  <span className="block bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 bg-clip-text text-transparent">
                     SPORT
                   </span>
-                  <span className="block">COLLECTION</span>
+                  <span className="block text-white">COLLECTION</span>
                 </motion.h1>
               </div>
               
@@ -426,26 +416,26 @@ const NewArrivalsPage: React.FC = () => {
                 className="space-y-4"
               >
                 <p className="text-lg md:text-xl text-gray-300 leading-relaxed max-w-lg font-light">
-                  The brand was originally aimed at men's fashion. Starting in <span className="text-purple-400 font-semibold">1995</span> women's fashion was launched in all its dimensions: from the most urban lines to the more casual.
+                  The brand was originally aimed at men's fashion. Starting in <span className="text-white font-semibold">1995</span> women's fashion was launched in all its dimensions: from the most urban lines to the more casual.
                 </p>
                 
                 {/* Feature highlights */}
                 <div className="flex flex-wrap gap-4 pt-4">
-                  <div className="flex items-center gap-2 bg-white/10 backdrop-blur-md border border-white/20 rounded-full px-4 py-2">
-                    <div className="w-2 h-2 bg-purple-400 rounded-full"></div>
-                    <span className="text-sm font-medium text-white">Premium Quality</span>
+                  <div className="flex items-center gap-2 bg-gradient-to-r from-blue-500/20 to-purple-500/20 backdrop-blur-sm text-white rounded-full px-4 py-2 shadow-lg">
+                    <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
+                    <span className="text-sm font-bold text-white">Premium Quality</span>
                   </div>
-                  <div className="flex items-center gap-2 bg-white/10 backdrop-blur-md border border-white/20 rounded-full px-4 py-2">
+                  <div className="flex items-center gap-2 bg-gradient-to-r from-purple-500/20 to-pink-500/20 backdrop-blur-sm text-white rounded-full px-4 py-2 shadow-lg">
                     <div className="w-2 h-2 bg-purple-400 rounded-full"></div>
-                    <span className="text-sm font-medium text-white">Urban Style</span>
+                    <span className="text-sm font-bold text-white">Urban Style</span>
                   </div>
-                  <div className="flex items-center gap-2 bg-white/10 backdrop-blur-md border border-white/20 rounded-full px-4 py-2">
-                    <div className="w-2 h-2 bg-purple-400 rounded-full"></div>
-                    <span className="text-sm font-medium text-white">Casual Comfort</span>
+                  <div className="flex items-center gap-2 bg-gradient-to-r from-pink-500/20 to-blue-500/20 backdrop-blur-sm text-white rounded-full px-4 py-2 shadow-lg">
+                    <div className="w-2 h-2 bg-pink-400 rounded-full"></div>
+                    <span className="text-sm font-bold text-white">Casual Comfort</span>
                   </div>
-                  <div className="flex items-center gap-2 bg-white/10 backdrop-blur-md border border-white/20 rounded-full px-4 py-2">
-                    <div className="w-2 h-2 bg-purple-400 rounded-full"></div>
-                    <span className="text-sm font-medium text-white">{maxProducts} Products</span>
+                  <div className="flex items-center gap-2 bg-gradient-to-r from-blue-500/20 to-purple-500/20 backdrop-blur-sm text-white rounded-full px-4 py-2 shadow-lg">
+                    <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
+                    <span className="text-sm font-bold text-white">200 Products</span>
                   </div>
                 </div>
               </motion.div>
@@ -461,10 +451,9 @@ const NewArrivalsPage: React.FC = () => {
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.98 }}
                   onClick={() => navigate('/shop')}
-                  className="group relative overflow-hidden bg-gradient-to-r from-purple-400 to-purple-600 text-white px-8 py-4 rounded-full font-semibold text-lg tracking-wide hover:shadow-lg hover:shadow-purple-400/30 transition-all duration-300"
+                  className="group relative overflow-hidden bg-white text-black px-8 py-4 rounded-full font-bold text-lg tracking-wide hover:bg-white transition-all duration-300 shadow-lg hover:shadow-xl border-2 border-white"
                 >
-                  <span className="relative z-10">Shop Collection</span>
-                  <div className="absolute inset-0 bg-gradient-to-r from-purple-500 to-purple-700 transform translate-x-full group-hover:translate-x-0 transition-transform duration-300 ease-out"></div>
+                  <span className="relative z-10 group-hover:text-black">Shop Collection</span>
                 </motion.button>
                 
                 <motion.button 
@@ -479,10 +468,9 @@ const NewArrivalsPage: React.FC = () => {
                       window.scrollTo({ top: window.innerHeight, behavior: 'smooth' });
                     }
                   }}
-                  className="group relative overflow-hidden border-2 border-white/30 text-white px-8 py-4 rounded-full font-semibold text-lg tracking-wide hover:border-purple-400 transition-all duration-300"
+                  className="group relative overflow-hidden border-2 border-white text-white px-8 py-4 rounded-full font-bold text-lg tracking-wide hover:bg-white hover:text-black transition-all duration-300 backdrop-blur-sm"
                 >
-                  <span className="relative z-10">View Lookbook</span>
-                  <div className="absolute inset-0 bg-purple-400 transform translate-x-full group-hover:translate-x-0 transition-transform duration-300 ease-out"></div>
+                  <span className="relative z-10 group-hover:text-black">View Lookbook</span>
                 </motion.button>
               </motion.div>
             </motion.div>
@@ -498,7 +486,7 @@ const NewArrivalsPage: React.FC = () => {
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.95 }}
             >
-              <div className="border-2 border-white/30 rounded-full p-4 flex items-center justify-center hover:border-purple-400 transition-all duration-300 group-hover:bg-white/10">
+              <div className="border-2 border-white/30 rounded-full p-4 flex items-center justify-center hover:border-blue-400 transition-all duration-300 group-hover:bg-gradient-to-r group-hover:from-blue-500/20 group-hover:to-purple-500/20">
                 <svg
                   width="24"
                   height="24"
@@ -507,12 +495,12 @@ const NewArrivalsPage: React.FC = () => {
                   strokeWidth="2"
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  className="animate-bounce text-purple-400"
+                  className="animate-bounce text-white"
                 >
                   <path d="M6 9l6 6 6-6" />
                 </svg>
               </div>
-              <span className="block text-sm text-gray-400 mt-2 group-hover:text-purple-400 transition-colors duration-300">Scroll to explore</span>
+              <span className="block text-sm text-gray-400 mt-2 group-hover:text-white transition-colors duration-300">Scroll to explore</span>
             </motion.button>
           </div>
         </div>
@@ -644,12 +632,12 @@ const NewArrivalsPage: React.FC = () => {
                 
                 {/* Promotional Text - Contained within card */}
                 <motion.div 
-                  className="mt-8 p-8 bg-black rounded-lg border border-[#FFD700]/20 min-h-[300px] flex items-center justify-center relative overflow-hidden"
+                  className="mt-8 p-8 bg-gradient-to-br from-gray-900 to-black rounded-lg shadow-xl min-h-[300px] flex items-center justify-center relative overflow-hidden"
                   animate={{
                     boxShadow: [
-                      '0 0 15px rgba(255, 215, 0, 0.2)',
-                      '0 0 30px rgba(255, 215, 0, 0.3)',
-                      '0 0 15px rgba(255, 215, 0, 0.2)',
+                      '0 0 15px rgba(59, 130, 246, 0.3)',
+                      '0 0 30px rgba(147, 51, 234, 0.4)',
+                      '0 0 15px rgba(59, 130, 246, 0.3)',
                     ],
                   }}
                   transition={{
@@ -661,47 +649,286 @@ const NewArrivalsPage: React.FC = () => {
                   {/* Background sparkles */}
                   <div className="absolute inset-0 overflow-hidden">
                     <div className="absolute top-1/4 left-1/4 animate-float-slow">
-                      <Sparkles size={20} className="text-[#FFD700] opacity-40" />
+                      <Sparkles size={20} className="text-white opacity-40" />
                     </div>
                     <div className="absolute bottom-1/3 right-1/3 animate-float">
-                      <Sparkles size={16} className="text-[#FFD700] opacity-40" />
+                      <Sparkles size={16} className="text-white opacity-40" />
                     </div>
                     <div className="absolute top-1/2 right-1/4 animate-float-delayed">
-                      <Sparkles size={24} className="text-[#FFD700] opacity-40" />
+                      <Sparkles size={24} className="text-white opacity-40" />
                     </div>
                   </div>
 
                   <motion.div 
-                    className="text-center space-y-6 relative z-10"
-                    animate={{
-                      color: colors[colorIndex],
-                      textShadow: [
-                        '0 0 10px rgba(255, 215, 0, 0.5)',
-                        '0 0 20px rgba(255, 215, 0, 0.7)',
-                        '0 0 10px rgba(255, 215, 0, 0.5)',
-                      ],
-                    }}
-                    transition={{
-                      duration: 2,
-                      ease: "easeInOut",
-                      repeat: Infinity,
-                    }}
+                    className="text-center space-y-6 relative z-10 text-white"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.8, delay: 0.2 }}
                   >
-                    <p className="text-3xl font-bold tracking-wider">✨ SPECIAL OFFER ✨</p>
-                    <p className="text-xl font-medium">Free shipping on orders over $50</p>
-                    <div className="w-20 h-0.5 bg-[#FFD700] mx-auto rounded-full opacity-50"></div>
-                    <p className="text-lg font-medium">Shop now and save up to 40%</p>
-                    <p className="text-base opacity-80">Limited time offer</p>
+                    <p className="text-3xl font-bold tracking-wider text-white">SPECIAL OFFER</p>
+                    <p className="text-xl font-medium text-white">Free shipping on orders over R500</p>
+                    <div className="w-20 h-0.5 bg-white mx-auto rounded-full opacity-50"></div>
+                    <p className="text-lg font-medium text-white">Shop now and save up to 40%</p>
+                    <p className="text-base opacity-80 text-white">Limited time offer</p>
                     <motion.button
                       onClick={() => navigate('/shop')}
-                      className="w-16 h-16 mx-auto rounded-full border-2 border-[#FFD700] flex items-center justify-center opacity-90 hover:opacity-100 transition-all duration-300 hover:scale-110 hover:bg-[#FFD700]/10"
+                      className="w-16 h-16 mx-auto rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center opacity-90 hover:opacity-100 transition-all duration-300 hover:scale-110 hover:from-blue-600 hover:to-purple-700 shadow-lg"
                       whileHover={{ scale: 1.1 }}
                       whileTap={{ scale: 0.95 }}
                     >
-                      <ArrowRight size={24} className="text-[#FFD700] transform transition-transform duration-300 group-hover:translate-x-1" />
+                      <ArrowRight size={24} className="text-white transform transition-transform duration-300 group-hover:translate-x-1" />
                     </motion.button>
                   </motion.div>
                 </motion.div>
+
+                {/* Mind-Blowing Additional Content Section */}
+                <div className="mt-8 space-y-6">
+                  {/* Animated Stats Cards */}
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.6, delay: 0.3 }}
+                    className="grid grid-cols-2 gap-3"
+                  >
+                    <motion.div
+                      whileHover={{ scale: 1.05, y: -5 }}
+                      className="bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl p-4 text-white shadow-lg relative overflow-hidden"
+                    >
+                      <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full -mr-10 -mt-10"></div>
+                      <div className="relative z-10">
+                        <TrendingUp size={20} className="mb-2" />
+                        <p className="text-2xl font-black">2.5K+</p>
+                        <p className="text-xs opacity-90">Trending Now</p>
+                      </div>
+                    </motion.div>
+
+                    <motion.div
+                      whileHover={{ scale: 1.05, y: -5 }}
+                      className="bg-gradient-to-br from-pink-500 to-red-600 rounded-xl p-4 text-white shadow-lg relative overflow-hidden"
+                    >
+                      <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full -mr-10 -mt-10"></div>
+                      <div className="relative z-10">
+                        <Users size={20} className="mb-2" />
+                        <p className="text-2xl font-black">10K+</p>
+                        <p className="text-xs opacity-90">Happy Customers</p>
+                      </div>
+                    </motion.div>
+                  </motion.div>
+
+                  {/* Trending Products Mini Showcase */}
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.6, delay: 0.4 }}
+                    className="bg-gradient-to-br from-slate-50 to-gray-100 rounded-xl p-4 border border-gray-200"
+                  >
+                    <div className="flex items-center justify-between mb-4">
+                      <h4 className="text-sm font-bold text-gray-900 flex items-center gap-2">
+                        <Zap size={16} className="text-yellow-500" />
+                        Trending Now
+                      </h4>
+                      <span className="text-xs text-gray-500">Hot</span>
+                    </div>
+                    <div className="space-y-3">
+                      {getFeaturedProducts().slice(0, 3).map((product, index) => (
+                        <motion.div
+                          key={product.id}
+                          initial={{ opacity: 0, x: -20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ duration: 0.4, delay: 0.5 + index * 0.1 }}
+                          whileHover={{ scale: 1.02, x: 5 }}
+                          onClick={() => handleProductClick(product.id)}
+                          className="flex items-center gap-3 p-2 rounded-lg bg-white hover:shadow-md transition-all cursor-pointer group"
+                        >
+                          <div className="w-14 h-14 rounded-lg overflow-hidden flex-shrink-0 border-2 border-gray-200 group-hover:border-black transition-colors">
+                            <img
+                              src={product.images[0]}
+                              alt={product.name}
+                              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                            />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-xs font-semibold text-gray-900 truncate group-hover:text-black">
+                              {product.name}
+                            </p>
+                            <div className="flex items-center gap-1 mt-1">
+                              <Star size={10} className="text-yellow-400 fill-yellow-400" />
+                              <span className="text-xs text-gray-600">4.8</span>
+                              <span className="text-xs text-gray-400 ml-1">•</span>
+                              <span className="text-xs font-bold text-gray-900">R{(product.price / 100).toFixed(0)}</span>
+                            </div>
+                          </div>
+                          <ArrowRight size={14} className="text-gray-400 group-hover:text-black group-hover:translate-x-1 transition-all" />
+                        </motion.div>
+                      ))}
+                    </div>
+                  </motion.div>
+
+                  {/* Animated Countdown/Feature Banner */}
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.6, delay: 0.6 }}
+                    className="relative rounded-xl overflow-hidden"
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-r from-purple-600 via-pink-600 to-red-600"></div>
+                    <div 
+                      className="absolute inset-0 opacity-20"
+                      style={{
+                        backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+                        backgroundSize: '60px 60px'
+                      }}
+                    ></div>
+                    <div className="relative p-5 text-white">
+                      <div className="flex items-center gap-2 mb-3">
+                        <Clock size={18} className="animate-pulse" />
+                        <span className="text-sm font-bold uppercase tracking-wider">Flash Sale</span>
+                      </div>
+                      <p className="text-2xl font-black mb-2">Ends Soon!</p>
+                      <p className="text-xs opacity-90 mb-3">Don't miss out on amazing deals</p>
+                      <motion.button
+                        onClick={() => navigate('/shop')}
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        className="w-full bg-white text-purple-600 py-2 px-4 rounded-lg text-xs font-bold hover:bg-gray-100 transition-colors flex items-center justify-center gap-2"
+                      >
+                        <ShoppingBag size={14} />
+                        Shop Now
+                      </motion.button>
+                    </div>
+                  </motion.div>
+
+                  {/* Quality Badge Section */}
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.6, delay: 0.7 }}
+                    className="bg-white border-2 border-gray-200 rounded-xl p-4"
+                  >
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+                        <Award size={20} className="text-white" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-bold text-gray-900">Premium Quality</p>
+                        <p className="text-xs text-gray-600">Guaranteed</p>
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-3 gap-2 text-center">
+                      <div>
+                        <p className="text-lg font-black text-gray-900">100%</p>
+                        <p className="text-xs text-gray-600">Authentic</p>
+                      </div>
+                      <div className="border-l border-r border-gray-200">
+                        <p className="text-lg font-black text-gray-900">24/7</p>
+                        <p className="text-xs text-gray-600">Support</p>
+                      </div>
+                      <div>
+                        <p className="text-lg font-black text-gray-900">Free</p>
+                        <p className="text-xs text-gray-600">Shipping</p>
+                      </div>
+                    </div>
+                  </motion.div>
+
+                  {/* Video Section - Hero Video */}
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.8, delay: 0.8 }}
+                    className="relative rounded-xl overflow-hidden border-2 border-gray-200 shadow-xl group"
+                  >
+                    <div className="relative w-full h-[400px] bg-black">
+                      <video
+                        autoPlay
+                        muted
+                        loop
+                        playsInline
+                        className="absolute inset-0 w-full h-full object-cover"
+                        poster="/images/background1.jpg"
+                      >
+                        <source src="/images/background.mp4" type="video/mp4" />
+                        Your browser does not support the video tag.
+                      </video>
+                      
+                      {/* Gradient Overlay */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/20 group-hover:from-black/70 group-hover:via-black/30 group-hover:to-black/10 transition-all duration-500"></div>
+                      
+                      {/* Content Overlay */}
+                      <div className="absolute inset-0 flex flex-col items-center justify-end p-4 text-white z-10">
+                        <motion.div
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.6, delay: 1 }}
+                          className="text-center space-y-2 w-full"
+                        >
+                          <div className="flex items-center justify-center gap-2 mb-2">
+                            <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
+                            <span className="text-xs font-bold uppercase tracking-wider">New Collection</span>
+                            <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
+                          </div>
+                          <h4 className="text-lg font-black uppercase tracking-tight">Featured Video</h4>
+                          <p className="text-xs opacity-90 max-w-xs mx-auto">Discover our latest styles and trends</p>
+                        </motion.div>
+                      </div>
+
+                      {/* Play Button Overlay (visible on hover) */}
+                      <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-20">
+                        <div className="w-16 h-16 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center border-2 border-white/30">
+                          <div className="w-0 h-0 border-l-[12px] border-l-white border-t-[8px] border-t-transparent border-b-[8px] border-b-transparent ml-1"></div>
+                        </div>
+                      </div>
+
+                      {/* Decorative Elements */}
+                      <div className="absolute top-3 left-3 px-2 py-1 bg-black/60 backdrop-blur-sm rounded-full border border-white/20">
+                        <span className="text-xs font-semibold text-white">LIVE</span>
+                      </div>
+                      <div className="absolute top-3 right-3 px-2 py-1 bg-black/60 backdrop-blur-sm rounded-full">
+                        <span className="text-xs text-white">▶</span>
+                      </div>
+                    </div>
+                  </motion.div>
+
+                  {/* Additional Visual Element */}
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.6, delay: 0.9 }}
+                    className="relative h-24 rounded-xl overflow-hidden bg-gradient-to-br from-cyan-400 via-blue-500 to-purple-600"
+                  >
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <motion.div
+                        animate={{
+                          scale: [1, 1.2, 1],
+                          rotate: [0, 180, 360],
+                        }}
+                        transition={{
+                          duration: 20,
+                          repeat: Infinity,
+                          ease: "linear"
+                        }}
+                        className="w-20 h-20 border-4 border-white/30 rounded-full"
+                      />
+                      <motion.div
+                        animate={{
+                          scale: [1.2, 1, 1.2],
+                          rotate: [360, 180, 0],
+                        }}
+                        transition={{
+                          duration: 15,
+                          repeat: Infinity,
+                          ease: "linear"
+                        }}
+                        className="absolute w-12 h-12 border-4 border-white/50 rounded-full"
+                      />
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <ShoppingBag size={24} className="text-white/80" />
+                      </div>
+                    </div>
+                    <div className="absolute bottom-2 left-2 right-2 text-center">
+                      <p className="text-xs font-bold text-white drop-shadow-lg">Style Collection</p>
+                    </div>
+                  </motion.div>
+                </div>
               </div>
             </aside>
           )}

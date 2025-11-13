@@ -166,7 +166,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Load cart from localStorage if available
   const savedCart = localStorage.getItem('cart');
   const cartVersion = localStorage.getItem('cartVersion');
-  const currentVersion = '2.3'; // Force complete cart reset
+  const currentVersion = '2.4'; // Force complete cart reset - fix price formatting
   
   // Clear cart if version is outdated
   if (cartVersion !== currentVersion) {

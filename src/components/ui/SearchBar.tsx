@@ -8,6 +8,7 @@ interface SearchBarProps {
   onFilterChange?: (filters: any) => void;
   placeholder?: string;
   className?: string;
+  initialValue?: string;
 }
 
 interface SearchSuggestion {
@@ -21,9 +22,10 @@ const SearchBar: React.FC<SearchBarProps> = ({
   onSearch, 
   onFilterChange, 
   placeholder = "Search products, categories, or trends...",
-  className = ""
+  className = "",
+  initialValue = ""
 }) => {
-  const [query, setQuery] = useState('');
+  const [query, setQuery] = useState(initialValue);
   const [suggestions, setSuggestions] = useState<SearchSuggestion[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [isListening, setIsListening] = useState(false);
@@ -34,6 +36,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
   
   const inputRef = useRef<HTMLInputElement>(null);
   const suggestionsRef = useRef<HTMLDivElement>(null);
+  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   // Load recent searches from localStorage
   useEffect(() => {
@@ -43,7 +46,24 @@ const SearchBar: React.FC<SearchBarProps> = ({
     }
   }, []);
 
-  // Generate search suggestions
+  // Update query when initialValue changes
+  useEffect(() => {
+    if (initialValue !== query) {
+      setQuery(initialValue);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialValue]);
+
+  // Cleanup debounce timer on unmount
+  useEffect(() => {
+    return () => {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+    };
+  }, []);
+
+  // Generate search suggestions with improved matching
   const generateSuggestions = (searchQuery: string): SearchSuggestion[] => {
     if (!searchQuery.trim()) {
       return [
@@ -63,43 +83,84 @@ const SearchBar: React.FC<SearchBarProps> = ({
     }
 
     const results: SearchSuggestion[] = [];
-    const queryLower = searchQuery.toLowerCase();
+    const queryLower = searchQuery.toLowerCase().trim();
+    const searchTerms = queryLower.split(/\s+/);
+    const seenIds = new Set<string>();
 
-    // Product matches
-    products.forEach(product => {
-      if (product.name.toLowerCase().includes(queryLower) ||
-          product.category.toLowerCase().includes(queryLower)) {
-        results.push({
-          id: product.id,
-          name: product.name,
-          category: product.category,
-          type: 'product'
-        });
-      }
-    });
+    // Product matches - prioritize exact and starts-with matches
+    products
+      .filter(p => p.isActive)
+      .forEach(product => {
+        const productName = product.name.toLowerCase();
+        const productCategory = product.category.toLowerCase();
+        const productTags = product.tags.map(t => t.toLowerCase());
+        
+        // Check if any search term matches
+        const matches = searchTerms.some(term => 
+          productName.includes(term) ||
+          productCategory.includes(term) ||
+          productTags.some(tag => tag.includes(term))
+        );
+
+        if (matches && !seenIds.has(product.id)) {
+          results.push({
+            id: product.id,
+            name: product.name,
+            category: product.category,
+            type: 'product'
+          });
+          seenIds.add(product.id);
+        }
+      });
 
     // Category matches
     const categories = [...new Set(products.map(p => p.category))];
     categories.forEach(category => {
-      if (category.toLowerCase().includes(queryLower)) {
+      const categoryLower = category.toLowerCase();
+      if (searchTerms.some(term => categoryLower.includes(term)) && !seenIds.has(`category-${category}`)) {
         results.push({
           id: `category-${category}`,
           name: category,
           category: 'Category',
           type: 'category'
         });
+        seenIds.add(`category-${category}`);
       }
     });
 
-    return results.slice(0, 8);
+    // Sort by relevance (exact matches first, then starts-with, then contains)
+    return results
+      .sort((a, b) => {
+        const aName = a.name.toLowerCase();
+        const bName = b.name.toLowerCase();
+        const firstTerm = searchTerms[0];
+        
+        if (aName === firstTerm && bName !== firstTerm) return -1;
+        if (aName !== firstTerm && bName === firstTerm) return 1;
+        if (aName.startsWith(firstTerm) && !bName.startsWith(firstTerm)) return -1;
+        if (!aName.startsWith(firstTerm) && bName.startsWith(firstTerm)) return 1;
+        return aName.localeCompare(bName);
+      })
+      .slice(0, 8);
   };
 
-  // Handle search input changes
+  // Handle search input changes with debouncing
   const handleInputChange = (value: string) => {
     setQuery(value);
-    const newSuggestions = generateSuggestions(value);
-    setSuggestions(newSuggestions);
-    setShowSuggestions(true);
+    
+    // Clear previous timer
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+    }
+    
+    // Debounce suggestions update
+    debounceTimerRef.current = setTimeout(() => {
+      const newSuggestions = generateSuggestions(value);
+      setSuggestions(newSuggestions);
+      if (value.trim() || newSuggestions.length > 0) {
+        setShowSuggestions(true);
+      }
+    }, 200);
   };
 
   // Handle suggestion selection
@@ -216,6 +277,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
             {/* Clear button with modern animation */}
             {query && (
               <motion.button
+                type="button"
                 initial={{ opacity: 0, scale: 0 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0 }}
@@ -225,8 +287,10 @@ const SearchBar: React.FC<SearchBarProps> = ({
                   setQuery('');
                   setSuggestions([]);
                   setShowSuggestions(false);
+                  onSearch(''); // Clear search
                 }}
                 className="p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-full transition-all duration-300"
+                aria-label="Clear search"
               >
                 <X size={18} />
               </motion.button>

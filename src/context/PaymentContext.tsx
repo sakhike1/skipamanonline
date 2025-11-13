@@ -26,59 +26,46 @@ interface PaymentResult {
   success: boolean;
   error?: string;
   paymentUrl?: string;
-  paymentId?: string;
 }
 
 const PaymentContext = createContext<PaymentContextType | undefined>(undefined);
 
-// PayFast configuration
-const PAYFAST_MERCHANT_ID = process.env.REACT_APP_PAYFAST_MERCHANT_ID || 'your_merchant_id';
-const PAYFAST_MERCHANT_KEY = process.env.REACT_APP_PAYFAST_MERCHANT_KEY || 'your_merchant_key';
-const PAYFAST_PASSPHRASE = process.env.REACT_APP_PAYFAST_PASSPHRASE || 'your_passphrase';
+// PayPal configuration
+const PAYPAL_PAYMENT_URL =
+  import.meta.env.VITE_PAYPAL_PAYMENT_URL || 'https://www.paypal.com/ncp/payment/64D66FJ3E455E';
 
 export const PaymentProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [paymentError, setPaymentError] = useState<string | null>(null);
   const [paymentSuccess, setPaymentSuccess] = useState(false);
-  const { cart, clearCart } = useCart();
+  const { cart } = useCart();
 
-  const processPayment = useCallback(async (paymentData: PaymentData): Promise<PaymentResult> => {
+  const processPayment = useCallback(async (_paymentData: PaymentData): Promise<PaymentResult> => {
     setIsProcessing(true);
     setPaymentError(null);
     setPaymentSuccess(false);
 
     try {
-      // Create PayFast payment request
-      const response = await fetch('/api/create-payfast-payment', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          amount: cart.total, // Amount in cents
-          items: cart.items,
-          customer: paymentData,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to create payment');
+      if (cart.items.length === 0) {
+        throw new Error('Your cart is empty. Add items before proceeding to payment.');
       }
 
-      const { paymentUrl, paymentId } = await response.json();
-
-      if (paymentUrl) {
-        // Redirect to PayFast payment page
-        window.location.href = paymentUrl;
-        
-        return {
-          success: true,
-          paymentUrl,
-          paymentId,
-        };
-      } else {
-        throw new Error('Failed to get payment URL');
+      if (!PAYPAL_PAYMENT_URL) {
+        throw new Error('PayPal payment link is not configured.');
       }
+
+      const trimmedUrl = PAYPAL_PAYMENT_URL.trim();
+      const popup = window.open(trimmedUrl, '_blank', 'noopener');
+
+      if (!popup) {
+        throw new Error('Unable to open PayPal checkout. Please allow pop-ups and try again.');
+      }
+
+      setPaymentSuccess(true);
+      return {
+        success: true,
+        paymentUrl: trimmedUrl,
+      };
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Payment failed';
       setPaymentError(errorMessage);

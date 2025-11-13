@@ -13,17 +13,17 @@ const SocialProof: React.FC<SocialProofProps> = ({ className = '' }) => {
   const testimonials = [
     {
       id: 1,
-      name: "Sarah M.",
-      location: "Cape Town",
+      name: "Sarah J.",
+      location: "New York",
       rating: 5,
-      text: "Absolutely love my new t-shirts! The quality is incredible and the designs are so unique. The Premium Cotton Tee feels like a dream to wear - soft, breathable, and perfectly fitted. I love how the unique designs make me stand out while still being comfortable for everyday wear. The ordering process was seamless and delivery was super fast. I've already ordered 3 more in different colors! This brand has definitely become my new favorite.",
-      avatar: "SM",
+      text: "The quality of these t-shirts is incredible! I love how they feel and the designs are so unique. Definitely my new favorite brand.",
+      avatar: "SJ",
       verified: true,
-      purchase: "Premium Cotton Tee",
+      purchase: "Premium Collection",
       date: "2 days ago",
-      helpful: 31,
+      helpful: 32,
       images: ["/images/reviews/sarah-1.jpg"],
-      tags: ["Unique Designs", "Comfortable", "Fast Delivery", "Great Quality"]
+      tags: ["Incredible Quality", "Unique Designs", "Favorite Brand", "Trusted Review"]
     },
     {
       id: 2,
@@ -145,67 +145,225 @@ const SocialProof: React.FC<SocialProofProps> = ({ className = '' }) => {
       </div>
 
       <div className="container mx-auto px-4 relative z-10">
-        {/* Header */}
+        {/* Brief Video Customer Review Section */}
         <motion.div 
-          className="text-center mb-16"
-          initial={{ opacity: 0, y: 30 }}
+          className="relative overflow-hidden rounded-3xl mb-16"
+          initial={{ opacity: 0, y: 40 }}
           whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
+          transition={{ duration: 0.8, delay: 0.1 }}
           viewport={{ once: true }}
         >
-          {/* Trust Badge */}
-          <motion.div 
-            className="inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-purple-100/80 to-pink-100/80 backdrop-blur-sm border-2 border-purple-200/60 rounded-full mb-8 shadow-lg"
-            initial={{ opacity: 0, y: 20, scale: 0.9 }}
-            whileInView={{ opacity: 1, y: 0, scale: 1 }}
-            transition={{ duration: 0.6, delay: 0.1 }}
-            viewport={{ once: true }}
-            whileHover={{ 
-              scale: 1.05,
-              boxShadow: "0 20px 40px rgba(147, 51, 234, 0.2)"
-            }}
-          >
+          {/* Video Background */}
+          <div className="relative w-full h-[60vh] min-h-[500px] rounded-3xl overflow-hidden">
+            <video
+              autoPlay
+              muted
+              loop
+              playsInline
+              className="absolute inset-0 w-full h-full object-cover"
+              poster="/images/background1.jpg"
+            >
+              <source src="/images/background.mp4" type="video/mp4" />
+              Your browser does not support the video tag.
+            </video>
+            
+            {/* Gradient Overlay */}
+            <div className="absolute inset-0 bg-gradient-to-br from-black/80 via-purple-900/60 to-black/90 rounded-3xl"></div>
+            
+            {/* Content */}
+            <div className="absolute inset-0 flex items-center justify-center z-10 px-6">
+              <div className="text-center max-w-4xl w-full">
+                {/* Header Badge */}
+                <motion.div 
+                  className="inline-flex items-center gap-3 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full px-6 py-3 mb-6 shadow-2xl"
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.6, delay: 0.2 }}
+                  viewport={{ once: true }}
+                >
+                  <motion.div
+                    className="w-2 h-2 bg-gradient-to-r from-yellow-400 to-orange-400 rounded-full"
+                    animate={{ 
+                      scale: [1, 1.3, 1],
+                      opacity: [0.7, 1, 0.7]
+                    }}
+                    transition={{ 
+                      duration: 2,
+                      repeat: Infinity,
+                      ease: "easeInOut"
+                    }}
+                  />
+                  <span className="text-sm font-bold text-white uppercase tracking-wider">
+                    Customer Love
+                  </span>
+                  <motion.div
+                    className="w-2 h-2 bg-gradient-to-r from-orange-400 to-pink-400 rounded-full"
+                    animate={{ 
+                      scale: [1, 1.3, 1],
+                      opacity: [0.7, 1, 0.7]
+                    }}
+                    transition={{ 
+                      duration: 2,
+                      repeat: Infinity,
+                      ease: "easeInOut",
+                      delay: 1
+                    }}
+                  />
+                </motion.div>
+
+                {/* Main Title */}
+                <motion.h2 
+                  className="text-4xl md:text-6xl font-black leading-[0.9] tracking-tight mb-4"
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.8, delay: 0.3 }}
+                  viewport={{ once: true }}
+                >
+                  <span className="block text-white drop-shadow-2xl">WHAT OUR</span>
+                  <span className="block bg-gradient-to-r from-yellow-400 via-orange-500 to-pink-500 bg-clip-text text-transparent drop-shadow-2xl">
+                    CUSTOMERS SAY
+                  </span>
+                </motion.h2>
+                
+                <motion.p 
+                  className="text-lg md:text-xl text-gray-200 font-light drop-shadow-lg max-w-3xl mx-auto mb-8"
+                  initial={{ opacity: 0, y: 15 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.8, delay: 0.4 }}
+                  viewport={{ once: true }}
+                >
+                  Join thousands of satisfied customers who trust us for premium quality and exceptional service
+                </motion.p>
+
+                {/* Featured Testimonial */}
+                <motion.div
+                  className="bg-white/10 backdrop-blur-sm rounded-2xl p-8 border border-white/20 shadow-2xl max-w-2xl mx-auto"
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.8, delay: 0.5 }}
+                  viewport={{ once: true }}
+                >
+                  <motion.div
+                    className="text-6xl text-yellow-400 font-serif mb-4"
+                    animate={{ 
+                      scale: [1, 1.1, 1],
+                      opacity: [0.8, 1, 0.8]
+                    }}
+                    transition={{ 
+                      duration: 3,
+                      repeat: Infinity,
+                      ease: "easeInOut"
+                    }}
+                  >
+                    "
+                  </motion.div>
+                  
+                  <blockquote className="text-lg md:text-xl text-white font-medium leading-relaxed mb-6">
+                    "Fast shipping and amazing customer service. The fit is perfect and the material is so comfortable. Highly recommend!"
+                  </blockquote>
+                  
+                  <div className="flex items-center justify-center gap-4">
+                    <div className="w-12 h-12 bg-gradient-to-r from-yellow-400 via-orange-500 to-pink-500 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                      MC
+                    </div>
+                    <div className="text-left">
+                      <div className="text-white font-bold">Michael C.</div>
+                      <div className="text-gray-300 text-sm">Verified Customer • Los Angeles</div>
+                      <div className="text-yellow-400 text-sm font-semibold">Trusted Review</div>
+                    </div>
+                  </div>
+                </motion.div>
+
+                {/* Closing Message */}
+                <motion.div
+                  className="mt-8"
+                  initial={{ opacity: 0, y: 15 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.8, delay: 0.6 }}
+                  viewport={{ once: true }}
+                >
+                  <h3 className="text-2xl md:text-3xl font-bold text-white mb-2">
+                    Join Our Happy Customers
+                  </h3>
+                  <p className="text-gray-300 text-lg">
+                    Experience the quality and service that thousands of customers trust
+                  </p>
+                </motion.div>
+              </div>
+            </div>
+
+            {/* Floating Icons */}
             <motion.div
+              className="absolute top-8 left-8 text-yellow-400/20"
               animate={{ 
-                rotate: [0, 360],
-                scale: [1, 1.1, 1]
+                y: [0, -15, 0],
+                rotate: [0, 10, 0]
               }}
               transition={{ 
-                duration: 8,
+                duration: 4,
                 repeat: Infinity,
                 ease: "easeInOut"
               }}
             >
-              <Star className="w-5 h-5 text-purple-500" />
+              <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+              </svg>
             </motion.div>
-            <span className="text-sm font-semibold text-gray-700 tracking-wider uppercase">
-              Trusted by Thousands
-            </span>
-          </motion.div>
-          
-          {/* Main Title */}
-          <motion.h2 
-            className="text-[clamp(2.5rem,6vw,4rem)] md:text-[clamp(3.5rem,8vw,5rem)] font-black leading-[0.85] tracking-tight mb-6"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-            viewport={{ once: true }}
-          >
-            <span className="block text-gray-800 drop-shadow-sm">LOVED BY</span>
-            <span className="block bg-gradient-to-r from-purple-600 via-pink-500 to-blue-600 bg-clip-text text-transparent drop-shadow-sm">
-              CUSTOMERS
-            </span>
-          </motion.h2>
-          
-          <motion.p 
-            className="max-w-3xl mx-auto text-xl md:text-2xl leading-relaxed text-gray-700 font-light drop-shadow-sm"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.3 }}
-            viewport={{ once: true }}
-          >
-            Join thousands of satisfied customers who trust us for premium quality and exceptional service.
-          </motion.p>
+
+            <motion.div
+              className="absolute top-12 right-12 text-orange-400/20"
+              animate={{ 
+                y: [0, 10, 0],
+                rotate: [0, -10, 0]
+              }}
+              transition={{ 
+                duration: 3,
+                repeat: Infinity,
+                ease: "easeInOut",
+                delay: 1
+              }}
+            >
+              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+              </svg>
+            </motion.div>
+
+            <motion.div
+              className="absolute bottom-12 left-12 text-pink-400/20"
+              animate={{ 
+                y: [0, -8, 0],
+                rotate: [0, 15, 0]
+              }}
+              transition={{ 
+                duration: 5,
+                repeat: Infinity,
+                ease: "easeInOut",
+                delay: 2
+              }}
+            >
+              <svg className="w-7 h-7" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+              </svg>
+            </motion.div>
+
+            <motion.div
+              className="absolute bottom-8 right-8 text-yellow-400/15"
+              animate={{ 
+                y: [0, 12, 0],
+                rotate: [0, -15, 0]
+              }}
+              transition={{ 
+                duration: 6,
+                repeat: Infinity,
+                ease: "easeInOut",
+                delay: 0.5
+              }}
+            >
+              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+              </svg>
+            </motion.div>
+          </div>
         </motion.div>
 
         {/* Stats Section */}
@@ -693,7 +851,7 @@ const SocialProof: React.FC<SocialProofProps> = ({ className = '' }) => {
               >
                 {/* Icon shimmer */}
                 <motion.div
-                  className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700"
+                  className="absolute inset-0  group-hover:translate-x-full transition-transform duration-700"
                 />
                 <feature.icon className="w-8 h-8 text-white relative z-10 drop-shadow-lg" />
               </motion.div>
@@ -719,6 +877,7 @@ const SocialProof: React.FC<SocialProofProps> = ({ className = '' }) => {
             </motion.div>
           ))}
         </motion.div>
+
       </div>
     </section>
   );

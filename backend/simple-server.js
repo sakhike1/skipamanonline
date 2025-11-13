@@ -11,14 +11,14 @@ const server = createServer(app);
 // Initialize Socket.IO
 const io = new Server(server, {
   cors: {
-    origin: "http://localhost:5173",
+    origin: ["http://localhost:5173", "http://localhost:5174", "http://localhost:5175", "http://localhost:5176", "http://localhost:5177", "http://localhost:5178"],
     methods: ["GET", "POST"]
   }
 });
 
 // CORS configuration
 app.use(cors({
-  origin: 'http://localhost:5173',
+  origin: ["http://localhost:5173", "http://localhost:5174", "http://localhost:5175", "http://localhost:5176", "http://localhost:5177", "http://localhost:5178"],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
@@ -83,6 +83,12 @@ let users = [
 // Sample orders data
 let orders = [];
 let notifications = [];
+
+// PayFast configuration
+const PAYFAST_MERCHANT_ID = process.env.PAYFAST_MERCHANT_ID || '13072591';
+const PAYFAST_MERCHANT_KEY = process.env.PAYFAST_MERCHANT_KEY || 'zxqpyqbjxifvg';
+const PAYFAST_PASSPHRASE = process.env.PAYFAST_PASSPHRASE || '45SkipamanTs';
+const PAYFAST_URL = process.env.PAYFAST_URL || 'https://www.payfast.co.za/eng/process';
 
 // Health check endpoint
 app.get('/health', (req, res) => {
@@ -235,6 +241,91 @@ app.get('/api/notifications/unread-count', (req, res) => {
     success: true,
     data: { unreadCount }
   });
+});
+
+// PayFast payment routes
+app.post('/api/create-payfast-payment', (req, res) => {
+  try {
+    const { amount, items, customer } = req.body;
+
+    // Generate unique payment ID
+    const paymentId = `PF_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
+    // Create item description
+    const itemDescription = items.map(item => `${item.name} (${item.quantity}x)`).join(', ');
+
+    // PayFast payment data
+    const paymentData = {
+      merchant_id: PAYFAST_MERCHANT_ID,
+      merchant_key: PAYFAST_MERCHANT_KEY,
+      return_url: `${req.protocol}://${req.get('host')}/payment/success`,
+      cancel_url: `${req.protocol}://${req.get('host')}/payment/cancel`,
+      notify_url: `${req.protocol}://${req.get('host')}/api/payfast-notify`,
+      name_first: customer.customerName.split(' ')[0] || '',
+      name_last: customer.customerName.split(' ').slice(1).join(' ') || '',
+      email_address: customer.customerEmail,
+      cell_number: customer.customerPhone || '',
+      m_payment_id: paymentId,
+      amount: (amount / 100).toFixed(2), // Convert cents to Rands
+      item_name: itemDescription,
+      item_description: `Order from SkipaMan Store - ${itemDescription}`,
+    };
+
+    // Generate signature
+    const signatureString = Object.keys(paymentData)
+      .sort()
+      .map(key => `${key}=${encodeURIComponent(paymentData[key])}`)
+      .join('&') + `&passphrase=${encodeURIComponent(PAYFAST_PASSPHRASE)}`;
+
+    // Simple MD5 hash (in production, use crypto library)
+    const crypto = require('crypto');
+    const signature = crypto.createHash('md5').update(signatureString).digest('hex');
+
+    // Add signature to payment data
+    paymentData.signature = signature;
+
+    // Create payment URL
+    const paymentUrl = `${PAYFAST_URL}?${new URLSearchParams(paymentData).toString()}`;
+
+    res.json({
+      success: true,
+      paymentUrl,
+      paymentId,
+      message: 'Payment created successfully'
+    });
+
+  } catch (error) {
+    console.error('PayFast payment creation error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to create payment',
+      error: error.message
+    });
+  }
+});
+
+// PayFast webhook handler
+app.post('/api/payfast-notify', (req, res) => {
+  try {
+    const paymentData = req.body;
+    console.log('PayFast webhook received:', paymentData);
+
+    // Update order status based on payment result
+    if (paymentData.payment_status === 'COMPLETE') {
+      // Find and update order
+      const orderIndex = orders.findIndex(o => o.paymentId === paymentData.m_payment_id);
+      if (orderIndex !== -1) {
+        orders[orderIndex].status = 'paid';
+        orders[orderIndex].paymentStatus = 'completed';
+        orders[orderIndex].paidAt = new Date().toISOString();
+      }
+    }
+
+    res.status(200).send('OK');
+  } catch (error) {
+    console.error('PayFast webhook error:', error);
+    res.status(500).send('Error');
+  }
 });
 
 // Admin routes

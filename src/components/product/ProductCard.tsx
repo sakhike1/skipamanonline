@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import { Product } from '../../types';
-import { Heart } from 'lucide-react';
 import { Button } from '../ui/Button';
-import { useWishlist } from '../../context/WishlistContext';
+import WishlistButton from './WishlistButton';
 
 interface ProductCardProps {
   product: Product;
@@ -12,8 +11,6 @@ interface ProductCardProps {
 const ProductCard: React.FC<ProductCardProps> = ({ product, onClick }) => {
   const [, setIsHovered] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const { isInWishlist, addToWishlist, removeFromWishlist } = useWishlist();
-  const isFavorite = isInWishlist(product.id);
   
   const formatPrice = (price: number) => {
     return `R${(price / 100).toFixed(2)}`;
@@ -31,14 +28,6 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onClick }) => {
     setCurrentImageIndex(0);
   };
   
-  const toggleFavorite = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (isFavorite) {
-      removeFromWishlist(product.id);
-    } else {
-      addToWishlist(product.id);
-    }
-  };
 
   const handleViewProduct = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -59,13 +48,14 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onClick }) => {
           className="h-full w-full object-cover object-center transition-transform duration-700 group-hover:scale-105"
         />
         
-        <button 
-          className={`absolute top-4 right-4 p-2 bg-white/10 backdrop-blur-sm transition-all ${isFavorite ? 'text-pink-500' : 'text-white'}`}
-          onClick={toggleFavorite}
-          aria-label={isFavorite ? "Remove from favorites" : "Add to favorites"}
-        >
-          <Heart size={20} fill={isFavorite ? "currentColor" : "none"} />
-        </button>
+        <div className="absolute top-4 right-4">
+          <WishlistButton 
+            product={product} 
+            size="md" 
+            variant="icon"
+            className="bg-white/10 backdrop-blur-sm hover:bg-white/20"
+          />
+        </div>
       </div>
       
       <div className="mt-6 space-y-2">

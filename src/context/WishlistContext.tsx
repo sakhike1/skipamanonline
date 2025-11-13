@@ -1,121 +1,130 @@
-import React, { createContext, useContext, useReducer, useEffect } from 'react';
-import { Wishlist, WishlistItem } from '../types';
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { useAuth } from './AuthContext';
+import { Product } from '../types';
 
-// Initialize empty wishlist
-const initialWishlist: Wishlist = {
-  items: [],
-};
+interface WishlistItem {
+  id: string;
+  product: Product;
+  addedAt: Date;
+}
 
-// Action types
-type WishlistAction =
-  | { type: 'ADD_ITEM'; payload: { productId: string } }
-  | { type: 'REMOVE_ITEM'; payload: { productId: string } }
-  | { type: 'CLEAR_WISHLIST' };
-
-// Context setup
-type WishlistContextType = {
-  wishlist: Wishlist;
-  addToWishlist: (productId: string) => void;
+interface WishlistContextType {
+  wishlist: WishlistItem[];
+  addToWishlist: (product: Product) => void;
   removeFromWishlist: (productId: string) => void;
-  clearWishlist: () => void;
   isInWishlist: (productId: string) => boolean;
-  wishlistCount: number;
-};
+  clearWishlist: () => void;
+  getWishlistCount: () => number;
+}
 
 const WishlistContext = createContext<WishlistContextType | undefined>(undefined);
 
-// Reducer function
-const wishlistReducer = (state: Wishlist, action: WishlistAction): Wishlist => {
-  switch (action.type) {
-    case 'ADD_ITEM': {
-      const { productId } = action.payload;
-      
-      // Check if item already exists in wishlist
-      const existingItem = state.items.find(item => item.productId === productId);
-      
-      if (existingItem) {
-        return state; // Item already exists
-      }
-      
-      // Add new item
-      const newItem: WishlistItem = {
-        productId,
-        addedAt: new Date().toISOString(),
-      };
-      
-      return {
-        ...state,
-        items: [...state.items, newItem],
-      };
-    }
-    
-    case 'REMOVE_ITEM': {
-      const { productId } = action.payload;
-      return {
-        ...state,
-        items: state.items.filter(item => item.productId !== productId),
-      };
-    }
-    
-    case 'CLEAR_WISHLIST':
-      return initialWishlist;
-      
-    default:
-      return state;
-  }
-};
-
-// Provider component
-export const WishlistProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  // Load wishlist from localStorage if available
-  const savedWishlist = localStorage.getItem('wishlist');
-  const initialState = savedWishlist ? JSON.parse(savedWishlist) : initialWishlist;
-  
-  const [wishlist, dispatch] = useReducer(wishlistReducer, initialState);
-  
-  // Save wishlist to localStorage whenever it changes
-  useEffect(() => {
-    localStorage.setItem('wishlist', JSON.stringify(wishlist));
-  }, [wishlist]);
-  
-  // Wishlist actions
-  const addToWishlist = (productId: string) => {
-    dispatch({ type: 'ADD_ITEM', payload: { productId } });
-  };
-  
-  const removeFromWishlist = (productId: string) => {
-    dispatch({ type: 'REMOVE_ITEM', payload: { productId } });
-  };
-  
-  const clearWishlist = () => {
-    dispatch({ type: 'CLEAR_WISHLIST' });
-  };
-  
-  const isInWishlist = (productId: string): boolean => {
-    return wishlist.items.some(item => item.productId === productId);
-  };
-  
-  const wishlistCount = wishlist.items.length;
-  
-  return (
-    <WishlistContext.Provider value={{ 
-      wishlist, 
-      addToWishlist, 
-      removeFromWishlist, 
-      clearWishlist, 
-      isInWishlist,
-      wishlistCount 
-    }}>
-      {children}
-    </WishlistContext.Provider>
-  );
-};
-
-// Custom hook to use wishlist context
-export const useWishlist = (): WishlistContextType => {
+export const useWishlist = () => {
   const context = useContext(WishlistContext);
   if (!context) {
     throw new Error('useWishlist must be used within a WishlistProvider');
   }
   return context;
-}; 
+};
+
+interface WishlistProviderProps {
+  children: ReactNode;
+}
+
+export const WishlistProvider: React.FC<WishlistProviderProps> = ({ children }) => {
+  const { user } = useAuth();
+  const [wishlist, setWishlist] = useState<WishlistItem[]>([]);
+
+  // Load wishlist from localStorage
+  useEffect(() => {
+    if (user) {
+      const savedWishlist = localStorage.getItem(`wishlist_${user.id}`);
+      if (savedWishlist) {
+        try {
+          const parsedWishlist = JSON.parse(savedWishlist);
+          // Convert date strings back to Date objects
+          const wishlistWithDates = parsedWishlist.map((item: any) => ({
+            ...item,
+            addedAt: new Date(item.addedAt)
+          }));
+          setWishlist(wishlistWithDates);
+        } catch (error) {
+          console.error('Error parsing wishlist from localStorage:', error);
+        }
+      }
+    } else {
+      // For non-authenticated users, use a temporary wishlist
+      const tempWishlist = localStorage.getItem('temp_wishlist');
+      if (tempWishlist) {
+        try {
+          const parsedWishlist = JSON.parse(tempWishlist);
+          const wishlistWithDates = parsedWishlist.map((item: any) => ({
+            ...item,
+            addedAt: new Date(item.addedAt)
+          }));
+          setWishlist(wishlistWithDates);
+        } catch (error) {
+          console.error('Error parsing temp wishlist from localStorage:', error);
+        }
+      }
+    }
+  }, [user]);
+
+  // Save wishlist to localStorage whenever it changes
+  useEffect(() => {
+    if (user) {
+      localStorage.setItem(`wishlist_${user.id}`, JSON.stringify(wishlist));
+    } else {
+      localStorage.setItem('temp_wishlist', JSON.stringify(wishlist));
+    }
+  }, [wishlist, user]);
+
+  const addToWishlist = (product: Product) => {
+    setWishlist(prev => {
+      // Check if product is already in wishlist
+      const existingItem = prev.find(item => item.product.id === product.id);
+      if (existingItem) {
+        return prev; // Don't add duplicates
+      }
+
+      const newItem: WishlistItem = {
+        id: `${product.id}_${Date.now()}`,
+        product,
+        addedAt: new Date()
+      };
+
+      return [...prev, newItem];
+    });
+  };
+
+  const removeFromWishlist = (productId: string) => {
+    setWishlist(prev => prev.filter(item => item.product.id !== productId));
+  };
+
+  const isInWishlist = (productId: string) => {
+    return wishlist.some(item => item.product.id === productId);
+  };
+
+  const clearWishlist = () => {
+    setWishlist([]);
+  };
+
+  const getWishlistCount = () => {
+    return wishlist.length;
+  };
+
+  const value: WishlistContextType = {
+    wishlist,
+    addToWishlist,
+    removeFromWishlist,
+    isInWishlist,
+    clearWishlist,
+    getWishlistCount
+  };
+
+  return (
+    <WishlistContext.Provider value={value}>
+      {children}
+    </WishlistContext.Provider>
+  );
+};

@@ -23,7 +23,8 @@ import {
   Send,
   Palette,
   Mail,
-  X
+  X,
+  ArrowRight
 } from 'lucide-react';
 
 interface DashboardStats {
@@ -929,6 +930,37 @@ const AdminDashboard: React.FC = () => {
             </motion.div>
           </div>
         )}
+
+        {/* CSM Dashboard Card */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 }}
+          className="mb-8"
+        >
+          <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 text-white">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-4">
+                <div className="p-3 bg-white/20 rounded-xl">
+                  <MessageSquare className="h-8 w-8 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold">Customer Service Management</h3>
+                  <p className="text-blue-100">Manage support tickets, customer requests, and service quality</p>
+                </div>
+              </div>
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => window.location.href = '/csm'}
+                className="bg-white text-blue-600 px-6 py-3 rounded-lg font-semibold hover:bg-blue-50 transition-colors duration-300 flex items-center space-x-2"
+              >
+                <span>Open CSM Dashboard</span>
+                <ArrowRight className="h-4 w-4" />
+              </motion.button>
+            </div>
+          </div>
+        </motion.div>
 
         {/* Orders Section */}
         <motion.div 

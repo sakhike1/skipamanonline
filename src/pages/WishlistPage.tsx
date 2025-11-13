@@ -1,27 +1,79 @@
 import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { 
+  Heart, 
+  ArrowLeft, 
+  ShoppingBag, 
+  Trash2, 
+  Eye, 
+  Search,
+  Grid,
+  List,
+  X,
+  Star,
+  Clock,
+  Tag
+} from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useWishlist } from '../context/WishlistContext';
 import { useCart } from '../context/CartContext';
-import { getProductById } from '../data/products';
-import ProductCard from '../components/product/ProductCard';
-import { Heart, ShoppingBag, ArrowLeft, Sparkles, Star, TrendingUp, Zap, CheckCircle } from 'lucide-react';
-import { Link } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useAuth } from '../context/AuthContext';
+import { Product } from '../types';
+import AuthPrompt from '../components/auth/AuthPrompt';
 
 const WishlistPage: React.FC = () => {
-  const { wishlist, removeFromWishlist, clearWishlist } = useWishlist();
+  const { wishlist, removeFromWishlist, clearWishlist, getWishlistCount } = useWishlist();
   const { addToCart } = useCart();
-  const [addAllSuccess, setAddAllSuccess] = useState(false);
-  const [clearSuccess, setClearSuccess] = useState(false);
+  const { isAuthenticated } = useAuth();
+  const navigate = useNavigate();
+  
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [sortBy, setSortBy] = useState<'date' | 'name' | 'price'>('date');
+  const [filterCategory, setFilterCategory] = useState<string>('all');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [showAuthPrompt, setShowAuthPrompt] = useState(false);
+  const [addingToCart, setAddingToCart] = useState<string | null>(null);
 
-  const wishlistProducts = wishlist.items
-    .map(item => getProductById(item.productId))
-    .filter((product): product is NonNullable<typeof product> => product !== undefined);
+  // Get unique categories from wishlist items
+  const categories = ['all', ...new Set(wishlist.map(item => item.product.category))];
 
-  const handleAddToCart = (productId: string) => {
-    const product = getProductById(productId);
-    if (product) {
-      // Add with default size and color
-      addToCart(productId, product.sizes[0], product.colors[0], 1);
+  // Filter and sort wishlist items
+  const filteredWishlist = wishlist
+    .filter(item => {
+      const matchesSearch = item.product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                           item.product.description.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesCategory = filterCategory === 'all' || item.product.category === filterCategory;
+      return matchesSearch && matchesCategory;
+    })
+    .sort((a, b) => {
+      switch (sortBy) {
+        case 'name':
+          return a.product.name.localeCompare(b.product.name);
+        case 'price':
+          return a.product.price - b.product.price;
+        case 'date':
+        default:
+          return b.addedAt.getTime() - a.addedAt.getTime();
+      }
+    });
+
+  const handleAddToCart = async (product: Product) => {
+    if (!isAuthenticated) {
+      setShowAuthPrompt(true);
+      return;
+    }
+
+    setAddingToCart(product.id);
+    try {
+      // Use default size and color from product
+      const defaultSize = product.sizes[0] || 'M';
+      const defaultColor = product.colors[0] || { name: 'Default', value: '#000000' };
+      addToCart(product.id, defaultSize, defaultColor, 1);
+      // You could add a toast notification here
+    } catch (error) {
+      console.error('Error adding to cart:', error);
+    } finally {
+      setAddingToCart(null);
     }
   };
 
@@ -29,161 +81,98 @@ const WishlistPage: React.FC = () => {
     removeFromWishlist(productId);
   };
 
-  if (wishlistProducts.length === 0) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900/20 to-slate-900 pt-20 relative overflow-hidden">
-        {/* Enhanced animated background elements */}
-        <div className="absolute inset-0 overflow-hidden">
-          <motion.div
-            className="absolute top-20 left-10 text-purple-500/30"
-            animate={{ 
-              y: [0, -30, 0],
-              rotate: [0, 15, -15, 0],
-              scale: [1, 1.3, 1]
-            }}
-            transition={{ 
-              duration: 6, 
-              repeat: Infinity, 
-              ease: "easeInOut" 
-            }}
-          >
-            <Heart size={80} fill="currentColor" />
-          </motion.div>
-          <motion.div
-            className="absolute top-40 right-20 text-purple-400/25"
-            animate={{ 
-              y: [0, -25, 0],
-              rotate: [0, -20, 20, 0],
-              scale: [1, 1.2, 1]
-            }}
-            transition={{ 
-              duration: 7, 
-              repeat: Infinity, 
-              ease: "easeInOut",
-              delay: 1
-            }}
-          >
-            <Heart size={60} fill="currentColor" />
-          </motion.div>
-          <motion.div
-            className="absolute bottom-40 left-20 text-purple-300/20"
-            animate={{ 
-              y: [0, -35, 0],
-              rotate: [0, 25, -25, 0],
-              scale: [1, 1.4, 1]
-            }}
-            transition={{ 
-              duration: 8, 
-              repeat: Infinity, 
-              ease: "easeInOut",
-              delay: 2
-            }}
-          >
-            <Heart size={100} fill="currentColor" />
-          </motion.div>
-          
-          {/* Floating sparkles */}
-          <motion.div
-            className="absolute top-1/4 right-1/4 text-purple-400/40"
-            animate={{ 
-              y: [0, -20, 0],
-              rotate: [0, 360],
-              scale: [1, 1.2, 1]
-            }}
-            transition={{ 
-              duration: 4, 
-              repeat: Infinity, 
-              ease: "easeInOut" 
-            }}
-          >
-            <Sparkles size={30} />
-          </motion.div>
-          <motion.div
-            className="absolute bottom-1/3 right-1/3 text-purple-300/30"
-            animate={{ 
-              y: [0, -15, 0],
-              rotate: [0, -360],
-              scale: [1, 1.1, 1]
-            }}
-            transition={{ 
-              duration: 5, 
-              repeat: Infinity, 
-              ease: "easeInOut",
-              delay: 1.5
-            }}
-          >
-            <Star size={25} />
-          </motion.div>
-        </div>
+  const handleClearWishlist = () => {
+    if (window.confirm('Are you sure you want to clear your entire wishlist?')) {
+      clearWishlist();
+    }
+  };
 
-        <div className="container mx-auto px-4 relative z-10">
-          <div className="text-center">
-            <motion.div 
-              className="w-32 h-32 mx-auto mb-8 bg-gradient-to-br from-purple-500 via-purple-600 to-purple-700 rounded-full flex items-center justify-center shadow-2xl shadow-purple-500/40 relative overflow-hidden"
-              animate={{ 
-                scale: [1, 1.1, 1],
-                boxShadow: [
-                  "0 0 30px rgba(168, 85, 247, 0.4)",
-                  "0 0 60px rgba(168, 85, 247, 0.8)",
-                  "0 0 30px rgba(168, 85, 247, 0.4)"
-                ]
-              }}
-              transition={{ 
-                duration: 3, 
-                repeat: Infinity, 
-                ease: "easeInOut" 
-              }}
-            >
-              {/* Shimmer effect */}
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full animate-shimmer"></div>
-              
-              <motion.div
-                animate={{ 
-                  scale: [1, 1.3, 1],
-                  rotate: [0, 10, -10, 0]
-                }}
-                transition={{ 
-                  duration: 4, 
-                  repeat: Infinity, 
-                  ease: "easeInOut" 
-                }}
-              >
-                <Heart className="text-white" size={50} fill="currentColor" />
-              </motion.div>
-            </motion.div>
-            
-            <motion.h1 
-              className="text-4xl md:text-6xl font-black text-white mb-6 bg-gradient-to-r from-purple-400 via-pink-400 to-purple-400 bg-clip-text text-transparent"
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8 }}
-            >
-              Your Wishlist is Empty
-            </motion.h1>
-            
-            <motion.p 
-              className="text-xl text-gray-300 mb-10 max-w-2xl mx-auto leading-relaxed"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.2 }}
-            >
-              Start building your wishlist by browsing our collection and adding items you love.
-              Create your perfect collection with our premium designs.
-            </motion.p>
-            
+  const formatDate = (date: Date) => {
+    return new Intl.DateTimeFormat('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric'
+    }).format(date);
+  };
+
+  if (wishlist.length === 0) {
+    return (
+      <div className="min-h-screen relative overflow-hidden">
+        {/* Background Image */}
+        <div 
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+          style={{
+            backgroundImage: 'url(/images/background1.jpg)',
+            backgroundAttachment: 'fixed'
+          }}
+        >
+          <div className="absolute inset-0 bg-black/40"></div>
+        </div>
+        
+        {/* Content */}
+        <div className="relative z-10">
+          {/* Header */}
+          <div className="bg-black/20 backdrop-blur-sm border-b border-white/20">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <Link
+                    to="/"
+                    className="flex items-center gap-2 text-white/80 hover:text-white transition-colors duration-300"
+                  >
+                    <ArrowLeft size={20} />
+                    <span>Back to Home</span>
+                  </Link>
+                  <div className="h-6 w-px bg-white/30"></div>
+                  <h1 className="text-2xl font-bold text-white">My Wishlist</h1>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Empty State */}
+          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.4 }}
+              transition={{ duration: 0.8 }}
+              className="text-center"
             >
-              <Link
-                to="/shop"
-                className="inline-flex items-center space-x-3 bg-gradient-to-r from-purple-500 via-purple-600 to-purple-700 text-white px-8 py-4 rounded-full hover:from-purple-600 hover:via-purple-700 hover:to-purple-800 transition-all duration-300 shadow-2xl hover:shadow-purple-500/40 font-semibold text-lg group"
+              <motion.div 
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ delay: 0.3, type: "spring", stiffness: 200 }}
+                className="w-32 h-32 mx-auto mb-8 bg-white/10 backdrop-blur-lg rounded-full flex items-center justify-center border border-white/20"
               >
-                <ArrowLeft size={24} className="group-hover:-translate-x-1 transition-transform duration-300" />
-                <span>Start Shopping</span>
-                <Zap size={20} className="group-hover:scale-110 transition-transform duration-300" />
-              </Link>
+                <Heart size={48} className="text-white" />
+              </motion.div>
+              
+              <h2 className="text-4xl font-bold text-white mb-6">
+                Your Wishlist is Empty
+              </h2>
+              
+              <p className="text-xl text-white/80 mb-10 max-w-lg mx-auto leading-relaxed">
+                Start building your wishlist by browsing our amazing collection and saving items you love. 
+                Your perfect style awaits.
+              </p>
+              
+              <div className="flex flex-col sm:flex-row gap-6 justify-center">
+                <Link
+                  to="/shop"
+                  className="inline-flex items-center gap-3 bg-white text-black px-8 py-4 rounded-2xl font-bold hover:bg-white/90 transition-all duration-300 transform hover:scale-105 shadow-2xl"
+                >
+                  <ShoppingBag size={20} />
+                  Browse Products
+                </Link>
+                
+                <Link
+                  to="/lookbook"
+                  className="inline-flex items-center gap-3 bg-white/10 backdrop-blur-lg text-white px-8 py-4 rounded-2xl font-bold border border-white/30 hover:bg-white/20 transition-all duration-300 transform hover:scale-105"
+                >
+                  <Heart size={20} />
+                  View Lookbook
+                </Link>
+              </div>
             </motion.div>
           </div>
         </div>
@@ -192,494 +181,336 @@ const WishlistPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900/20 to-slate-900 pt-20 relative overflow-hidden">
-      {/* Enhanced animated background elements */}
-      <div className="absolute inset-0 overflow-hidden">
-        <motion.div
-          className="absolute top-10 right-10 text-purple-500/15"
-          animate={{ 
-            y: [0, -40, 0],
-            rotate: [0, 20, -20, 0],
-            scale: [1, 1.2, 1]
-          }}
-          transition={{ 
-            duration: 10, 
-            repeat: Infinity, 
-            ease: "easeInOut" 
-          }}
-        >
-          <Heart size={120} fill="currentColor" />
-        </motion.div>
-        <motion.div
-          className="absolute bottom-20 left-10 text-purple-400/12"
-          animate={{ 
-            y: [0, -30, 0],
-            rotate: [0, -25, 25, 0],
-            scale: [1, 1.3, 1]
-          }}
-          transition={{ 
-            duration: 12, 
-            repeat: Infinity, 
-            ease: "easeInOut",
-            delay: 3
-          }}
-        >
-          <Heart size={140} fill="currentColor" />
-        </motion.div>
-        
-        {/* Floating elements */}
-        <motion.div
-          className="absolute top-1/3 left-1/4 text-purple-400/20"
-          animate={{ 
-            y: [0, -25, 0],
-            rotate: [0, 360],
-            scale: [1, 1.2, 1]
-          }}
-          transition={{ 
-            duration: 6, 
-            repeat: Infinity, 
-            ease: "easeInOut" 
-          }}
-        >
-          <Sparkles size={40} />
-        </motion.div>
-        <motion.div
-          className="absolute bottom-1/4 right-1/4 text-purple-300/25"
-          animate={{ 
-            y: [0, -20, 0],
-            rotate: [0, -360],
-            scale: [1, 1.1, 1]
-          }}
-          transition={{ 
-            duration: 7, 
-            repeat: Infinity, 
-            ease: "easeInOut",
-            delay: 2
-          }}
-        >
-          <Star size={35} />
-        </motion.div>
+    <div className="min-h-screen relative overflow-hidden">
+      {/* Background Image */}
+      <div 
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+        style={{
+          backgroundImage: 'url(/images/background1.jpg)',
+          backgroundAttachment: 'fixed'
+        }}
+      >
+        <div className="absolute inset-0 bg-black/30"></div>
       </div>
-
-      <div className="container mx-auto px-4 relative z-10">
-        {/* Enhanced Header */}
-        <motion.div 
-          className="flex items-center justify-between mb-12"
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-        >
-          <div>
-            <motion.h1 
-              className="text-4xl md:text-5xl font-black text-white mb-3 flex items-center gap-4"
-              animate={{ 
-                textShadow: [
-                  "0 0 20px rgba(168, 85, 247, 0.4)",
-                  "0 0 40px rgba(168, 85, 247, 0.8)",
-                  "0 0 20px rgba(168, 85, 247, 0.4)"
-                ]
-              }}
-              transition={{ 
-                duration: 3, 
-                repeat: Infinity, 
-                ease: "easeInOut" 
-              }}
-            >
-              <span className="bg-gradient-to-r from-purple-400 via-pink-400 to-purple-400 bg-clip-text text-transparent">
-              My Wishlist
-              </span>
-              <motion.div
-                animate={{ 
-                  scale: [1, 1.3, 1],
-                  rotate: [0, 10, -10, 0]
-                }}
-                transition={{ 
-                  duration: 4, 
-                  repeat: Infinity, 
-                  ease: "easeInOut" 
-                }}
-                className="bg-gradient-to-br from-purple-500 to-purple-600 p-3 rounded-full shadow-lg shadow-purple-500/30"
-              >
-                <Heart className="text-white" size={28} fill="currentColor" />
-              </motion.div>
-            </motion.h1>
-            <motion.p 
-              className="text-xl text-gray-300 flex items-center gap-2"
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.8, delay: 0.2 }}
-            >
-              <TrendingUp className="text-purple-400" size={20} />
-              {wishlistProducts.length} {wishlistProducts.length === 1 ? 'item' : 'items'} in your collection
-            </motion.p>
-          </div>
-          
-            <motion.button
-              onClick={clearWishlist}
-            className="flex items-center space-x-3 bg-gradient-to-r from-purple-600 via-purple-700 to-purple-800 text-white px-6 py-3 rounded-full hover:from-purple-700 hover:via-purple-800 hover:to-purple-900 transition-all duration-300 shadow-2xl hover:shadow-purple-500/40 font-semibold group"
-            whileHover={{ scale: 1.05, y: -2 }}
-              whileTap={{ scale: 0.95 }}
-            >
-            <motion.div
-              animate={{ 
-                scale: [1, 1.2, 1],
-                rotate: [0, 10, -10, 0]
-              }}
-              transition={{ 
-                duration: 3, 
-                repeat: Infinity, 
-                ease: "easeInOut" 
-              }}
-            >
-              <Heart size={20} />
-            </motion.div>
-            <span>Clear Wishlist</span>
-          </motion.button>
-        </motion.div>
-
-        {/* Enhanced Products Grid */}
-        <motion.div 
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8"
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.3 }}
-        >
-          {wishlistProducts.map((product, index) => (
-            <motion.div 
-              key={product.id} 
-              className="group relative"
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: index * 0.1 }}
-              whileHover={{ y: -5 }}
-            >
-              <ProductCard 
-                product={product} 
-                onClick={(productId) => window.location.href = `/product/${productId}`}
-              />
-              
-              {/* Enhanced Action Buttons Overlay */}
-              <div className="absolute top-4 right-4 flex space-x-3 opacity-0 group-hover:opacity-100 transition-all duration-500">
-                <motion.button
-                  onClick={() => handleAddToCart(product.id)}
-                  className="w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-full flex items-center justify-center shadow-2xl hover:shadow-purple-500/40 transition-all duration-300 text-white"
-                  title="Add to Cart"
-                  whileHover={{ scale: 1.15, rotate: 5 }}
-                  whileTap={{ scale: 0.9 }}
+      
+      {/* Content */}
+      <div className="relative z-10">
+        {/* Header */}
+        <div className="bg-black/20 backdrop-blur-sm border-b border-white/20">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <Link
+                  to="/"
+                  className="flex items-center gap-2 text-white/80 hover:text-white transition-colors duration-300"
                 >
-                  <ShoppingBag size={20} />
-                </motion.button>
-                <motion.button
-                  onClick={() => handleRemoveFromWishlist(product.id)}
-                  className="w-12 h-12 bg-gradient-to-br from-red-500 to-red-600 rounded-full flex items-center justify-center shadow-2xl hover:shadow-red-500/40 transition-all duration-300 text-white"
-                  title="Remove from Wishlist"
-                  whileHover={{ scale: 1.15, rotate: -5 }}
-                  whileTap={{ scale: 0.9 }}
-                >
-                  <motion.div
-                    animate={{ 
-                      scale: [1, 1.2, 1],
-                      rotate: [0, 10, -10, 0]
-                    }}
-                    transition={{ 
-                      duration: 3, 
-                      repeat: Infinity, 
-                      ease: "easeInOut" 
-                    }}
-                  >
-                    <Heart size={20} className="fill-current" />
-                  </motion.div>
-                </motion.button>
+                  <ArrowLeft size={20} />
+                  <span>Back to Home</span>
+                </Link>
+                <div className="h-6 w-px bg-white/30"></div>
+                <h1 className="text-2xl font-bold text-white">
+                  My Wishlist ({getWishlistCount()})
+                </h1>
               </div>
-            </motion.div>
-          ))}
-        </motion.div>
-
-        {/* Enhanced Quick Actions */}
-        <motion.div 
-          className="mt-16 bg-gradient-to-br from-purple-900/30 via-purple-800/20 to-black/40 backdrop-blur-2xl border border-purple-500/30 rounded-2xl p-8 shadow-2xl shadow-purple-500/10 relative overflow-hidden"
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.5 }}
-        >
-          {/* Enhanced animated background sparkles */}
-          <div className="absolute inset-0 overflow-hidden">
-            <motion.div
-              className="absolute top-6 right-6 text-purple-500/30"
-              animate={{ 
-                rotate: [0, 360],
-                scale: [1, 1.3, 1]
-              }}
-              transition={{ 
-                duration: 5, 
-                repeat: Infinity, 
-                ease: "linear" 
-              }}
-            >
-              <Sparkles size={30} />
-            </motion.div>
-            <motion.div
-              className="absolute bottom-6 left-6 text-purple-400/25"
-              animate={{ 
-                rotate: [0, -360],
-                scale: [1, 1.2, 1]
-              }}
-              transition={{ 
-                duration: 7, 
-                repeat: Infinity, 
-                ease: "linear",
-                delay: 2
-              }}
-            >
-              <Sparkles size={25} />
-            </motion.div>
-            <motion.div
-              className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-purple-300/20"
-              animate={{ 
-                rotate: [0, 360],
-                scale: [1, 1.1, 1]
-              }}
-              transition={{ 
-                duration: 8, 
-                repeat: Infinity, 
-                ease: "linear",
-                delay: 1
-              }}
-            >
-              <Star size={20} />
-            </motion.div>
-          </div>
-
-          <div className="relative z-10">
-            <motion.h2 
-              className="text-2xl font-black text-white mb-6 flex items-center gap-3"
-              animate={{ 
-                textShadow: [
-                  "0 0 15px rgba(168, 85, 247, 0.4)",
-                  "0 0 30px rgba(168, 85, 247, 0.8)",
-                  "0 0 15px rgba(168, 85, 247, 0.4)"
-                ]
-              }}
-              transition={{ 
-                duration: 3, 
-                repeat: Infinity, 
-                ease: "easeInOut" 
-              }}
-            >
-              <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
-              Quick Actions
-              </span>
-              <motion.div
-                animate={{ 
-                  scale: [1, 1.3, 1],
-                  rotate: [0, 15, -15, 0]
-                }}
-                transition={{ 
-                  duration: 4, 
-                  repeat: Infinity, 
-                  ease: "easeInOut" 
-                }}
-                className="bg-gradient-to-br from-purple-500 to-purple-600 p-2 rounded-full shadow-lg shadow-purple-500/30"
-              >
-                <Heart className="text-white" size={24} fill="currentColor" />
-              </motion.div>
-            </motion.h2>
-            
-            <div className="flex flex-wrap gap-6">
-              {/* Add All to Cart Button */}
-              <motion.button
-                onClick={() => {
-                  if (wishlistProducts.length > 0) {
-                    wishlistProducts.forEach(product => {
-                      handleAddToCart(product.id);
-                    });
-                    setAddAllSuccess(true);
-                    setTimeout(() => setAddAllSuccess(false), 3000);
-                  }
-                }}
-                className="relative flex items-center space-x-4 bg-gradient-to-r from-purple-500 via-purple-600 to-purple-700 text-white px-8 py-5 rounded-2xl hover:from-purple-600 hover:via-purple-700 hover:to-purple-800 transition-all duration-300 shadow-2xl hover:shadow-purple-500/40 font-bold group overflow-hidden"
-                whileHover={{ scale: 1.05, y: -3 }}
-                whileTap={{ scale: 0.95 }}
-                disabled={wishlistProducts.length === 0}
-              >
-                {/* Shimmer Effect */}
-                <motion.div
-                  className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"
-                />
-                
-                {/* Button Content */}
-                <div className="relative z-10 flex items-center space-x-4">
-                  <motion.div
-                    whileHover={{ rotate: 15, scale: 1.1 }}
-                    transition={{ type: "spring", stiffness: 300 }}
-                  >
-                    <AnimatePresence mode="wait">
-                      {addAllSuccess ? (
-                        <motion.div
-                          key="success"
-                          initial={{ scale: 0, rotate: -180 }}
-                          animate={{ scale: 1, rotate: 0 }}
-                          exit={{ scale: 0, rotate: 180 }}
-                          transition={{ type: "spring", stiffness: 300 }}
-                        >
-                          <CheckCircle size={22} className="text-green-300" />
-                        </motion.div>
-                      ) : (
-                        <motion.div
-                          key="bag"
-                          initial={{ scale: 0 }}
-                          animate={{ scale: 1 }}
-                          exit={{ scale: 0 }}
-                          transition={{ type: "spring", stiffness: 300 }}
-                        >
-                          <ShoppingBag size={22} className="group-hover:scale-110 transition-transform duration-300" />
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-                  </motion.div>
-                  <span className="text-lg">
-                    {addAllSuccess ? "Added to Cart!" : "Add All to Cart"}
-                  </span>
-                  <motion.div
-                    animate={{ 
-                      scale: [1, 1.2, 1],
-                      rotate: [0, 5, -5, 0]
-                    }}
-                    transition={{ 
-                      duration: 2, 
-                      repeat: Infinity, 
-                      ease: "easeInOut" 
-                    }}
-                  >
-                    <Zap size={20} className="text-yellow-300 group-hover:scale-110 transition-transform duration-300" />
-                  </motion.div>
-                </div>
-                
-                {/* Product Count Badge */}
-                {wishlistProducts.length > 0 && (
-                  <motion.div
-                    className="absolute -top-2 -right-2 bg-gradient-to-r from-yellow-400 to-orange-400 text-purple-900 text-xs font-bold px-2 py-1 rounded-full shadow-lg"
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    transition={{ type: "spring", stiffness: 300 }}
-                  >
-                    {wishlistProducts.length}
-                  </motion.div>
-                )}
-              </motion.button>
-
-              {/* Clear Wishlist Button */}
-              <motion.button
-                onClick={() => {
-                  if (wishlistProducts.length > 0) {
-                    clearWishlist();
-                    setClearSuccess(true);
-                    setTimeout(() => setClearSuccess(false), 3000);
-                  }
-                }}
-                className="relative flex items-center space-x-4 bg-gradient-to-r from-red-500 via-red-600 to-red-700 text-white px-8 py-5 rounded-2xl hover:from-red-600 hover:via-red-700 hover:to-red-800 transition-all duration-300 shadow-2xl hover:shadow-red-500/40 font-bold group overflow-hidden"
-                whileHover={{ scale: 1.05, y: -3 }}
-                whileTap={{ scale: 0.95 }}
-                disabled={wishlistProducts.length === 0}
-              >
-                {/* Shimmer Effect */}
-                <motion.div
-                  className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"
-                />
-                
-                {/* Button Content */}
-                <div className="relative z-10 flex items-center space-x-4">
-                  <motion.div
-                    animate={{ 
-                      scale: [1, 1.2, 1],
-                      rotate: [0, 10, -10, 0]
-                    }}
-                    transition={{ 
-                      duration: 3, 
-                      repeat: Infinity, 
-                      ease: "easeInOut" 
-                    }}
-                    whileHover={{ scale: 1.3, rotate: 15 }}
-                  >
-                    <AnimatePresence mode="wait">
-                      {clearSuccess ? (
-                        <motion.div
-                          key="success"
-                          initial={{ scale: 0, rotate: -180 }}
-                          animate={{ scale: 1, rotate: 0 }}
-                          exit={{ scale: 0, rotate: 180 }}
-                          transition={{ type: "spring", stiffness: 300 }}
-                        >
-                          <CheckCircle size={22} className="text-green-300" />
-                        </motion.div>
-                      ) : (
-                        <motion.div
-                          key="heart"
-                          initial={{ scale: 0 }}
-                          animate={{ scale: 1 }}
-                          exit={{ scale: 0 }}
-                          transition={{ type: "spring", stiffness: 300 }}
-                        >
-                          <Heart size={22} className="fill-current group-hover:scale-110 transition-transform duration-300" />
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-                  </motion.div>
-                  <span className="text-lg">
-                    {clearSuccess ? "Wishlist Cleared!" : "Clear Wishlist"}
-                  </span>
-                  <motion.div
-                    whileHover={{ rotate: 180 }}
-                    transition={{ duration: 0.5 }}
-                  >
-                    <AnimatePresence mode="wait">
-                      {clearSuccess ? (
-                        <motion.div
-                          key="success-trash"
-                          initial={{ scale: 0 }}
-                          animate={{ scale: 1 }}
-                          exit={{ scale: 0 }}
-                          transition={{ type: "spring", stiffness: 300 }}
-                        >
-                          <CheckCircle size={20} className="text-green-300" />
-                        </motion.div>
-                      ) : (
-                        <motion.div
-                          key="trash"
-                          initial={{ scale: 0 }}
-                          animate={{ scale: 1 }}
-                          exit={{ scale: 0 }}
-                          transition={{ type: "spring", stiffness: 300 }}
-                        >
-                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                          </svg>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-                  </motion.div>
-                </div>
-                
-                {/* Empty State Indicator */}
-                {wishlistProducts.length === 0 && (
-                  <motion.div
-                    className="absolute inset-0 bg-gray-400/50 rounded-2xl cursor-not-allowed"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    <div className="flex items-center justify-center h-full">
-                      <span className="text-gray-600 font-medium">Wishlist Empty</span>
-                    </div>
-                  </motion.div>
-                )}
-              </motion.button>
+              <div className="flex items-center gap-4">
+                <button
+                  onClick={handleClearWishlist}
+                  className="text-white/80 hover:text-red-400 transition-colors duration-300 flex items-center gap-2 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-lg border border-white/20 hover:bg-white/20"
+                >
+                  <Trash2 size={16} />
+                  <span>Clear All</span>
+                </button>
+              </div>
             </div>
           </div>
-        </motion.div>
+        </div>
+
+        {/* Filters and Controls */}
+        <div className="bg-black/20 backdrop-blur-sm border-b border-white/20">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            <div className="flex flex-col lg:flex-row gap-6 items-center justify-between">
+              {/* Search */}
+              <div className="relative flex-1 max-w-md">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/60" size={20} />
+                <input
+                  type="text"
+                  placeholder="Search wishlist..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-10 pr-4 py-3 bg-white/10 backdrop-blur-sm border border-white/30 rounded-xl focus:ring-2 focus:ring-white/50 focus:border-white/50 text-white placeholder-white/60 transition-all duration-300"
+                />
+              </div>
+
+              {/* Filters */}
+              <div className="flex items-center gap-4">
+                <select
+                  value={filterCategory}
+                  onChange={(e) => setFilterCategory(e.target.value)}
+                  className="px-4 py-3 bg-white/10 backdrop-blur-sm border border-white/30 rounded-xl focus:ring-2 focus:ring-white/50 focus:border-white/50 text-white transition-all duration-300"
+                >
+                  {categories.map(category => (
+                    <option key={category} value={category} className="bg-black text-white">
+                      {category === 'all' ? 'All Categories' : category}
+                    </option>
+                  ))}
+                </select>
+
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value as 'date' | 'name' | 'price')}
+                  className="px-4 py-3 bg-white/10 backdrop-blur-sm border border-white/30 rounded-xl focus:ring-2 focus:ring-white/50 focus:border-white/50 text-white transition-all duration-300"
+                >
+                  <option value="date" className="bg-black text-white">Date Added</option>
+                  <option value="name" className="bg-black text-white">Name</option>
+                  <option value="price" className="bg-black text-white">Price</option>
+                </select>
+
+                {/* View Mode Toggle */}
+                <div className="flex border border-white/30 rounded-xl overflow-hidden">
+                  <button
+                    onClick={() => setViewMode('grid')}
+                    className={`p-3 transition-all duration-300 ${
+                      viewMode === 'grid' 
+                        ? 'bg-white text-black' 
+                        : 'text-white/80 hover:bg-white/10 hover:text-white'
+                    }`}
+                  >
+                    <Grid size={16} />
+                  </button>
+                  <button
+                    onClick={() => setViewMode('list')}
+                    className={`p-3 transition-all duration-300 ${
+                      viewMode === 'list' 
+                        ? 'bg-white text-black' 
+                        : 'text-white/80 hover:bg-white/10 hover:text-white'
+                    }`}
+                  >
+                    <List size={16} />
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Wishlist Items */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <AnimatePresence mode="wait">
+          {viewMode === 'grid' ? (
+            <motion.div
+              key="grid"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+            >
+              {filteredWishlist.map((item) => (
+                <motion.div
+                  key={item.id}
+                  layout
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.9 }}
+                  whileHover={{ y: -5, scale: 1.02 }}
+                  className="bg-white/10 backdrop-blur-lg rounded-2xl shadow-2xl hover:shadow-white/20 transition-all duration-300 overflow-hidden group border border-white/20 hover:border-white/30"
+                >
+                  {/* Product Image */}
+                  <div className="relative aspect-square bg-black/20">
+                    <img
+                      src={item.product.images[0] || '/images/placeholder.jpg'}
+                      alt={item.product.name}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    />
+                    <button
+                      onClick={() => handleRemoveFromWishlist(item.product.id)}
+                      className="absolute top-3 right-3 p-2 bg-black/60 hover:bg-black/80 backdrop-blur-sm rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-all duration-300 border border-white/20"
+                    >
+                      <X size={16} className="text-white" />
+                    </button>
+                    {item.product.featured && (
+                      <div className="absolute top-3 left-3 bg-white text-black text-xs px-3 py-1 rounded-full font-bold shadow-lg">
+                        Featured
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Product Info */}
+                  <div className="p-6">
+                    <h3 className="font-bold text-white mb-3 line-clamp-2 text-lg">
+                      {item.product.name}
+                    </h3>
+                    <p className="text-sm text-white/70 mb-3 line-clamp-2">
+                      {item.product.description}
+                    </p>
+                    <div className="flex items-center justify-between mb-4">
+                      <span className="text-xl font-bold text-white">
+                        R{(item.product.price / 100).toFixed(2)}
+                      </span>
+                      <div className="flex items-center gap-1">
+                        <Star size={14} className="text-yellow-400 fill-current" />
+                        <span className="text-sm text-white/80">4.5</span>
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between text-xs text-white/60 mb-5">
+                      <span className="flex items-center gap-1">
+                        <Clock size={12} />
+                        Added {formatDate(item.addedAt)}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <Tag size={12} />
+                        {item.product.category}
+                      </span>
+                    </div>
+                    <div className="flex gap-3">
+                      <button
+                        onClick={() => navigate(`/product/${item.product.id}`)}
+                        className="flex-1 bg-white/10 backdrop-blur-sm text-white py-3 px-4 rounded-xl hover:bg-white/20 transition-all duration-300 flex items-center justify-center gap-2 border border-white/30 hover:border-white/50 font-medium"
+                      >
+                        <Eye size={14} />
+                        View
+                      </button>
+                      <button
+                        onClick={() => handleAddToCart(item.product)}
+                        disabled={addingToCart === item.product.id}
+                        className="flex-1 bg-white text-black py-3 px-4 rounded-xl hover:bg-white/90 transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-50 font-bold shadow-lg hover:shadow-xl"
+                      >
+                        {addingToCart === item.product.id ? (
+                          <div className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin" />
+                        ) : (
+                          <>
+                            <ShoppingBag size={14} />
+                            Add to Cart
+                          </>
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
+            </motion.div>
+          ) : (
+            <motion.div
+              key="list"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="space-y-4"
+            >
+              {filteredWishlist.map((item) => (
+                <motion.div
+                  key={item.id}
+                  layout
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: 20 }}
+                  className="bg-white/10 backdrop-blur-lg rounded-2xl shadow-2xl hover:shadow-white/20 transition-all duration-300 p-6 border border-white/20 hover:border-white/30"
+                >
+                  <div className="flex items-center gap-6">
+                    {/* Product Image */}
+                    <div className="relative w-24 h-24 bg-black/20 rounded-xl overflow-hidden flex-shrink-0">
+                      <img
+                        src={item.product.images[0] || '/images/placeholder.jpg'}
+                        alt={item.product.name}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+
+                    {/* Product Info */}
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-bold text-white mb-2 text-lg">
+                        {item.product.name}
+                      </h3>
+                      <p className="text-sm text-white/70 mb-3 line-clamp-2">
+                        {item.product.description}
+                      </p>
+                      <div className="flex items-center gap-4 text-sm text-white/60">
+                        <span className="flex items-center gap-1">
+                          <Clock size={12} />
+                          Added {formatDate(item.addedAt)}
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <Tag size={12} />
+                          {item.product.category}
+                        </span>
+                        <div className="flex items-center gap-1">
+                          <Star size={12} className="text-yellow-400 fill-current" />
+                          <span>4.5</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Price and Actions */}
+                    <div className="flex flex-col items-end gap-4">
+                      <span className="text-2xl font-bold text-white">
+                        R{(item.product.price / 100).toFixed(2)}
+                      </span>
+                      <div className="flex items-center gap-3">
+                        <button
+                          onClick={() => navigate(`/product/${item.product.id}`)}
+                          className="p-3 text-white/80 hover:text-white hover:bg-white/10 rounded-xl transition-all duration-300 border border-white/20 hover:border-white/40"
+                        >
+                          <Eye size={16} />
+                        </button>
+                        <button
+                          onClick={() => handleRemoveFromWishlist(item.product.id)}
+                          className="p-3 text-white/80 hover:text-red-400 hover:bg-red-500/20 rounded-xl transition-all duration-300 border border-white/20 hover:border-red-400/50"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                        <button
+                          onClick={() => handleAddToCart(item.product)}
+                          disabled={addingToCart === item.product.id}
+                          className="bg-white text-black px-6 py-3 rounded-xl hover:bg-white/90 transition-all duration-300 flex items-center gap-2 disabled:opacity-50 font-bold shadow-lg hover:shadow-xl"
+                        >
+                          {addingToCart === item.product.id ? (
+                            <div className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin" />
+                          ) : (
+                            <>
+                              <ShoppingBag size={14} />
+                              Add to Cart
+                            </>
+                          )}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+          {filteredWishlist.length === 0 && wishlist.length > 0 && (
+            <div className="text-center py-16">
+              <div className="w-24 h-24 mx-auto mb-6 bg-white/10 backdrop-blur-lg rounded-full flex items-center justify-center border border-white/20">
+                <Search size={32} className="text-white/60" />
+              </div>
+              <h3 className="text-xl font-bold text-white mb-3">No items found</h3>
+              <p className="text-white/70 mb-6">Try adjusting your search or filter criteria</p>
+              <button
+                onClick={() => {
+                  setSearchQuery('');
+                  setFilterCategory('all');
+                }}
+                className="bg-white/10 backdrop-blur-sm text-white px-6 py-3 rounded-xl font-medium hover:bg-white/20 transition-all duration-300 border border-white/30 hover:border-white/50"
+              >
+                Clear filters
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* Auth Prompt */}
+        <AuthPrompt
+          isOpen={showAuthPrompt}
+          onClose={() => setShowAuthPrompt(false)}
+          action="add_to_cart"
+          title="Add to Cart"
+          description="Log in to add items to your cart and start shopping"
+        />
       </div>
     </div>
   );
 };
 
-export default WishlistPage; 
+export default WishlistPage;

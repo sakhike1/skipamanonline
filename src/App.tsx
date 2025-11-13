@@ -1,10 +1,11 @@
 import { Suspense, lazy, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { CartProvider } from './context/CartContext';
-import { WishlistProvider } from './context/WishlistContext';
 import { AuthProvider } from './context/AuthContext';
 import { HeaderProvider } from './context/HeaderContext';
 import { PaymentProvider } from './context/PaymentContext';
+import { PointsProvider } from './context/PointsContext';
+import { WishlistProvider } from './context/WishlistContext';
 import Layout from './components/layout/Layout';
 import LoadingSpinner from './components/ui/LoadingSpinner';
 import ProtectedRoute from './components/auth/ProtectedRoute';
@@ -20,14 +21,18 @@ const WishlistPage = lazy(() => import('./pages/WishlistPage'));
 const OrdersPage = lazy(() => import('./pages/OrdersPage'));
 const OrderTrackingPage = lazy(() => import('./pages/OrderTrackingPage'));
 const AdminDashboard = lazy(() => import('./pages/AdminDashboard') as Promise<{ default: React.ComponentType<unknown> }>);
-const CheckoutPage = lazy(() => import('./pages/Checkout'));
 const LoginForm = lazy(() => import('./assets/cart/LoginForm'));
 const RegisterForm = lazy(() => import('./components/auth/RegisterForm'));
 const ProfilePage = lazy(() => import('./pages/ProfilePage'));
 const SettingsPage = lazy(() => import('./pages/SettingsPage'));
 const CustomDesignPage = lazy(() => import('./pages/EnhancedCustomDesignPage'));
+const LookbookPage = lazy(() => import('./pages/LookbookPage'));
+const ReviewsPage = lazy(() => import('./pages/ReviewsPage'));
+const ClientCenter = lazy(() => import('./pages/ClientCenter'));
+const CSMDashboard = lazy(() => import('./pages/CSMDashboard'));
 const PaymentSuccess = lazy(() => import('./pages/PaymentSuccess'));
 const PaymentCancel = lazy(() => import('./pages/PaymentCancel'));
+const EnhancedCheckoutPage = lazy(() => import('./pages/EnhancedCheckoutPage'));
 
 // Loading fallback component
 const PageLoader = () => (
@@ -74,20 +79,23 @@ function App() {
     <AuthProvider>
       <CartProvider>
         <PaymentProvider>
-          <WishlistProvider>
+          <PointsProvider>
             <HeaderProvider>
-            <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-              <Layout>
-                <Suspense fallback={<PageLoader />}>
-                  <Routes>
-                    {/* Public Routes */}
-                    <Route path="/" element={<HomePage />} />
-                    <Route path="/shop" element={<ShopPage />} />
-                    <Route path="/product/:id" element={<ProductPage />} />
-                    <Route path="/about" element={<About />} />
-                    <Route path="/new-arrivals" element={<NewArrivalsPage />} />
-                    <Route path="/search" element={<SearchPage />} />
-                    <Route path="/custom-design" element={<CustomDesignPage />} />
+              <WishlistProvider>
+                <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+                  <Layout>
+                  <Suspense fallback={<PageLoader />}>
+                    <Routes>
+                      {/* Public Routes */}
+                      <Route path="/" element={<HomePage />} />
+                      <Route path="/shop" element={<ShopPage />} />
+                      <Route path="/product/:id" element={<ProductPage />} />
+                      <Route path="/about" element={<About />} />
+                      <Route path="/new-arrivals" element={<NewArrivalsPage />} />
+                      <Route path="/search" element={<SearchPage />} />
+                      <Route path="/lookbook" element={<LookbookPage />} />
+                      <Route path="/reviews" element={<ReviewsPage />} />
+                      <Route path="/custom-design" element={<CustomDesignPage />} />
                     
                     {/* Auth Routes */}
                     <Route path="/login" element={<LoginForm />} />
@@ -96,16 +104,8 @@ function App() {
                     {/* Payment Routes */}
                     <Route path="/payment/success" element={<PaymentSuccess />} />
                     <Route path="/payment/cancel" element={<PaymentCancel />} />
+                    <Route path="/checkout" element={<EnhancedCheckoutPage />} />
                     
-                    {/* Checkout Route */}
-                    <Route 
-                      path="/checkout" 
-                      element={
-                        <ProtectedRoute>
-                          <CheckoutPage />
-                        </ProtectedRoute>
-                      } 
-                    />
                     
                     {/* Protected Routes */}
                     <Route 
@@ -149,6 +149,14 @@ function App() {
                       } 
                     />
                     <Route 
+                      path="/client-center" 
+                      element={
+                        <ProtectedRoute>
+                          <ClientCenter />
+                        </ProtectedRoute>
+                      } 
+                    />
+                    <Route 
                       path="/admin" 
                       element={
                         <ProtectedRoute requireAdmin>
@@ -156,12 +164,21 @@ function App() {
                         </ProtectedRoute>
                       } 
                     />
-                  </Routes>
-                </Suspense>
-              </Layout>
-            </Router>
+                    <Route 
+                      path="/csm" 
+                      element={
+                        <ProtectedRoute requireAdmin>
+                          <CSMDashboard />
+                        </ProtectedRoute>
+                      } 
+                    />
+                    </Routes>
+                  </Suspense>
+                </Layout>
+              </Router>
+            </WishlistProvider>
             </HeaderProvider>
-          </WishlistProvider>
+          </PointsProvider>
         </PaymentProvider>
       </CartProvider>
     </AuthProvider>

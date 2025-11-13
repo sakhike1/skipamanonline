@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import Header from './Header';
+import Header from '../features/header/Header';
 import Footer from './Footer';
 import ScrollToTop from '../ui/ScrollToTop';
 import AdminNotificationBanner from '../notifications/AdminNotificationBanner';

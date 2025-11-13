@@ -15,7 +15,7 @@ const CartPreview: React.FC<CartPreviewProps> = ({ onClose }) => {
   
   // Format price
   const formatPrice = (price: number) => {
-    return `R${(price / 100).toFixed(2)}`;
+    return `R${price.toFixed(2)}`;
   };
   
   // Click outside handler
@@ -143,7 +143,7 @@ const CartPreview: React.FC<CartPreviewProps> = ({ onClose }) => {
                         <div>
                           <div className="flex justify-between text-base font-medium text-gray-900">
                             <h3>{product.name}</h3>
-                            <p className="ml-4">{formatPrice(product.price * item.quantity)}</p>
+                            <p className="ml-4">{formatPrice((product.price / 100) * item.quantity)}</p>
                           </div>
                           <p className="mt-1 text-sm text-gray-500">
                             {item.color.name} / Size {item.size}

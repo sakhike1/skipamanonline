@@ -1,7 +1,12 @@
 import React, { createContext, useContext, useReducer, useEffect, useCallback, ReactNode, useMemo } from 'react';
 import { User, LoginCredentials, RegisterCredentials } from '../types';
 import { authAPI } from '../services/api';
+import strapiAuth from '../services/strapiAuth';
 import socketService from '../services/socket';
+
+// Determine which auth service to use based on environment variable
+// Note: Vite uses import.meta.env, not process.env
+const USE_STRAPI_AUTH = import.meta.env.VITE_USE_STRAPI_AUTH === 'true';
 
 // Auth State Interface
 interface AuthState {
@@ -149,22 +154,30 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         
         if (token && userData) {
           try {
-            // Verify token is still valid by getting fresh user data
-            const response = await authAPI.getCurrentUser();
-            if (response.success && response.data) {
-              const freshUser = response.data.user;
-              localStorage.setItem('user_data', JSON.stringify(freshUser));
-              
-              // Connect to Socket.IO
-              socketService.connect(token);
-              
-              dispatch({ type: 'AUTH_SUCCESS', payload: freshUser });
+            let freshUser: User;
+
+            if (USE_STRAPI_AUTH) {
+              // Verify token with Strapi
+              strapiAuth.setAuthToken(token);
+              freshUser = await strapiAuth.getCurrentUser();
             } else {
-              // Token is invalid, clear auth
-              localStorage.removeItem('auth_token');
-              localStorage.removeItem('user_data');
-              dispatch({ type: 'AUTH_LOGOUT' });
+              // Verify token with custom backend
+              const response = await authAPI.getCurrentUser();
+              if (response.success && response.data) {
+                freshUser = response.data.user;
+              } else {
+                throw new Error('Invalid token');
+              }
             }
+
+            localStorage.setItem('user_data', JSON.stringify(freshUser));
+            
+            // Connect to Socket.IO (only if not using Strapi)
+            if (!USE_STRAPI_AUTH) {
+              socketService.connect(token);
+            }
+            
+            dispatch({ type: 'AUTH_SUCCESS', payload: freshUser });
           } catch (error) {
             // Token is invalid, clear auth
             localStorage.removeItem('auth_token');
@@ -188,29 +201,44 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       dispatch({ type: 'AUTH_START' });
       
-      // Use backend authentication
-      console.log('Attempting backend login for:', credentials.email);
-      const response = await authAPI.login(credentials);
-      
-      if (response.success && response.data) {
-        const { user, token } = response.data;
-        
-        // Store token and user data
-        localStorage.setItem('auth_token', token);
-        localStorage.setItem('user_data', JSON.stringify(user));
-        
-        // Connect to Socket.IO
-        socketService.connect(token);
-        
-        console.log('Backend login successful:', user.role);
-        dispatch({ type: 'AUTH_SUCCESS', payload: user });
-        return user; // Return user data for redirect logic
+      let user: User;
+      let token: string;
+
+      if (USE_STRAPI_AUTH) {
+        // Use Strapi authentication
+        console.log('Attempting Strapi login for:', credentials.email);
+        const result = await strapiAuth.login(credentials);
+        user = result.user;
+        token = result.token;
+        console.log('Strapi login successful:', user.role);
       } else {
-        throw new Error(response.message || 'Login failed');
+        // Use custom backend authentication
+        console.log('Attempting backend login for:', credentials.email);
+        const response = await authAPI.login(credentials);
+        
+        if (response.success && response.data) {
+          user = response.data.user;
+          token = response.data.token;
+          console.log('Backend login successful:', user.role);
+        } else {
+          throw new Error(response.message || 'Login failed');
+        }
       }
+      
+      // Store token and user data
+      localStorage.setItem('auth_token', token);
+      localStorage.setItem('user_data', JSON.stringify(user));
+      
+      // Connect to Socket.IO (only if not using Strapi or if you have Socket.IO in Strapi)
+      if (!USE_STRAPI_AUTH) {
+        socketService.connect(token);
+      }
+      
+      dispatch({ type: 'AUTH_SUCCESS', payload: user });
+      return user; // Return user data for redirect logic
     } catch (error: any) {
       const errorMessage = error.response?.data?.message || error.message || 'Login failed';
-      console.log('AuthContext: Backend login failed:', errorMessage);
+      console.log('AuthContext: Login failed:', errorMessage);
       dispatch({ 
         type: 'AUTH_FAILURE', 
         payload: errorMessage
@@ -225,42 +253,64 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       dispatch({ type: 'AUTH_START' });
       
-      // Use backend registration
-      console.log('Attempting backend registration for:', credentials.email);
-      const response = await authAPI.register(credentials);
-      
-      if (response.success && response.data) {
-        const { user, token } = response.data;
-        
-        // Store token and user data
-        localStorage.setItem('auth_token', token);
-        localStorage.setItem('user_data', JSON.stringify(user));
-        
-        // Connect to Socket.IO
-        socketService.connect(token);
-        
-        console.log('Backend registration successful:', user.role);
-        dispatch({ type: 'AUTH_SUCCESS', payload: user });
-        return;
+      let user: User;
+      let token: string;
+
+      if (USE_STRAPI_AUTH) {
+        // Use Strapi registration
+        console.log('Attempting Strapi registration for:', credentials.email);
+        const result = await strapiAuth.register(credentials);
+        user = result.user;
+        token = result.token;
+        console.log('Strapi registration successful:', user.role);
       } else {
-        throw new Error(response.message || 'Registration failed');
+        // Use custom backend registration
+        console.log('Attempting backend registration for:', credentials.email);
+        const response = await authAPI.register(credentials);
+        
+        if (response.success && response.data) {
+          user = response.data.user;
+          token = response.data.token;
+          console.log('Backend registration successful:', user.role);
+        } else {
+          throw new Error(response.message || 'Registration failed');
+        }
       }
+      
+      // Store token and user data
+      localStorage.setItem('auth_token', token);
+      localStorage.setItem('user_data', JSON.stringify(user));
+      
+      // Connect to Socket.IO (only if not using Strapi)
+      if (!USE_STRAPI_AUTH) {
+        socketService.connect(token);
+      }
+      
+      dispatch({ type: 'AUTH_SUCCESS', payload: user });
+      return;
     } catch (error: any) {
-      const errorMessage = error.response?.data?.message || error.message || 'Registration failed';
-      console.log('AuthContext: Backend registration failed:', errorMessage);
+      // The error message is already enhanced in strapiAuth.register()
+      const errorMessage = error.message || 'Registration failed';
+      console.error('AuthContext: Registration failed:', errorMessage);
+      console.error('Full error details:', error);
       dispatch({ 
         type: 'AUTH_FAILURE', 
         payload: errorMessage
       });
-      throw new Error(errorMessage);
+      throw error; // Re-throw the original error with enhanced message
     }
   };
 
   // Logout function
   const logout = async () => {
     try {
-      // Use backend logout
-      await authAPI.logout();
+      if (USE_STRAPI_AUTH) {
+        // Strapi logout (just clears token locally)
+        await strapiAuth.logout();
+      } else {
+        // Custom backend logout
+        await authAPI.logout();
+      }
     } catch (error) {
       console.log('Logout API call failed:', error);
     } finally {
@@ -268,7 +318,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       localStorage.removeItem('auth_token');
       localStorage.removeItem('user_data');
       localStorage.removeItem('refresh_token');
-      socketService.disconnect();
+      if (!USE_STRAPI_AUTH) {
+        socketService.disconnect();
+      }
       dispatch({ type: 'AUTH_LOGOUT' });
     }
   };

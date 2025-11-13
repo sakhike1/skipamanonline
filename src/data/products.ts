@@ -3,18 +3,16 @@ import { Product } from '../types';
 export const products: Product[] = [
   {
     id: '1',
-    name: 'Classic Black Tee',
-    description: 'Our signature classic tee in sleek black. Made from 100% organic cotton for ultimate comfort and durability. Features a relaxed fit and soft-touch finish.',
+    name: 'Skipaman Gray',
+    description: 'Our signature classic tee in sleek gray. Made from 100% organic cotton for ultimate comfort and durability. Features a relaxed fit and soft-touch finish.',
     price: 50000,
     images: [
-      '/src/assets/black1.png',
-      '/src/assets/blackPurpleTwo.png',
-      '/src/assets/blackPurple.png',
+      '/images/grey1.png',
+      '/images/grey2.png',
+      '/images/grey3.png',
     ],
     sizes: ['S', 'M', 'L', 'XL', 'XXL'],
     colors: [
-      { name: 'Black', value: '#000000' },
-      { name: 'White', value: '#FFFFFF' },
       { name: 'Gray', value: '#808080' },
     ],
     category: 'basics',
@@ -30,13 +28,13 @@ export const products: Product[] = [
   },
   {
     id: '2',
-    name: 'AI Future Graphic Tee',
+    name: 'Skipaman Blues',
     description: 'Express your love for technology with our AI Future graphic tee. Features a unique AI-inspired design on premium cotton fabric.',
     price: 50000,
     images: [
-      '/src/assets/black1.png',
-      '/src/assets/blackPurpleTwo.png',
-      '/src/assets/blackPurple.png',
+      '/images/blue1.png',
+      '/images/blue2.png',
+      '/images/blue3.png',
     ],
     sizes: ['S', 'M', 'L', 'XL'],
     colors: [
@@ -56,17 +54,16 @@ export const products: Product[] = [
   },
   {
     id: '3',
-    name: 'Minimalist Logo Tee',
+    name: 'Skipaman White Box',
     description: 'Clean, simple, elegant. Our minimalist logo tee speaks volumes with its understated design and premium quality construction.',
     price: 50000,
     images: [
-      '/src/assets/black1.png',
-      '/src/assets/blackPurpleTwo.png',
-      '/src/assets/blackPurple.png',
+      '/images/white1.png',
+      '/images/white2.png',
+      '/images/white3.png',
     ],
     sizes: ['S', 'M', 'L', 'XL', 'XXL'],
     colors: [
-      { name: 'White', value: '#FFFFFF' },
       { name: 'Light Gray', value: '#D3D3D3' },
       { name: 'Cream', value: '#F5F5DC' },
     ],
@@ -83,18 +80,18 @@ export const products: Product[] = [
   },
   {
     id: '4',
-    name: 'Vintage Band Tee',
+    name: 'Skipaman Vintage Charcoal',
     description: 'Rock your style with our vintage band tee collection. Featuring distressed prints and that perfect broken-in feel.',
     price: 50000,
     images: [
-      '/src/assets/black1.png',
-      '/src/assets/blackPurpleTwo.png',
-      '/src/assets/blackPurple.png',
+      '/images/orange1.png',
+      '/images/orange2.png',
+      '/images/orange3.png',
     ],
     sizes: ['M', 'L', 'XL'],
     colors: [
       { name: 'Charcoal', value: '#36454F' },
-      { name: 'Faded Black', value: '#2F2F2F' },
+      { name: 'Slate Gray', value: '#708090' },
     ],
     category: 'vintage',
     featured: true,
@@ -109,12 +106,13 @@ export const products: Product[] = [
   },
   {
     id: '5',
-    name: 'Eco-Friendly Organic Tee',
+    name: 'Skipaman Earth Green',
     description: 'Sustainable fashion meets style. Made from 100% organic cotton with eco-friendly dyes. Perfect for the environmentally conscious.',
     price: 50000,
     images: [
-      '/images/5.jpg',
-      '/images/6.jpg',
+      '/images/new1.png',
+      '/images/new2.png',
+      '/images/new3.png',
     ],
     sizes: ['S', 'M', 'L', 'XL'],
     colors: [
@@ -135,12 +133,13 @@ export const products: Product[] = [
   },
   {
     id: '6',
-    name: 'Premium Pocket Tee',
+    name: 'Skipaman Premium Heather',
     description: 'Elevated basics with a modern twist. Features a subtle chest pocket and superior fabric blend for lasting comfort and style.',
     price: 50000,
     images: [
-      '/images/6.jpg',
-      '/images/7.jpg',
+      '/images/white1.png',
+      '/images/white2.png',
+      '/images/white3.png',
     ],
     sizes: ['S', 'M', 'L', 'XL', 'XXL'],
     colors: [
@@ -161,12 +160,13 @@ export const products: Product[] = [
   },
   {
     id: '7',
-    name: 'Sport Performance Tee',
+    name: 'Skipaman Athletic Gray',
     description: 'Engineered for active lifestyles. Moisture-wicking technology and athletic fit make this perfect for workouts and casual wear.',
     price: 50000,
     images: [
-      '/images/7.jpg',
-      '/images/8.jpg',
+      '/images/blue1.png',
+      '/images/blue2.png',
+      '/images/blue3.png',
     ],
     sizes: ['S', 'M', 'L', 'XL'],
     colors: [
@@ -187,12 +187,13 @@ export const products: Product[] = [
   },
   {
     id: '8',
-    name: 'Limited Edition Artist Tee',
+    name: 'Skipaman Black Artist',
     description: 'Collaboration with local artists brings you unique, limited-edition designs. Only 100 pieces available - collect them all!',
     price: 50000,
     images: [
-      '/images/8.jpg',
-      '/images/1.png',
+      '/images/orange1.png',
+      '/images/orange2.png',
+      '/images/orange3.png',
     ],
     sizes: ['S', 'M', 'L', 'XL'],
     colors: [
@@ -212,7 +213,7 @@ export const products: Product[] = [
   },
   {
     id: '9',
-    name: 'Urban Street Style Tee',
+    name: 'Skipaman Street Black',
     description: 'Bold streetwear design with urban graphics. Perfect for making a statement in the city.',
     price: 50000,
     images: [
@@ -237,7 +238,7 @@ export const products: Product[] = [
   },
   {
     id: '10',
-    name: 'Comfort Fit Long Sleeve',
+    name: 'Skipaman Navy Long Sleeve',
     description: 'Extended comfort with our premium long sleeve tee. Perfect for layering or wearing solo.',
     price: 50000,
     images: [
@@ -263,12 +264,13 @@ export const products: Product[] = [
   },
   {
     id: '11',
-    name: 'Retro Gaming Tee',
+    name: 'Skipaman Pixel Black',
     description: 'Nostalgic gaming graphics meet modern comfort. Show your love for classic games.',
     price: 50000,
     images: [
-      '/images/5.jpg',
-      '/images/6.jpg',
+      '/images/grey1.png',
+      '/images/grey2.png',
+      '/images/grey3.png',
     ],
     sizes: ['S', 'M', 'L', 'XL', 'XXL'],
     colors: [
@@ -288,12 +290,13 @@ export const products: Product[] = [
   },
   {
     id: '12',
-    name: 'Summer Breeze Tank Top',
+    name: 'Skipaman Summer White Tank',
     description: 'Lightweight and breathable tank top perfect for warm weather. Stay cool and stylish.',
     price: 50000,
     images: [
-      '/images/7.jpg',
-      '/images/8.jpg',
+      '/images/black1.png',
+      '/images/black2.png',
+      '/images/black3.png',
     ],
     sizes: ['S', 'M', 'L', 'XL'],
     colors: [
@@ -314,7 +317,7 @@ export const products: Product[] = [
   },
   {
     id: '13',
-    name: 'Workout Essentials Tee',
+    name: 'Skipaman Athletic Black',
     description: 'Designed for active lifestyles with moisture-wicking technology and comfortable fit.',
     price: 50000,
     images: [
@@ -340,7 +343,7 @@ export const products: Product[] = [
   },
   {
     id: '14',
-    name: 'Cozy Winter Flannel',
+    name: 'Skipaman Red Plaid Flannel',
     description: 'Warm and comfortable flannel shirt perfect for cold weather. Soft brushed interior.',
     price: 50000,
     images: [
@@ -366,7 +369,7 @@ export const products: Product[] = [
   },
   {
     id: '15',
-    name: 'Business Casual Polo',
+    name: 'Skipaman Business Navy Polo',
     description: 'Professional polo shirt perfect for business casual settings. Classic collar and button placket.',
     price: 50000,
     images: [
@@ -392,7 +395,7 @@ export const products: Product[] = [
   },
   {
     id: '16',
-    name: 'Artistic Abstract Tee',
+    name: 'Skipaman White Canvas',
     description: 'Unique abstract design that stands out. Perfect for creative individuals who love art.',
     price: 50000,
     images: [
@@ -417,12 +420,13 @@ export const products: Product[] = [
   },
   {
     id: '17',
-    name: 'Hoodie Essential',
+    name: 'Skipaman Black Hood',
     description: 'Comfortable hoodie with kangaroo pocket and drawstring hood. Perfect for casual wear.',
     price: 50000,
     images: [
-      '/images/2.png',
-      '/images/3.png',
+      '/images/blueHoody1.png',
+      '/images/blueHoody2.png',
+      '/images/blueHoody3.png',
     ],
     sizes: ['S', 'M', 'L', 'XL', 'XXL'],
     colors: [
@@ -443,7 +447,7 @@ export const products: Product[] = [
   },
   {
     id: '18',
-    name: 'Music Festival Tee',
+    name: 'Skipaman Festival Black',
     description: 'Vibrant festival-themed design perfect for music lovers and festival-goers.',
     price: 50000,
     images: [
@@ -469,7 +473,7 @@ export const products: Product[] = [
   },
   {
     id: '19',
-    name: 'Travel Adventure Tee',
+    name: 'Skipaman Adventure Green',
     description: 'Inspire wanderlust with our travel-themed tee. Perfect for adventurers and explorers.',
     price: 50000,
     images: [
@@ -494,7 +498,7 @@ export const products: Product[] = [
   },
   {
     id: '20',
-    name: 'Minimalist Typography Tee',
+    name: 'Skipaman Black Quote',
     description: 'Clean typography design with inspiring quotes. Perfect for those who love simple, meaningful designs.',
     price: 50000,
     images: [
@@ -520,7 +524,7 @@ export const products: Product[] = [
   },
   {
     id: '21',
-    name: 'Sports Team Pride Tee',
+    name: 'Skipaman Team Red',
     description: 'Show your team spirit with our sports-themed collection. Support your favorite teams in style.',
     price: 50000,
     images: [
@@ -546,7 +550,7 @@ export const products: Product[] = [
   },
   {
     id: '22',
-    name: 'Nature Lover Tee',
+    name: 'Skipaman Forest Green',
     description: 'Celebrate nature with beautiful botanical designs. Perfect for outdoor enthusiasts.',
     price: 50000,
     images: [
@@ -572,7 +576,7 @@ export const products: Product[] = [
   },
   {
     id: '23',
-    name: 'Tech Innovation Tee',
+    name: 'Skipaman Tech Black',
     description: 'Embrace the future with our tech-inspired designs. Perfect for tech enthusiasts and innovators.',
     price: 50000,
     images: [
@@ -598,7 +602,7 @@ export const products: Product[] = [
   },
   {
     id: '24',
-    name: 'Vintage Denim Jacket',
+    name: 'Skipaman Classic Blues Jacket',
     description: 'Classic denim jacket with vintage wash. Timeless style that never goes out of fashion.',
     price: 50000,
     images: [
@@ -623,7 +627,7 @@ export const products: Product[] = [
   },
   {
     id: '25',
-    name: 'Cozy Sweater',
+    name: 'Skipaman Cream Sweater',
     description: 'Warm and comfortable sweater perfect for cold weather. Soft knit fabric with relaxed fit.',
     price: 50000,
     images: [
@@ -649,7 +653,7 @@ export const products: Product[] = [
   },
   {
     id: '26',
-    name: 'Beach Vacation Tee',
+    name: 'Skipaman Ocean Blues',
     description: 'Tropical vibes with beach-themed graphics. Perfect for vacation and summer fun.',
     price: 50000,
     images: [
@@ -675,7 +679,7 @@ export const products: Product[] = [
   },
   {
     id: '27',
-    name: 'Fitness Motivation Tee',
+    name: 'Skipaman Gym Black',
     description: 'Stay motivated with inspiring fitness quotes and designs. Perfect for gym sessions.',
     price: 50000,
     images: [
@@ -701,7 +705,7 @@ export const products: Product[] = [
   },
   {
     id: '28',
-    name: 'Coffee Lover Tee',
+    name: 'Skipaman Coffee',
     description: 'Celebrate your love for coffee with our caffeine-inspired designs. Perfect for coffee enthusiasts.',
     price: 50000,
     images: [
@@ -727,7 +731,7 @@ export const products: Product[] = [
   },
   {
     id: '29',
-    name: 'Space Explorer Tee',
+    name: 'Skipaman Space Black',
     description: 'Journey to the stars with our space-themed collection. Perfect for astronomy enthusiasts.',
     price: 50000,
     images: [
@@ -753,7 +757,7 @@ export const products: Product[] = [
   },
   {
     id: '30',
-    name: 'Pet Lover Tee',
+    name: 'Skipaman Pet Pink',
     description: 'Show your love for pets with adorable animal designs. Perfect for pet owners and animal lovers.',
     price: 50000,
     images: [
@@ -779,13 +783,13 @@ export const products: Product[] = [
   },
   {
     id: '31',
-    name: 'Premium Black Hoody',
-    description: 'Ultimate comfort meets street style. Our premium black hoody features front, back, and lifestyle views showcasing the perfect fit and quality craftsmanship.',
+    name: 'Skipaman Premium Black Hood',
+    description: 'Ultimate comfort meets street style. Our premium hoody features front, back, and lifestyle views showcasing the perfect fit and quality craftsmanship.',
     price: 75000,
     images: [
-      '/src/assets/hoodyBlack.png',
-      '/src/assets/hoodyBlackTwo.png',
-      '/src/assets/hoodyBlackThree.png',
+      '/images/blueHoody1.png',
+      '/images/blueHoody2.png',
+      '/images/blueHoody3.png',
     ],
     sizes: ['S', 'M', 'L', 'XL', 'XXL'],
     colors: [
@@ -805,8 +809,8 @@ export const products: Product[] = [
   },
   {
     id: '32',
-    name: 'Classic Black T-Shirt',
-    description: 'The perfect black tee with front, back, and lifestyle views. Premium cotton blend with modern fit and timeless style that works for any occasion.',
+    name: 'Skipaman Charcoal',
+    description: 'The perfect tee with front, back, and lifestyle views. Premium cotton blend with modern fit and timeless style that works for any occasion.',
     price: 45000,
     images: [
       '/src/assets/blacktFront.png',
@@ -815,8 +819,8 @@ export const products: Product[] = [
     ],
     sizes: ['S', 'M', 'L', 'XL', 'XXL'],
     colors: [
-      { name: 'Classic Black', value: '#000000' },
-      { name: 'Jet Black', value: '#1C1C1C' },
+      { name: 'Charcoal Gray', value: '#36454F' },
+      { name: 'Heather Gray', value: '#D3D3D3' },
     ],
     category: 'basics',
     featured: true,
@@ -831,7 +835,7 @@ export const products: Product[] = [
   },
   {
     id: '33',
-    name: 'Purple Statement T-Shirt',
+    name: 'Skipaman Royal Purple',
     description: 'Bold and vibrant purple tee that makes a statement. Features front, back, and lifestyle views showcasing the rich purple color and modern design.',
     price: 55000,
     images: [
@@ -871,13 +875,90 @@ export const getProductById = (id: string): Product | undefined => {
   return products.find(product => product.id === id);
 };
 
+interface SearchResult {
+  product: Product;
+  score: number;
+}
+
 export const searchProducts = (query: string): Product[] => {
-  const lowercaseQuery = query.toLowerCase();
-  return products.filter(product =>
-    product.name.toLowerCase().includes(lowercaseQuery) ||
-    product.description.toLowerCase().includes(lowercaseQuery) ||
-    product.tags.some(tag => tag.toLowerCase().includes(lowercaseQuery))
-  );
+  if (!query || !query.trim()) {
+    return products.filter(p => p.isActive);
+  }
+
+  const searchTerms = query.toLowerCase().trim().split(/\s+/).filter(term => term.length > 0);
+  if (searchTerms.length === 0) {
+    return products.filter(p => p.isActive);
+  }
+
+  const results: SearchResult[] = [];
+
+  products.forEach(product => {
+    if (!product.isActive) return;
+
+    let score = 0;
+    const productName = product.name.toLowerCase();
+    const productDescription = product.description.toLowerCase();
+    const productCategory = product.category.toLowerCase();
+    const productTags = product.tags.map(tag => tag.toLowerCase());
+    const productColors = product.colors.map(c => c.name.toLowerCase());
+
+    searchTerms.forEach(term => {
+      // Exact name match (highest priority)
+      if (productName === term) {
+        score += 100;
+      } else if (productName.startsWith(term)) {
+        score += 50;
+      } else if (productName.includes(term)) {
+        score += 30;
+      }
+
+      // Category match
+      if (productCategory.includes(term)) {
+        score += 20;
+      }
+
+      // Tag match
+      productTags.forEach(tag => {
+        if (tag === term) {
+          score += 25;
+        } else if (tag.includes(term)) {
+          score += 15;
+        }
+      });
+
+      // Color match
+      productColors.forEach(color => {
+        if (color.includes(term)) {
+          score += 20;
+        }
+      });
+
+      // Description match (lower priority)
+      if (productDescription.includes(term)) {
+        score += 10;
+      }
+
+      // SKU match
+      if (product.sku.toLowerCase().includes(term)) {
+        score += 15;
+      }
+    });
+
+    // Boost featured products
+    if (product.featured) {
+      score += 5;
+    }
+
+    // Only include products with some match
+    if (score > 0) {
+      results.push({ product, score });
+    }
+  });
+
+  // Sort by score (highest first) and return products
+  return results
+    .sort((a, b) => b.score - a.score)
+    .map(result => result.product);
 };
 
 export const getAvailableSizes = (): string[] => {

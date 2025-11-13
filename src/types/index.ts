@@ -44,6 +44,12 @@ export interface Review {
   verified: boolean;
   helpful: number;
   images?: string[];
+  size?: string;
+  color?: string;
+  fit?: 'Perfect' | 'Too Small' | 'Too Big' | 'Just Right';
+  quality?: 'Excellent' | 'Good' | 'Average' | 'Poor';
+  wouldRecommend?: boolean;
+  pointsEarned?: number;
 }
 
 export interface ReviewStats {
@@ -106,6 +112,7 @@ export interface OrderItem {
 
 export type OrderStatus = 
   | 'pending'
+  | 'awaiting_payment'
   | 'confirmed'
   | 'processing'
   | 'shipped'
@@ -120,6 +127,71 @@ export type PaymentStatus =
   | 'failed'
   | 'refunded'
   | 'partially_refunded';
+
+// Strapi Order Sync Types
+export interface StrapiOrderItemInput {
+  name: string;
+  description?: string;
+  quantity: number;
+  unitPrice: number;
+  lineTotal: number;
+  productId?: string;
+  sku?: string;
+  size?: string;
+  color?: string;
+}
+
+export interface StrapiOrderCustomerInput {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone?: string;
+  userId?: string;
+}
+
+export interface StrapiOrderAddressInput {
+  line1: string;
+  line2?: string;
+  city: string;
+  postalCode: string;
+  country: string;
+}
+
+export interface StrapiOrderCreateInput {
+  orderNumber: string;
+  paymentStatus: PaymentStatus;
+  subtotal: number;
+  shippingTotal: number;
+  total: number;
+  currency: string;
+  customer: StrapiOrderCustomerInput;
+  shippingAddress: StrapiOrderAddressInput;
+  orderItems: StrapiOrderItemInput[];
+  orderStatus?: OrderStatus;
+  order_status?: OrderStatus;
+  notes?: string;
+  metadata?: Record<string, unknown>;
+}
+
+export interface StrapiOrderAttributes extends StrapiOrderCreateInput {
+  createdAt: string;
+  updatedAt: string;
+  publishedAt?: string;
+}
+
+export interface StrapiOrderEntity {
+  id: number;
+  attributes: StrapiOrderAttributes;
+}
+
+export interface StrapiOrderListMeta {
+  pagination: {
+    page: number;
+    pageSize: number;
+    pageCount: number;
+    total: number;
+  };
+}
 
 export interface PaymentMethod {
   type: 'stripe' | 'paypal' | 'bank_transfer';

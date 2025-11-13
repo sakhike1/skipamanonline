@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, LogIn, UserPlus, Lock, AlertCircle } from 'lucide-react';
-import { useAuth } from '../../hooks/useAuth';
+import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
 interface AuthPromptProps {
@@ -50,18 +50,14 @@ const AuthPrompt: React.FC<AuthPromptProps> = ({
 
     try {
       if (isLoginMode) {
-        const result = await login({
+        await login({
           email: formData.email,
           password: formData.password
         });
 
-        if (result.success) {
-          onClose();
-          if (redirectTo) {
-            navigate(redirectTo);
-          }
-        } else {
-          setError(result.error || 'Login failed');
+        onClose();
+        if (redirectTo) {
+          navigate(redirectTo);
         }
       } else {
         if (formData.password !== formData.confirmPassword) {
@@ -70,23 +66,21 @@ const AuthPrompt: React.FC<AuthPromptProps> = ({
           return;
         }
 
-        const result = await register({
-          name: formData.name,
+        await register({
+          firstName: formData.name.split(' ')[0] || '',
+          lastName: formData.name.split(' ').slice(1).join(' ') || '',
           email: formData.email,
           password: formData.password
         });
 
-        if (result.success) {
-          onClose();
-          if (redirectTo) {
-            navigate(redirectTo);
-          }
-        } else {
-          setError(result.error || 'Registration failed');
+        onClose();
+        if (redirectTo) {
+          navigate(redirectTo);
         }
       }
     } catch (err) {
-      setError('An unexpected error occurred');
+      const errorMessage = err instanceof Error ? err.message : 'An unexpected error occurred';
+      setError(errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -117,6 +111,18 @@ const AuthPrompt: React.FC<AuthPromptProps> = ({
           title: 'View Profile',
           description: 'Log in to view your profile and order history',
           icon: '👤'
+        };
+      case 'write_review':
+        return {
+          title: 'Write a Review',
+          description: 'Log in to share your experience and help other customers',
+          icon: '⭐'
+        };
+      case 'add_to_wishlist':
+        return {
+          title: 'Add to Wishlist',
+          description: 'Log in to save items to your wishlist and never lose track of products you love',
+          icon: '❤️'
         };
       default:
         return {

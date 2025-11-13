@@ -11,9 +11,9 @@ app.use(cors());
 app.use(express.json());
 
 // PayFast configuration
-const PAYFAST_MERCHANT_ID = process.env.PAYFAST_MERCHANT_ID || 'your_merchant_id';
-const PAYFAST_MERCHANT_KEY = process.env.PAYFAST_MERCHANT_KEY || 'your_merchant_key';
-const PAYFAST_PASSPHRASE = process.env.PAYFAST_PASSPHRASE || 'your_passphrase';
+const PAYFAST_MERCHANT_ID = process.env.PAYFAST_MERCHANT_ID || '13072591';
+const PAYFAST_MERCHANT_KEY = process.env.PAYFAST_MERCHANT_KEY || 'zxqpyqbjxifvg';
+const PAYFAST_PASSPHRASE = process.env.PAYFAST_PASSPHRASE || '45SkipamanTs';
 const PAYFAST_URL = process.env.PAYFAST_URL || 'https://www.payfast.co.za/eng/process';
 
 // Email configuration (you'll need to set up your email service)

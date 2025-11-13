@@ -26,6 +26,7 @@ const ProductPage: React.FC = () => {
         if (foundProduct && isMounted) {
           setProduct(foundProduct);
           
+          
           // Load reviews and stats
           const productReviews = getReviewsByProductId(id);
           const stats = getReviewStats(id);
@@ -101,9 +102,14 @@ const ProductPage: React.FC = () => {
               productId={product.id}
               reviews={reviews}
               stats={reviewStats}
-              onWriteReview={() => {
-                // TODO: Implement write review functionality
-                console.log('Write review clicked');
+              productName={product.name}
+              onReviewSubmitted={(newReview) => {
+                // Add the new review to the existing reviews
+                setReviews(prev => [newReview, ...prev]);
+                
+                // Recalculate review stats
+                const updatedStats = getReviewStats(product.id);
+                setReviewStats(updatedStats);
               }}
             />
           </div>
