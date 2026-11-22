@@ -54,7 +54,7 @@ export const products: Product[] = [
   },
   {
     id: '3',
-    name: 'Skipaman White Box',
+    name: 'Skipaman White',
     description: 'Clean, simple, elegant. Our minimalist logo tee speaks volumes with its understated design and premium quality construction.',
     price: 50000,
     images: [
@@ -80,7 +80,7 @@ export const products: Product[] = [
   },
   {
     id: '4',
-    name: 'Skipaman Vintage Charcoal',
+    name: 'Skipaman Vintage',
     description: 'Rock your style with our vintage band tee collection. Featuring distressed prints and that perfect broken-in feel.',
     price: 50000,
     images: [
@@ -809,13 +809,13 @@ export const products: Product[] = [
   },
   {
     id: '32',
-    name: 'Skipaman Charcoal',
+    name: 'Skipaman Classic',
     description: 'The perfect tee with front, back, and lifestyle views. Premium cotton blend with modern fit and timeless style that works for any occasion.',
     price: 45000,
     images: [
-      '/src/assets/blacktFront.png',
-      '/src/assets/blacktback.png',
-      '/src/assets/blackTOne.png',
+      '/images/blacktFront.png',
+      '/images/blacktback.png',
+      '/images/blackTOne.png',
     ],
     sizes: ['S', 'M', 'L', 'XL', 'XXL'],
     colors: [
@@ -839,9 +839,9 @@ export const products: Product[] = [
     description: 'Bold and vibrant purple tee that makes a statement. Features front, back, and lifestyle views showcasing the rich purple color and modern design.',
     price: 55000,
     images: [
-      '/src/assets/blackPurpleTwo.png',
-      '/src/assets/black1.png',
-      '/src/assets/blackPurpleTwo.png',
+      '/images/blackPurpleTwo.png',
+      '/images/black1.png',
+      '/images/blackPurpleTwo.png',
     ],
     sizes: ['S', 'M', 'L', 'XL', 'XXL'],
     colors: [

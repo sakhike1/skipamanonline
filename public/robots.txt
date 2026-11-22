@@ -1,0 +1,62 @@
+# robots.txt for Skipaman Store
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /csm
+Disallow: /api/
+Disallow: /checkout
+Disallow: /payment/
+
+# Sitemap
+Sitemap: https://skipaman.co.za/sitemap.xml
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

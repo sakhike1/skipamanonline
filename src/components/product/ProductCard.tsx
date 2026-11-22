@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Product } from '../../types';
 import { Button } from '../ui/Button';
 import WishlistButton from './WishlistButton';
@@ -9,23 +9,44 @@ interface ProductCardProps {
 }
 
 const ProductCard: React.FC<ProductCardProps> = ({ product, onClick }) => {
-  const [, setIsHovered] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [isTransitioning, setIsTransitioning] = useState(false);
   
   const formatPrice = (price: number) => {
     return `R${(price / 100).toFixed(2)}`;
   };
-  
+
+  // Auto-rotate images every 7 seconds when not hovered
+  useEffect(() => {
+    if (isHovered || product.images.length <= 1) return; // Pause auto-rotation on hover
+    
+    const interval = setInterval(() => {
+      setIsTransitioning(true);
+      setTimeout(() => {
+        setCurrentImageIndex((prev) => (prev + 1) % product.images.length);
+        setIsTransitioning(false);
+      }, 300);
+    }, 7000); // Change every 7 seconds
+
+    return () => clearInterval(interval);
+  }, [isHovered, product.images.length]);
+
   const handleMouseEnter = () => {
     setIsHovered(true);
     if (product.images.length > 1) {
-      setCurrentImageIndex(1);
+      // Immediately change image on hover
+      setIsTransitioning(true);
+      setTimeout(() => {
+        setCurrentImageIndex((prev) => (prev + 1) % product.images.length);
+        setIsTransitioning(false);
+      }, 300); // Smooth fade transition
     }
   };
   
   const handleMouseLeave = () => {
     setIsHovered(false);
-    setCurrentImageIndex(0);
+    setIsTransitioning(false);
   };
   
 
@@ -42,11 +63,18 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onClick }) => {
       onClick={() => onClick(product.id)}
     >
       <div className="relative aspect-[4/5] w-full overflow-hidden bg-neutral-100">
-        <img
-          src={product.images[currentImageIndex]}
-          alt={product.name}
-          className="h-full w-full object-cover object-center transition-transform duration-700 group-hover:scale-105"
-        />
+        {product.images.map((imageSrc, index) => (
+          <img
+            key={index}
+            src={imageSrc}
+            alt={`${product.name} - Image ${index + 1}`}
+            className={`absolute inset-0 h-full w-full object-cover object-center transition-all duration-500 ease-in-out
+              ${index === currentImageIndex ? 'opacity-100 z-10' : 'opacity-0 z-0'}
+              ${isTransitioning ? 'blur-[0.5px]' : 'blur-0'}
+              group-hover:scale-105
+            `}
+          />
+        ))}
         
         <div className="absolute top-4 right-4">
           <WishlistButton 

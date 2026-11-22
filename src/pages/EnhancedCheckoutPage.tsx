@@ -8,12 +8,14 @@ import {
   MapPin, 
   ShoppingBag,
   ArrowRight,
+  ArrowLeft,
   Lock,
   CheckCircle,
-  AlertCircle
+  AlertCircle,
+  X
 } from 'lucide-react';
 import { useCart } from '../context/CartContext';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../context/useAuth';
 import { getProductById } from '../data/products';
 import PaymentForm from '../components/payment/PaymentForm';
 import { OrderData } from '../services/paypalService';
@@ -99,9 +101,16 @@ const EnhancedCheckoutPage: React.FC = () => {
         if (!trimmed) return 'Phone number is required';
         const digits = trimmed.replace(/\D/g, '');
         if (digits.startsWith('27')) {
-          return digits.length === 11 ? '' : 'Enter +27 followed by 9 digits';
+          return digits.length === 11
+            ? ''
+            : 'Use +27 and 9 digits after the country code (e.g. +27 82 123 4567)';
         }
-        return digits.length === 10 ? '' : 'Enter a 10-digit South African number';
+        if (digits.startsWith('0')) {
+          return digits.length === 10
+            ? ''
+            : 'Enter 10 digits starting with 0 (e.g. 082 123 4567)';
+        }
+        return 'Enter a South African number: 10 digits starting with 0, or +27 with 9 digits after.';
       }
       case 'address.line1':
         return trimmed ? '' : 'Street address is required';
@@ -110,7 +119,8 @@ const EnhancedCheckoutPage: React.FC = () => {
       case 'address.postal_code': {
         if (!trimmed) return 'Postal code is required';
         const digits = trimmed.replace(/\D/g, '');
-        return digits.length === 4 ? '' : 'Postal code must be 4 digits';
+        if (digits.length !== 4) return 'Use a 4-digit South African postal code (e.g. 0157)';
+        return '';
       }
       default:
         return '';
@@ -120,10 +130,10 @@ const EnhancedCheckoutPage: React.FC = () => {
   const getInputClasses = (field: string) => {
     const showError = shippingTouched[field] && shippingErrors[field];
     return [
-      'w-full px-4 py-3 rounded-lg transition-all duration-200 border',
+      'w-full px-4 py-3 rounded-xl transition-all duration-200 border-2 bg-white text-black',
       showError
         ? 'border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-400/60 bg-red-50/40'
-        : 'border-gray-300 focus:border-transparent focus:ring-2 focus:ring-blue-500',
+        : 'border-gray-200 focus:border-black focus:ring-2 focus:ring-black/20',
     ].join(' ');
   };
 
@@ -275,69 +285,103 @@ const EnhancedCheckoutPage: React.FC = () => {
 
   if (cart.items.length === 0) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center px-4 py-16">
-        <div className="max-w-3xl w-full bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-12 text-center shadow-[0_40px_120px_-20px_rgba(15,23,42,0.5)] relative overflow-hidden">
-          <div className="absolute inset-0 pointer-events-none">
-            <div className="absolute -top-32 -left-24 w-64 h-64 bg-purple-500/30 rounded-full blur-3xl"></div>
-            <div className="absolute top-1/2 -right-20 w-72 h-72 bg-blue-500/20 rounded-full blur-3xl"></div>
-            <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[90%] h-1/2 bg-gradient-to-t from-slate-900/60 to-transparent" />
-          </div>
+      <div className="min-h-screen bg-white pt-20 pb-20 relative overflow-hidden">
+        {/* Premium background with subtle pattern */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute inset-0 bg-gradient-to-br from-gray-50 via-white to-gray-50"></div>
+          <div className="absolute inset-0" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, rgba(0,0,0,0.02) 1px, transparent 0)', backgroundSize: '40px 40px' }}></div>
+        </div>
 
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16 relative z-10">
           <motion.div
-            initial={{ opacity: 0, scale: 0.8 }}
+            initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.6, ease: 'easeOut' }}
-            className="relative z-10"
+            className="relative bg-white rounded-3xl shadow-2xl p-12 md:p-16 text-center border border-gray-200"
           >
-            <div className="mx-auto mb-8 h-20 w-20 rounded-2xl bg-gradient-to-br from-yellow-400 via-orange-500 to-pink-500 flex items-center justify-center shadow-lg">
-              <ShoppingBag className="w-10 h-10 text-white" />
+            <button
+              type="button"
+              onClick={() => navigate('/')}
+              className="absolute top-4 right-4 w-10 h-10 rounded-full flex items-center justify-center bg-white border-2 border-black text-black hover:bg-black hover:text-white transition-all duration-300 z-50 shadow-lg"
+              aria-label="Close"
+            >
+              <X size={24} strokeWidth={2.5} />
+            </button>
+            <div className="flex justify-start mb-10">
+              <button
+                type="button"
+                onClick={() => navigate(-1)}
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-full border-2 border-black text-black bg-white hover:bg-black hover:text-white transition-all duration-300"
+                aria-label="Go back"
+              >
+                <ArrowLeft size={18} />
+                <span className="text-sm font-black uppercase tracking-wider">Back</span>
+              </button>
             </div>
 
-            <div className="mb-10 space-y-4">
-              <h2 className="text-4xl md:text-5xl font-extrabold tracking-tight text-white">
-                Your cart is feeling lonely
-              </h2>
-              <p className="text-lg md:text-xl text-slate-200 max-w-xl mx-auto leading-relaxed">
-                The styles you love are waiting. Curate your look, elevate your fit, and come back to checkout when
-                you’re ready to make it legendary.
-              </p>
-            </div>
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
+              className="mx-auto mb-10 h-28 w-28 rounded-3xl bg-black flex items-center justify-center shadow-2xl"
+            >
+              <ShoppingBag className="w-14 h-14 text-white" strokeWidth={1.5} />
+            </motion.div>
 
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2, duration: 0.5 }}
-              className="flex flex-col sm:flex-row items-center justify-center gap-4"
+              transition={{ delay: 0.3 }}
+              className="mb-12 space-y-5"
+            >
+              <h2 className="text-5xl md:text-6xl font-black tracking-tight text-black leading-tight">
+                Your Collection Awaits
+              </h2>
+              <p className="text-xl md:text-2xl text-gray-700 max-w-2xl mx-auto leading-relaxed font-medium">
+                Curate your signature style. Discover pieces crafted for those who demand excellence and refuse to blend in.
+              </p>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4, duration: 0.5 }}
+              className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16"
             >
               <button
                 onClick={() => navigate('/shop')}
-                className="inline-flex items-center gap-3 px-8 py-4 rounded-full text-base font-semibold text-slate-900 bg-white shadow-lg shadow-white/20 hover:shadow-white/40 transition-transform duration-300 hover:-translate-y-1"
+                className="inline-flex items-center gap-3 px-10 py-5 rounded-xl text-lg font-bold text-white bg-black shadow-xl hover:bg-gray-900 transition-all duration-300 transform hover:scale-105 hover:shadow-2xl"
               >
-                Discover the Collection
-                <ArrowRight className="w-5 h-5" />
+                Explore Collection
+                <ArrowRight className="w-6 h-6" />
               </button>
               <button
                 onClick={() => navigate('/')}
-                className="inline-flex items-center gap-2 px-6 py-4 rounded-full text-base font-semibold text-white/80 border border-white/30 hover:border-white/60 transition-all duration-300"
+                className="inline-flex items-center gap-2 px-8 py-5 rounded-xl text-lg font-bold text-black border-2 border-black hover:bg-black hover:text-white transition-all duration-300"
               >
-                Back to Home
+                Return Home
               </button>
             </motion.div>
 
-            <div className="mt-12 grid grid-cols-1 sm:grid-cols-3 gap-6 text-sm text-slate-200/80">
-              <div className="p-4 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md">
-                <p className="font-semibold text-white mb-1">Curated Drops</p>
-                <p>New arrivals weekly with exclusive access for members.</p>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5 }}
+              className="grid grid-cols-1 sm:grid-cols-3 gap-6"
+            >
+              <div className="p-8 rounded-2xl border-2 border-black bg-white hover:bg-black hover:text-white transition-all duration-300 group">
+                <p className="font-black text-lg mb-3 group-hover:text-white">Premium Quality</p>
+                <p className="text-gray-600 group-hover:text-gray-200 leading-relaxed">Meticulously crafted pieces that define modern luxury and timeless style.</p>
               </div>
-              <div className="p-4 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md">
-                <p className="font-semibold text-white mb-1">Global Shipping</p>
-                <p>Fast & secure delivery, tracked from our studio to your door.</p>
+              <div className="p-8 rounded-2xl border-2 border-black bg-white hover:bg-black hover:text-white transition-all duration-300 group">
+                <p className="font-black text-lg mb-3 group-hover:text-white">Express Delivery</p>
+                <p className="text-gray-600 group-hover:text-gray-200 leading-relaxed">Swift, secure shipping with real-time tracking from our atelier to your door.</p>
               </div>
-              <div className="p-4 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md">
-                <p className="font-semibold text-white mb-1">Style Concierge</p>
-                <p>Need advice? Our team is ready to help you build the perfect fit.</p>
+              <div className="p-8 rounded-2xl border-2 border-black bg-white hover:bg-black hover:text-white transition-all duration-300 group">
+                <p className="font-black text-lg mb-3 group-hover:text-white">Expert Styling</p>
+                <p className="text-gray-600 group-hover:text-gray-200 leading-relaxed">Personalized guidance to help you curate a wardrobe that commands attention.</p>
               </div>
-            </div>
+            </motion.div>
           </motion.div>
         </div>
       </div>
@@ -345,31 +389,42 @@ const EnhancedCheckoutPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-white pt-20 pb-20 relative overflow-hidden">
+      {/* Clean minimal background */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute inset-0 bg-gradient-to-b from-gray-50/50 to-white opacity-40"></div>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 relative z-10">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Checkout</h1>
-          <p className="text-gray-600">Complete your purchase securely</p>
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-12"
+        >
+          <div>
+            <h1 className="text-5xl font-black text-black mb-3">Checkout</h1>
+            <p className="text-gray-600 text-lg">Complete your purchase securely</p>
         </div>
+        </motion.div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Content */}
           <div className="lg:col-span-2">
             {/* Progress Steps */}
             <div className="flex items-center mb-8">
-              <div className={`flex items-center ${currentStep === 'shipping' ? 'text-blue-600' : 'text-green-600'}`}>
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center ${currentStep === 'shipping' ? 'bg-blue-600 text-white' : 'bg-green-600 text-white'}`}>
+              <div className={`flex items-center ${currentStep === 'shipping' ? 'text-black' : 'text-black'}`}>
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center ${currentStep === 'shipping' ? 'bg-black text-white' : 'bg-black text-white'}`}>
                   {currentStep === 'shipping' ? '1' : <CheckCircle className="w-5 h-5" />}
                 </div>
-                <span className="ml-2 font-medium">Shipping</span>
+                <span className="ml-2 font-semibold">Shipping</span>
               </div>
-              <div className="flex-1 h-px bg-gray-300 mx-4"></div>
-              <div className={`flex items-center ${currentStep === 'payment' ? 'text-blue-600' : 'text-gray-400'}`}>
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center ${currentStep === 'payment' ? 'bg-blue-600 text-white' : 'bg-gray-300 text-gray-600'}`}>
+              <div className="flex-1 h-px bg-gray-200 mx-4"></div>
+              <div className={`flex items-center ${currentStep === 'payment' ? 'text-black' : 'text-gray-400'}`}>
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center ${currentStep === 'payment' ? 'bg-black text-white' : 'bg-gray-200 text-gray-600'}`}>
                   2
                 </div>
-                <span className="ml-2 font-medium">Payment</span>
+                <span className="ml-2 font-semibold">Payment</span>
               </div>
             </div>
 
@@ -381,18 +436,18 @@ const EnhancedCheckoutPage: React.FC = () => {
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: 20 }}
-                  className="bg-white rounded-xl shadow-lg p-8"
+                  className="bg-white rounded-3xl shadow-lg p-8 border-2 border-gray-200"
                 >
                   <div className="flex items-center mb-6">
-                    <Truck className="w-6 h-6 text-blue-600 mr-3" />
-                    <h2 className="text-2xl font-bold text-gray-900">Shipping Information</h2>
+                    <Truck className="w-6 h-6 text-black mr-3" />
+                    <h2 className="text-2xl font-bold text-black">Shipping Information</h2>
                   </div>
 
                   <form onSubmit={handleShippingSubmit} className="space-y-6">
                     {/* Personal Information */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                        <label className="block text-sm font-semibold text-black mb-2">
                           First Name *
                         </label>
                         <input
@@ -408,7 +463,7 @@ const EnhancedCheckoutPage: React.FC = () => {
                         {renderFieldError('customerName')}
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                        <label className="block text-sm font-semibold text-black mb-2">
                           Last Name *
                         </label>
                         <input
@@ -427,7 +482,7 @@ const EnhancedCheckoutPage: React.FC = () => {
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                        <label className="block text-sm font-semibold text-black mb-2">
                           Email Address *
                         </label>
                         <input
@@ -443,7 +498,7 @@ const EnhancedCheckoutPage: React.FC = () => {
                         {renderFieldError('email')}
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                        <label className="block text-sm font-semibold text-black mb-2">
                           Phone Number *
                         </label>
                         <input
@@ -453,10 +508,14 @@ const EnhancedCheckoutPage: React.FC = () => {
                           onChange={handleInputChange}
                           onBlur={handleInputBlur}
                           className={getInputClasses('phone')}
-                          placeholder="0XX XXX XXXX or +27 XXX XXX XXX"
+                          placeholder="0XX XXX XXXX or +27 XX XXX XXXX"
                           autoComplete="tel"
                           aria-invalid={Boolean(shippingTouched['phone'] && shippingErrors['phone'])}
+                          aria-describedby="checkout-hint-phone"
                         />
+                        <p id="checkout-hint-phone" className="mt-1.5 text-xs text-gray-500">
+                          South African mobile or landline: 10 digits starting with 0, or +27 and 9 digits after the country code.
+                        </p>
                         {renderFieldError('phone')}
                       </div>
                     </div>
@@ -464,13 +523,13 @@ const EnhancedCheckoutPage: React.FC = () => {
                     {/* Address Information */}
                     <div className="border-t pt-6">
                       <div className="flex items-center mb-4">
-                        <MapPin className="w-5 h-5 text-blue-600 mr-2" />
-                        <h3 className="text-lg font-semibold text-gray-900">Shipping Address</h3>
+                        <MapPin className="w-5 h-5 text-black mr-2" />
+                        <h3 className="text-lg font-semibold text-black">Shipping Address</h3>
                       </div>
 
                       <div className="space-y-4">
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                          <label className="block text-sm font-semibold text-black mb-2">
                             Address Line 1 *
                           </label>
                           <input
@@ -486,7 +545,7 @@ const EnhancedCheckoutPage: React.FC = () => {
                           {renderFieldError('address.line1')}
                         </div>
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                          <label className="block text-sm font-semibold text-black mb-2">
                             Address Line 2
                           </label>
                           <input
@@ -495,12 +554,12 @@ const EnhancedCheckoutPage: React.FC = () => {
                             value={shippingData.address.line2}
                             onChange={handleInputChange}
                             onBlur={handleInputBlur}
-                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl bg-white text-black focus:border-black focus:ring-2 focus:ring-black/20"
                           />
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                           <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                            <label className="block text-sm font-semibold text-black mb-2">
                               City *
                             </label>
                             <input
@@ -516,24 +575,31 @@ const EnhancedCheckoutPage: React.FC = () => {
                             {renderFieldError('address.city')}
                           </div>
                           <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                            <label className="block text-sm font-semibold text-black mb-2">
                               Postal Code *
                             </label>
                             <input
                               type="text"
                               name="address.postal_code"
+                              inputMode="numeric"
                               value={shippingData.address.postal_code}
                               onChange={handleInputChange}
                               onBlur={handleInputBlur}
                               className={getInputClasses('address.postal_code')}
-                              placeholder="0000"
+                              placeholder="e.g. 0157"
                               autoComplete="postal-code"
-                              aria-invalid={Boolean(shippingTouched['address.postal_code'] && shippingErrors['address.postal_code'])}
+                              aria-invalid={Boolean(
+                                shippingTouched['address.postal_code'] && shippingErrors['address.postal_code'],
+                              )}
+                              aria-describedby="checkout-hint-postal"
                             />
+                            <p id="checkout-hint-postal" className="mt-1.5 text-xs text-gray-500">
+                              4-digit South African postal code.
+                            </p>
                             {renderFieldError('address.postal_code')}
                           </div>
                           <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                            <label className="block text-sm font-semibold text-black mb-2">
                               Country
                             </label>
                             <input
@@ -541,7 +607,7 @@ const EnhancedCheckoutPage: React.FC = () => {
                               name="address.country"
                               value={shippingData.address.country}
                               onChange={handleInputChange}
-                              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                              className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl bg-white text-black focus:border-black focus:ring-2 focus:ring-black/20"
                               readOnly
                             />
                           </div>
@@ -551,10 +617,10 @@ const EnhancedCheckoutPage: React.FC = () => {
 
                     {/* Error Message */}
                     {paymentError && (
-                      <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                      <div className="bg-red-50 border-2 border-red-300 rounded-xl p-4">
                         <div className="flex items-center">
                           <AlertCircle className="w-5 h-5 text-red-600 mr-3" />
-                          <p className="text-red-800">{paymentError}</p>
+                          <p className="text-red-800 font-medium">{paymentError}</p>
                         </div>
                       </div>
                     )}
@@ -562,7 +628,7 @@ const EnhancedCheckoutPage: React.FC = () => {
                     {/* Continue Button */}
                     <button
                       type="submit"
-                      className="w-full bg-blue-600 text-white py-4 px-6 rounded-lg font-semibold hover:bg-blue-700 transition-colors duration-300 flex items-center justify-center space-x-2"
+                      className="w-full bg-black text-white py-4 px-6 rounded-xl font-bold hover:bg-gray-800 transition-all duration-300 flex items-center justify-center space-x-2 shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
                     >
                       <span>Continue to Payment</span>
                       <ArrowRight className="w-5 h-5" />
@@ -591,8 +657,8 @@ const EnhancedCheckoutPage: React.FC = () => {
 
           {/* Order Summary Sidebar */}
           <div className="lg:col-span-1">
-            <div className="bg-white rounded-xl shadow-lg p-6 sticky top-8">
-              <h3 className="text-xl font-bold text-gray-900 mb-6">Order Summary</h3>
+            <div className="bg-white rounded-3xl shadow-lg p-6 sticky top-8 border-2 border-gray-200">
+              <h3 className="text-xl font-bold text-black mb-6">Order Summary</h3>
               
               {/* Items */}
               <div className="space-y-4 mb-6">
@@ -610,13 +676,13 @@ const EnhancedCheckoutPage: React.FC = () => {
                         />
                       </div>
                       <div className="flex-1">
-                        <h4 className="font-medium text-gray-900">{product.name}</h4>
+                        <h4 className="font-semibold text-black">{product.name}</h4>
                         <p className="text-sm text-gray-600">
                           {item.color.name} / Size {item.size}
                         </p>
                         <p className="text-sm text-gray-600">Qty: {item.quantity}</p>
                       </div>
-                      <p className="font-semibold text-gray-900">
+                      <p className="font-bold text-black">
                         R{((product.price / 100) * item.quantity).toFixed(2)}
                       </p>
                     </div>
@@ -625,28 +691,28 @@ const EnhancedCheckoutPage: React.FC = () => {
               </div>
 
               {/* Totals */}
-              <div className="border-t border-gray-200 pt-4 space-y-3">
+              <div className="border-t-2 border-gray-200 pt-4 space-y-3">
                 <div className="flex justify-between text-gray-600">
                   <span>Subtotal</span>
-                  <span>R{subtotal.toFixed(2)}</span>
+                  <span className="font-semibold">R{subtotal.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between text-gray-600">
                   <span>Shipping</span>
-                  <span>{shipping === 0 ? 'Free' : `R${shipping.toFixed(2)}`}</span>
+                  <span className="font-semibold">{shipping === 0 ? 'Free' : `R${shipping.toFixed(2)}`}</span>
                 </div>
-                <div className="flex justify-between text-lg font-bold text-gray-900 pt-2 border-t border-gray-200">
+                <div className="flex justify-between text-xl font-bold text-black pt-3 border-t-2 border-gray-200">
                   <span>Total</span>
                   <span>R{total.toFixed(2)}</span>
                 </div>
               </div>
 
               {/* Security Notice */}
-              <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
-                <div className="flex items-center text-sm text-green-700">
-                  <Lock className="w-4 h-4 mr-2" />
-                  <span className="font-medium">Secure checkout powered by PayPal</span>
+              <div className="mt-6 p-5 bg-black rounded-xl shadow-lg">
+                <div className="flex items-center text-sm text-white">
+                  <Lock className="w-5 h-5 mr-2" />
+                  <span className="font-bold">Secure checkout powered by PayPal</span>
                 </div>
-                <p className="text-xs text-green-600 mt-1">
+                <p className="text-xs text-gray-300 mt-2 ml-7">
                   Your payment information is encrypted and secure
                 </p>
               </div>

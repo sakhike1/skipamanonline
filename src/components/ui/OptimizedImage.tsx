@@ -1,101 +1,141 @@
-'use client'
+import React, { useState, useEffect, useRef } from 'react';
+import { getOptimizedImageUrl, generateSrcSet, generateSizes } from '../../utils/imageOptimizer';
 
-import Image from 'next/image'
-import { useState } from 'react'
-import { motion } from 'framer-motion'
-
-interface OptimizedImageProps {
-  src: string
-  alt: string
-  width?: number
-  height?: number
-  className?: string
-  priority?: boolean
-  placeholder?: 'blur' | 'empty'
-  blurDataURL?: string
-  sizes?: string
-  fill?: boolean
-  quality?: number
-  loading?: 'lazy' | 'eager'
+interface OptimizedImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
+  src: string;
+  alt: string;
+  width?: number;
+  height?: number;
+  quality?: number;
+  format?: 'webp' | 'avif' | 'jpg' | 'png';
+  lazy?: boolean;
+  priority?: boolean;
+  sizes?: string;
+  className?: string;
+  onLoad?: () => void;
+  onError?: () => void;
 }
 
-export default function OptimizedImage({
+export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   src,
   alt,
   width,
   height,
-  className = '',
-  priority = false,
-  placeholder = 'blur',
-  blurDataURL,
-  sizes,
-  fill = false,
   quality = 85,
-  loading = 'lazy',
-}: OptimizedImageProps) {
-  const [isLoading, setIsLoading] = useState(true)
-  const [hasError, setHasError] = useState(false)
+  format = 'webp',
+  lazy = true,
+  priority = false,
+  sizes,
+  className = '',
+  onLoad,
+  onError,
+  ...props
+}) => {
+  const [isLoaded, setIsLoaded] = useState(false);
+  const [hasError, setHasError] = useState(false);
+  const [imageSrc, setImageSrc] = useState<string | undefined>(
+    priority ? getOptimizedImageUrl(src, { width, height, quality, format }) : undefined
+  );
+  const imgRef = useRef<HTMLImageElement>(null);
+  const observerRef = useRef<IntersectionObserver | null>(null);
 
-  // Generate a simple blur placeholder if none provided
-  const defaultBlurDataURL = 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwCdABmX/9k='
+  useEffect(() => {
+    if (priority || !lazy) {
+      setImageSrc(getOptimizedImageUrl(src, { width, height, quality, format }));
+      return;
+    }
+
+    // Lazy loading with Intersection Observer
+    if (imgRef.current && 'IntersectionObserver' in window) {
+      observerRef.current = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              setImageSrc(getOptimizedImageUrl(src, { width, height, quality, format }));
+              if (observerRef.current && imgRef.current) {
+                observerRef.current.unobserve(imgRef.current);
+              }
+            }
+          });
+        },
+        {
+          rootMargin: '50px',
+        }
+      );
+
+      observerRef.current.observe(imgRef.current);
+    } else {
+      // Fallback: load immediately if IntersectionObserver not supported
+      setImageSrc(getOptimizedImageUrl(src, { width, height, quality, format }));
+    }
+
+    return () => {
+      if (observerRef.current && imgRef.current) {
+        observerRef.current.unobserve(imgRef.current);
+      }
+    };
+  }, [src, width, height, quality, format, lazy, priority]);
+
+  const handleLoad = () => {
+    setIsLoaded(true);
+    onLoad?.();
+  };
+
+  const handleError = () => {
+    setHasError(true);
+    onError?.();
+  };
+
+  // Generate responsive srcset if width is provided
+  const srcSet = width ? generateSrcSet(src, [width, width * 2, width * 3]) : undefined;
+  const sizesAttr = sizes || (width ? generateSizes({ mobile: '100vw', tablet: '50vw', desktop: '33vw' }) : undefined);
 
   if (hasError) {
     return (
-      <div 
-        className={`bg-gray-200 flex items-center justify-center ${className}`}
+      <div
+        className={`bg-gray-200 dark:bg-gray-800 flex items-center justify-center ${className}`}
         style={{ width, height }}
+        role="img"
+        aria-label={alt}
       >
         <span className="text-gray-500 text-sm">Failed to load image</span>
       </div>
-    )
+    );
   }
 
   return (
-    <motion.div
-      className={`relative overflow-hidden ${className}`}
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.3 }}
-    >
-      <Image
-        src={src}
-        alt={alt}
-        width={fill ? undefined : width}
-        height={fill ? undefined : height}
-        fill={fill}
-        priority={priority}
-        placeholder={placeholder}
-        blurDataURL={blurDataURL || defaultBlurDataURL}
-        sizes={sizes}
-        quality={quality}
-        loading={loading}
-        className={`transition-opacity duration-300 ${
-          isLoading ? 'opacity-0' : 'opacity-100'
-        }`}
-        onLoad={() => setIsLoading(false)}
-        onError={() => {
-          setIsLoading(false)
-          setHasError(true)
-        }}
-      />
-      
-      {/* Loading skeleton */}
-      {isLoading && (
-        <motion.div
-          className="absolute inset-0 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200"
-          animate={{
-            backgroundPosition: ['200% 0', '-200% 0'],
-          }}
-          transition={{
-            duration: 1.5,
-            repeat: Infinity,
-            ease: 'linear',
-          }}
-          style={{
-            backgroundSize: '200% 100%',
-          }}
+    <div className={`relative overflow-hidden ${className}`} style={{ width, height }}>
+      {/* Placeholder/skeleton */}
+      {!isLoaded && (
+        <div
+          className="absolute inset-0 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 dark:from-gray-700 dark:via-gray-600 dark:to-gray-700 animate-pulse"
+          style={{ width, height }}
         />
       )}
-    </motion.div>
-  )
-}
+
+      {/* Actual image */}
+      {imageSrc && (
+        <img
+          ref={imgRef}
+          src={imageSrc}
+          srcSet={srcSet}
+          sizes={sizesAttr}
+          alt={alt}
+          width={width}
+          height={height}
+          loading={lazy && !priority ? 'lazy' : 'eager'}
+          decoding="async"
+          fetchPriority={priority ? 'high' : 'auto'}
+          className={`transition-opacity duration-300 ${
+            isLoaded ? 'opacity-100' : 'opacity-0'
+          } ${className}`}
+          onLoad={handleLoad}
+          onError={handleError}
+          {...props}
+        />
+      )}
+    </div>
+  );
+};
+
+export default OptimizedImage;

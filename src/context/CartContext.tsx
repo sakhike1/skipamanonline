@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useReducer, useEffect } from 'react';
-import { Cart, CartItem, Size, Color } from '../types';
-import { getProductById } from '../data/products';
+import { Cart, CartItem, Size, Color, Product } from '../types';
+import { useProductData } from './ProductDataContext';
 
 // Initialize empty cart
 const initialCart: Cart = {
@@ -37,7 +37,7 @@ const cartReducer = (state: Cart, action: CartAction): Cart => {
   switch (action.type) {
     case 'ADD_ITEM': {
       const { productId, size, color, quantity } = action.payload;
-      const product = getProductById(productId);
+      const product = productLookup(productId);
       
       if (!product) return state;
       
@@ -143,10 +143,13 @@ const cartReducer = (state: Cart, action: CartAction): Cart => {
   }
 };
 
+// Dynamic product lookup function (defaults to no-op)
+let productLookup: (id: string) => Product | undefined = () => undefined;
+
 // Helper to calculate subtotal
 const calculateSubtotal = (items: CartItem[]): number => {
   return items.reduce((total, item) => {
-    const product = getProductById(item.productId);
+    const product = productLookup(item.productId);
     return total + ((product?.price || 0) / 100) * item.quantity;
   }, 0);
 };
@@ -163,6 +166,10 @@ const calculateOrderTotals = (subtotal: number) => {
 
 // Provider component
 export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { getProductById: fetchProductById } = useProductData();
+  // Update global lookup to use latest function
+  productLookup = fetchProductById;
+
   // Load cart from localStorage if available
   const savedCart = localStorage.getItem('cart');
   const cartVersion = localStorage.getItem('cartVersion');

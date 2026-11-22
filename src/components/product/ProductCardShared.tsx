@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ArrowRight } from 'lucide-react';
 
 export interface Product {
@@ -26,12 +26,37 @@ export const ProductCardShared: React.FC<ProductCardSharedProps> = ({
   variant = 'default'
 }) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [isTransitioning, setIsTransitioning] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
+
+  // Auto-rotate images every 7 seconds when not hovered
+  useEffect(() => {
+    if (isHovered || product.images.length <= 1) return; // Pause auto-rotation on hover
+    
+    const interval = setInterval(() => {
+      setIsTransitioning(true);
+      setTimeout(() => {
+        setCurrentImageIndex((prevIndex) =>
+          prevIndex === product.images.length - 1 ? 0 : prevIndex + 1
+        );
+        setIsTransitioning(false);
+      }, 300);
+    }, 7000); // Change every 7 seconds
+
+    return () => clearInterval(interval);
+  }, [isHovered, product.images.length]);
 
   const handleImageHover = () => {
     if (product.images.length > 1) {
-      setCurrentImageIndex((prevIndex) =>
-        prevIndex === product.images.length - 1 ? 0 : prevIndex + 1
-      );
+      setIsHovered(true);
+      // Immediately change image on hover
+      setIsTransitioning(true);
+      setTimeout(() => {
+        setCurrentImageIndex((prevIndex) =>
+          prevIndex === product.images.length - 1 ? 0 : prevIndex + 1
+        );
+        setIsTransitioning(false);
+      }, 300); // Smooth fade transition
     }
   };
 
@@ -41,13 +66,24 @@ export const ProductCardShared: React.FC<ProductCardSharedProps> = ({
         className="group relative bg-white border border-neutral-300 rounded-lg overflow-hidden hover:shadow-md transition-all duration-300 cursor-pointer"
         onClick={() => onClick(product.id)}
         onMouseEnter={handleImageHover}
+        onMouseLeave={() => {
+          setIsHovered(false);
+          setIsTransitioning(false);
+        }}
       >
         <div className="aspect-square overflow-hidden relative">
-          <img
-            src={product.images[currentImageIndex] || product.images[0]}
-            alt={product.name}
-            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 absolute inset-0"
-          />
+          {product.images.map((imageSrc, index) => (
+            <img
+              key={index}
+              src={imageSrc}
+              alt={`${product.name} - Image ${index + 1}`}
+              className={`absolute inset-0 w-full h-full object-cover transition-all duration-500 ease-in-out
+                ${index === currentImageIndex ? 'opacity-100 z-10' : 'opacity-0 z-0'}
+                ${isTransitioning ? 'blur-[0.5px]' : 'blur-0'}
+                group-hover:scale-105
+              `}
+            />
+          ))}
         </div>
         <div className="p-3">
           <h3 className="font-medium text-black text-sm line-clamp-1 mb-1">{product.name}</h3>
@@ -63,12 +99,23 @@ export const ProductCardShared: React.FC<ProductCardSharedProps> = ({
         className="aspect-square overflow-hidden cursor-pointer relative"
         onClick={() => onClick(product.id)}
         onMouseEnter={handleImageHover}
+        onMouseLeave={() => {
+          setIsHovered(false);
+          setIsTransitioning(false);
+        }}
       >
-        <img
-          src={product.images[currentImageIndex] || product.images[0]}
-          alt={product.name}
-          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 absolute inset-0"
-        />
+        {product.images.map((imageSrc, index) => (
+          <img
+            key={index}
+            src={imageSrc}
+            alt={`${product.name} - Image ${index + 1}`}
+            className={`absolute inset-0 w-full h-full object-cover transition-all duration-500 ease-in-out
+              ${index === currentImageIndex ? 'opacity-100 z-10' : 'opacity-0 z-0'}
+              ${isTransitioning ? 'blur-[0.5px]' : 'blur-0'}
+              group-hover:scale-105
+            `}
+          />
+        ))}
         {product.images.length > 1 && (
           <div className="absolute bottom-2 right-2 bg-black bg-opacity-70 text-white text-xs px-2 py-1 rounded-full">
             {currentImageIndex + 1}/{product.images.length}

@@ -1,6 +1,6 @@
 import { useCallback, useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
-import { useAuth } from '../../../../context/AuthContext';
+import { useAuth } from '../../../../context/useAuth';
 import { useHeader } from '../../../../context/HeaderContext';
 
 export const useHeaderStyles = (isScrolled: boolean) => {
@@ -12,11 +12,18 @@ export const useHeaderStyles = (isScrolled: boolean) => {
   const isShopPage = location.pathname === '/shop';
   const isAboutPage = location.pathname === '/about';
   const isCheckoutPage = location.pathname === '/checkout';
-  const isLoginPage = location.pathname === '/login';
+  /** Customer + staff sign-in (staff uses `/admin/login` and must not use the transparent hero header). */
+  const isLoginPage =
+    location.pathname === '/login' || location.pathname === '/admin/login';
   const isRegisterPage = location.pathname === '/register';
-  const isCustomDesignPage = location.pathname === '/custom-design';
   const isLookbookPage = location.pathname === '/lookbook';
   const isReviewsPage = location.pathname === '/reviews';
+  const isBrandingPage = location.pathname === '/virtual-stylist';
+  /** Printing hub + location/service landings use light heroes — header must stay solid for contrast */
+  const isPrintingSurface =
+    location.pathname === '/printing' ||
+    location.pathname.startsWith('/locations/') ||
+    location.pathname.startsWith('/services/');
 
   const getHeaderClassName = useCallback(() => {
     if (isAuthenticated) {
@@ -25,7 +32,11 @@ export const useHeaderStyles = (isScrolled: boolean) => {
     if (isAboutPage || isCheckoutPage) {
       return 'bg-gradient-to-r from-purple-900/95 via-black/90 to-black/95 backdrop-blur-sm shadow-md py-2';
     }
-    if (isHeaderDark || isShopPage || isLoginPage || isRegisterPage || isCustomDesignPage || isLookbookPage || isReviewsPage) {
+    // Solid bar so white nav links stay readable on light auth page backgrounds
+    if (isLoginPage || isRegisterPage) {
+      return 'bg-black border-b border-white/10 shadow-lg py-2.5';
+    }
+    if (isHeaderDark || isShopPage || isLookbookPage || isReviewsPage || isBrandingPage || isPrintingSurface) {
       return 'bg-black/95 backdrop-blur-sm shadow-md py-2';
     }
     if (isScrolled) {
@@ -41,9 +52,10 @@ export const useHeaderStyles = (isScrolled: boolean) => {
     isShopPage,
     isLoginPage,
     isRegisterPage,
-    isCustomDesignPage,
     isLookbookPage,
     isReviewsPage,
+    isBrandingPage,
+    isPrintingSurface,
     isScrolled
   ]);
 
@@ -70,7 +82,7 @@ export const useHeaderStyles = (isScrolled: boolean) => {
 
   const isDarkPage = useMemo(() => {
     return isHeaderDark || isShopPage || isLoginPage || isRegisterPage || 
-           isAboutPage || isCheckoutPage || isCustomDesignPage || isLookbookPage || isReviewsPage;
+           isAboutPage || isCheckoutPage || isLookbookPage || isReviewsPage || isBrandingPage || isPrintingSurface;
   }, [
     isHeaderDark,
     isShopPage,
@@ -78,9 +90,10 @@ export const useHeaderStyles = (isScrolled: boolean) => {
     isRegisterPage,
     isAboutPage,
     isCheckoutPage,
-    isCustomDesignPage,
     isLookbookPage,
-    isReviewsPage
+    isReviewsPage,
+    isBrandingPage,
+    isPrintingSurface
   ]);
 
   return {
@@ -95,7 +108,6 @@ export const useHeaderStyles = (isScrolled: boolean) => {
       isCheckoutPage,
       isLoginPage,
       isRegisterPage,
-      isCustomDesignPage,
       isLookbookPage
     }
   };

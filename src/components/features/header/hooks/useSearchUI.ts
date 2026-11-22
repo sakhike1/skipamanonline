@@ -47,17 +47,17 @@ export const useSearchUI = () => {
   }, []);
 
   useEffect(() => {
-    if (showSearchDropdown) {
-      setShowSearchDropdown(false);
-      setIsSearchFocused(false);
-      setIsInteracting(false);
-    }
-  }, [location.pathname, showSearchDropdown]);
+    // Close search dropdown when route changes
+    setShowSearchDropdown(false);
+    setIsSearchFocused(false);
+    setIsInteracting(false);
+  }, [location.pathname]);
 
   return {
     showSearchDropdown,
     setShowSearchDropdown,
     isSearchFocused,
+    setIsSearchFocused,
     searchInputRef,
     searchContainerRef,
     handleSearchFocus,

@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { useAuth } from '../context/AuthContext';
-import { authAPI } from '../services/api';
-import { User } from '../types';
+import { useAuth } from '../context/useAuth';
+import { supabase } from '../lib/supabase';
 import { 
   User as UserIcon, 
   Mail, 
@@ -55,33 +54,41 @@ const ProfilePage: React.FC = () => {
 
   const handleSave = async () => {
     if (!user) return;
-    
+
     setIsLoading(true);
     setMessage(null);
-    
+
     try {
-      const response = await authAPI.updateProfile({
-        firstName: formData.firstName,
-        lastName: formData.lastName,
-        phone: formData.phone,
-        dateOfBirth: formData.dateOfBirth,
-        gender: formData.gender
+      if (!supabase) throw new Error('Supabase is not configured.');
+
+      const fullName = `${formData.firstName} ${formData.lastName}`.trim();
+      const { error: profileErr } = await supabase
+        .from('profiles')
+        .update({
+          full_name: fullName,
+          phone: formData.phone || null,
+        })
+        .eq('id', user.id);
+
+      if (profileErr) throw profileErr;
+
+      const { error: metaErr } = await supabase.auth.updateUser({
+        data: {
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          full_name: fullName,
+          dateOfBirth: formData.dateOfBirth,
+          gender: formData.gender,
+        },
       });
-      
-      if (response.success) {
-        setMessage({ type: 'success', text: 'Profile updated successfully!' });
-        setIsEditing(false);
-        // Update local storage with new user data
-        const updatedUser = { ...user, ...formData };
-        localStorage.setItem('user_data', JSON.stringify(updatedUser));
-      } else {
-        setMessage({ type: 'error', text: response.message || 'Failed to update profile' });
-      }
-    } catch (error: any) {
-      setMessage({ 
-        type: 'error', 
-        text: error.response?.data?.message || 'Failed to update profile' 
-      });
+
+      if (metaErr) throw metaErr;
+
+      setMessage({ type: 'success', text: 'Profile updated successfully!' });
+      setIsEditing(false);
+    } catch (error: unknown) {
+      const text = error instanceof Error ? error.message : 'Failed to update profile';
+      setMessage({ type: 'error', text });
     } finally {
       setIsLoading(false);
     }

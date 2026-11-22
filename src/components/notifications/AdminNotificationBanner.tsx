@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '../../context/AuthContext';
-import socketService from '../../services/socket';
+import { useAuth } from '../../context/useAuth';
 import { motion, AnimatePresence } from 'framer-motion';
+import { supabase } from '../../lib/supabase';
 import { 
   AlertTriangle, 
   Info, 
@@ -40,34 +40,47 @@ const AdminNotificationBanner: React.FC = () => {
       setDismissedNotifications(new Set(JSON.parse(dismissed)));
     }
 
-    // Listen for admin broadcasts
-    const handleAdminBroadcast = (data: AdminNotification) => {
-      setNotifications(prev => {
-        // Don't add if already dismissed
-        if (dismissedNotifications.has(data.id)) return prev;
-        
-        // Add to beginning of array (most recent first)
-        return [data, ...prev];
-      });
+    if (!supabase) return;
+
+    const sb = supabase;
+    const loadLatest = async () => {
+      const { data, error } = await sb
+        .from('admin_announcements')
+        .select('id,title,message,type,priority,action_required,action_url,persistent,created_at')
+        .order('created_at', { ascending: false })
+        .limit(10);
+
+      if (error) return;
+      const mapped: AdminNotification[] = (data ?? []).map((row: any) => ({
+        id: String(row.id),
+        type: (row.type ?? 'info') as AdminNotification['type'],
+        title: String(row.title ?? ''),
+        message: String(row.message ?? ''),
+        priority: (row.priority ?? 'medium') as AdminNotification['priority'],
+        timestamp: String(row.created_at ?? new Date().toISOString()),
+        actionRequired: Boolean(row.action_required),
+        actionUrl: row.action_url ? String(row.action_url) : undefined,
+        persistent: Boolean(row.persistent),
+      }));
+
+      setNotifications(mapped.filter((n) => !dismissedNotifications.has(n.id)));
     };
 
-    // Listen for system announcements
-    const handleSystemAnnouncement = (data: AdminNotification) => {
-      setNotifications(prev => {
-        // Don't add if already dismissed
-        if (dismissedNotifications.has(data.id)) return prev;
-        
-        // Add to beginning of array (most recent first)
-        return [data, ...prev];
-      });
-    };
+    void loadLatest();
 
-    socketService.onAdminBroadcast(handleAdminBroadcast);
-    socketService.onSystemAnnouncement(handleSystemAnnouncement);
+    const channel = sb
+      .channel('admin-announcements')
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'admin_announcements' },
+        () => {
+          void loadLatest();
+        },
+      )
+      .subscribe();
 
     return () => {
-      socketService.offAdminBroadcast(handleAdminBroadcast);
-      socketService.offSystemAnnouncement(handleSystemAnnouncement);
+      void sb.removeChannel(channel);
     };
   }, [isAuthenticated, user, dismissedNotifications]);
 

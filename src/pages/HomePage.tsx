@@ -1,61 +1,73 @@
-import React from 'react';
+import React, { useCallback, memo } from 'react';
 import Hero from '../components/home/Hero';
-import SportCollection from '../components/home/SportCollection';
 import FeaturedProducts from '../components/home/FeaturedProducts';
 import NewArrivals from '../components/home/NewArrivals';
+import { HomeSectionReveal } from '../components/home/HomeSectionReveal';
 import { NewsletterSection } from '../components/home/NewsletterSection';
+import { HomeWorkflowSection } from '../components/home/HomeWorkflowSection';
 import { CustomerAssuranceSection } from '../components/home/CustomerAssuranceSection';
 import CustomerReviewSection from '../components/home/CustomerReviewSection';
 import { Toast } from '../components/ui/Toast';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '../hooks/useToast';
-
+import { usePerformance } from '../hooks/usePerformance';
+// Note: avoid preloading hard-coded local hero images.
+// Hero media is served from `/public/images`, so preloading /images/*.jpg can produce "preloaded but not used" warnings.
 const HomePage: React.FC = () => {
   const navigate = useNavigate();
   const { toast, showToast } = useToast();
+  usePerformance(); // Monitor performance
 
-  const handleProductClick = (productId: string) => {
+  const handleProductClick = useCallback((productId: string) => {
     navigate(`/product/${productId}`);
     // Scroll to top after navigation
-    setTimeout(() => {
+    requestAnimationFrame(() => {
       window.scrollTo({
         top: 0,
         behavior: 'smooth'
       });
-    }, 100);
-  };
+    });
+  }, [navigate]);
 
-  const handleSubscribeSuccess = () => {
+  const handleSubscribeSuccess = useCallback(() => {
     showToast('Successfully subscribed to our newsletter!', 'success');
-  };
+  }, [showToast]);
 
-  const handleSubscribeError = (error: string) => {
+  const handleSubscribeError = useCallback((error: string) => {
     showToast(error, 'error');
-  };
+  }, [showToast]);
 
   return (
-    <div>
+    <div className="bg-gradient-to-b from-gray-50 via-white to-gray-50 min-h-screen">
       <Hero />
-      <SportCollection />
-      <NewArrivals />
-      <FeaturedProducts onProductClick={handleProductClick} />
-      
-      <NewsletterSection 
-        onSubscribeSuccess={handleSubscribeSuccess}
-        onSubscribeError={handleSubscribeError}
-      />
+      <HomeSectionReveal>
+        <HomeWorkflowSection />
+      </HomeSectionReveal>
+      <HomeSectionReveal delay={0.02}>
+        <NewArrivals />
+      </HomeSectionReveal>
+      <HomeSectionReveal delay={0.05}>
+        <FeaturedProducts onProductClick={handleProductClick} />
+      </HomeSectionReveal>
 
-      <CustomerAssuranceSection />
+      <HomeSectionReveal delay={0.06} variant="dark">
+        <NewsletterSection
+          onSubscribeSuccess={handleSubscribeSuccess}
+          onSubscribeError={handleSubscribeError}
+        />
+      </HomeSectionReveal>
 
-      <Toast 
-        show={toast.show}
-        message={toast.message}
-        type={toast.type}
-      />
-      
-      <CustomerReviewSection />
+      <HomeSectionReveal delay={0.07} variant="dark">
+        <CustomerAssuranceSection />
+      </HomeSectionReveal>
+
+      <Toast show={toast.show} message={toast.message} type={toast.type} />
+
+      <HomeSectionReveal delay={0.08}>
+        <CustomerReviewSection />
+      </HomeSectionReveal>
     </div>
   );
 };
 
-export default HomePage;
+export default memo(HomePage);

@@ -17,9 +17,10 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import { useWishlist } from '../context/WishlistContext';
 import { useCart } from '../context/CartContext';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../context/useAuth';
 import { Product } from '../types';
 import AuthPrompt from '../components/auth/AuthPrompt';
+import { RetailEmptyState } from '../components/ui/RetailEmptyState';
 
 const WishlistPage: React.FC = () => {
   const { wishlist, removeFromWishlist, clearWishlist, getWishlistCount } = useWishlist();
@@ -35,13 +36,15 @@ const WishlistPage: React.FC = () => {
   const [addingToCart, setAddingToCart] = useState<string | null>(null);
 
   // Get unique categories from wishlist items
-  const categories = ['all', ...new Set(wishlist.map(item => item.product.category))];
+  const categories = ['all', ...new Set(wishlist.map(item => item.product.category).filter(Boolean))];
 
   // Filter and sort wishlist items
   const filteredWishlist = wishlist
     .filter(item => {
-      const matchesSearch = item.product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                           item.product.description.toLowerCase().includes(searchQuery.toLowerCase());
+      const productName = item.product.name?.toLowerCase() || '';
+      const productDescription = item.product.description?.toLowerCase() || '';
+      const searchLower = searchQuery.toLowerCase();
+      const matchesSearch = productName.includes(searchLower) || productDescription.includes(searchLower);
       const matchesCategory = filterCategory === 'all' || item.product.category === filterCategory;
       return matchesSearch && matchesCategory;
     })
@@ -66,8 +69,8 @@ const WishlistPage: React.FC = () => {
     setAddingToCart(product.id);
     try {
       // Use default size and color from product
-      const defaultSize = product.sizes[0] || 'M';
-      const defaultColor = product.colors[0] || { name: 'Default', value: '#000000' };
+      const defaultSize = product.sizes?.[0] || 'M';
+      const defaultColor = product.colors?.[0] || { name: 'Default', value: '#000000' };
       addToCart(product.id, defaultSize, defaultColor, 1);
       // You could add a toast notification here
     } catch (error) {
@@ -131,49 +134,15 @@ const WishlistPage: React.FC = () => {
           </div>
 
           {/* Empty State */}
-          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8 }}
-              className="text-center"
-            >
-              <motion.div 
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                transition={{ delay: 0.3, type: "spring", stiffness: 200 }}
-                className="w-32 h-32 mx-auto mb-8 bg-white/10 backdrop-blur-lg rounded-full flex items-center justify-center border border-white/20"
-              >
-                <Heart size={48} className="text-white" />
-              </motion.div>
-              
-              <h2 className="text-4xl font-bold text-white mb-6">
-                Your Wishlist is Empty
-              </h2>
-              
-              <p className="text-xl text-white/80 mb-10 max-w-lg mx-auto leading-relaxed">
-                Start building your wishlist by browsing our amazing collection and saving items you love. 
-                Your perfect style awaits.
-              </p>
-              
-              <div className="flex flex-col sm:flex-row gap-6 justify-center">
-                <Link
-                  to="/shop"
-                  className="inline-flex items-center gap-3 bg-white text-black px-8 py-4 rounded-2xl font-bold hover:bg-white/90 transition-all duration-300 transform hover:scale-105 shadow-2xl"
-                >
-                  <ShoppingBag size={20} />
-                  Browse Products
-                </Link>
-                
-                <Link
-                  to="/lookbook"
-                  className="inline-flex items-center gap-3 bg-white/10 backdrop-blur-lg text-white px-8 py-4 rounded-2xl font-bold border border-white/30 hover:bg-white/20 transition-all duration-300 transform hover:scale-105"
-                >
-                  <Heart size={20} />
-                  View Lookbook
-                </Link>
-              </div>
-            </motion.div>
+          <div className="mx-auto max-w-4xl px-4 py-16 sm:px-6 lg:px-8">
+            <RetailEmptyState
+              icon={Heart}
+              title="Your wishlist is empty"
+              description="Save pieces you love from the shop or lookbook—your wishlist syncs when you’re signed in."
+              primaryAction={{ label: 'Browse the shop', to: '/shop' }}
+              secondaryAction={{ label: 'View lookbook', to: '/lookbook' }}
+              surface="hero"
+            />
           </div>
         </div>
       </div>
@@ -339,9 +308,11 @@ const WishlistPage: React.FC = () => {
                     <h3 className="font-bold text-white mb-3 line-clamp-2 text-lg">
                       {item.product.name}
                     </h3>
-                    <p className="text-sm text-white/70 mb-3 line-clamp-2">
-                      {item.product.description}
-                    </p>
+                    {item.product.description && (
+                      <p className="text-sm text-white/70 mb-3 line-clamp-2">
+                        {item.product.description}
+                      </p>
+                    )}
                     <div className="flex items-center justify-between mb-4">
                       <span className="text-xl font-bold text-white">
                         R{(item.product.price / 100).toFixed(2)}
@@ -356,10 +327,12 @@ const WishlistPage: React.FC = () => {
                         <Clock size={12} />
                         Added {formatDate(item.addedAt)}
                       </span>
-                      <span className="flex items-center gap-1">
-                        <Tag size={12} />
-                        {item.product.category}
-                      </span>
+                      {item.product.category && (
+                        <span className="flex items-center gap-1">
+                          <Tag size={12} />
+                          {item.product.category}
+                        </span>
+                      )}
                     </div>
                     <div className="flex gap-3">
                       <button
@@ -420,18 +393,22 @@ const WishlistPage: React.FC = () => {
                       <h3 className="font-bold text-white mb-2 text-lg">
                         {item.product.name}
                       </h3>
-                      <p className="text-sm text-white/70 mb-3 line-clamp-2">
-                        {item.product.description}
-                      </p>
+                      {item.product.description && (
+                        <p className="text-sm text-white/70 mb-3 line-clamp-2">
+                          {item.product.description}
+                        </p>
+                      )}
                       <div className="flex items-center gap-4 text-sm text-white/60">
                         <span className="flex items-center gap-1">
                           <Clock size={12} />
                           Added {formatDate(item.addedAt)}
                         </span>
-                        <span className="flex items-center gap-1">
-                          <Tag size={12} />
-                          {item.product.category}
-                        </span>
+                        {item.product.category && (
+                          <span className="flex items-center gap-1">
+                            <Tag size={12} />
+                            {item.product.category}
+                          </span>
+                        )}
                         <div className="flex items-center gap-1">
                           <Star size={12} className="text-yellow-400 fill-current" />
                           <span>4.5</span>

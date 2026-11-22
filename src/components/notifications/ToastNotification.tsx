@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '../../context/AuthContext';
-import socketService from '../../services/socket';
+import { useAuth } from '../../context/useAuth';
 import { motion, AnimatePresence } from 'framer-motion';
+import { supabase } from '../../lib/supabase';
 import { 
   CheckCircle, 
   AlertTriangle, 
@@ -38,51 +38,73 @@ const ToastNotification: React.FC<ToastContainerProps> = ({
   useEffect(() => {
     if (!isAuthenticated || !user) return;
 
-    // Listen for order updates
-    const handleOrderUpdate = (data: any) => {
-      addToast({
-        id: `order-${data.orderId}-${Date.now()}`,
-        type: 'order_update',
-        title: 'Order Update',
-        message: data.message || `Order ${data.orderNumber} status updated`,
-        timestamp: data.timestamp || new Date().toISOString(),
-        duration: 8000,
-        actionUrl: `/orders/${data.orderId}`
-      });
-    };
+    if (!supabase) return;
+    const sb = supabase;
 
-    // Listen for new notifications
-    const handleNewNotification = (data: any) => {
-      addToast({
-        id: `notification-${data.id}`,
-        type: data.type === 'admin_message' ? 'admin_message' : 'info',
-        title: data.title || 'New Notification',
-        message: data.message,
-        timestamp: data.createdAt || new Date().toISOString(),
-        duration: 6000
-      });
-    };
+    const ordersChannel = sb
+      .channel(`toast-orders:${user.id}`)
+      .on(
+        'postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'orders', filter: `user_id=eq.${user.id}` },
+        (payload) => {
+          const row = payload.new as { id?: string; status?: string } | null;
+          if (!row?.id) return;
+          addToast({
+            id: `order-${row.id}-${Date.now()}`,
+            type: 'order_update',
+            title: 'Order Update',
+            message: row.status ? `Status: ${row.status}` : 'Order updated',
+            timestamp: new Date().toISOString(),
+            duration: 8000,
+            actionUrl: `/orders/${row.id}`,
+          });
+        },
+      )
+      .subscribe();
 
-    // Listen for admin broadcasts
-    const handleAdminBroadcast = (data: any) => {
-      addToast({
-        id: `admin-broadcast-${Date.now()}`,
-        type: 'admin_message',
-        title: data.title || 'Admin Message',
-        message: data.message,
-        timestamp: data.timestamp || new Date().toISOString(),
-        duration: data.priority === 'urgent' ? 12000 : 8000
-      });
-    };
+    const notificationsChannel = sb
+      .channel(`toast-notifications:${user.id}`)
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'notifications', filter: `user_id=eq.${user.id}` },
+        (payload) => {
+          const row = payload.new as any;
+          addToast({
+            id: `notification-${String(row?.id ?? Date.now())}`,
+            type: row?.type === 'admin_message' ? 'admin_message' : 'info',
+            title: String(row?.title ?? 'New Notification'),
+            message: String(row?.body ?? row?.message ?? ''),
+            timestamp: String(row?.created_at ?? new Date().toISOString()),
+            duration: 6000,
+          });
+        },
+      )
+      .subscribe();
 
-    socketService.onOrderUpdate(handleOrderUpdate);
-    socketService.onNewNotification(handleNewNotification);
-    socketService.onAdminBroadcast(handleAdminBroadcast);
+    const announcementsChannel = sb
+      .channel('toast-admin-announcements')
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'admin_announcements' },
+        (payload) => {
+          const row = payload.new as any;
+          addToast({
+            id: `admin-broadcast-${String(row?.id ?? Date.now())}`,
+            type: 'admin_message',
+            title: String(row?.title ?? 'Admin Message'),
+            message: String(row?.message ?? ''),
+            timestamp: String(row?.created_at ?? new Date().toISOString()),
+            duration: row?.priority === 'urgent' ? 12000 : 8000,
+            actionUrl: row?.action_url ? String(row.action_url) : undefined,
+          });
+        },
+      )
+      .subscribe();
 
     return () => {
-      socketService.offOrderUpdate(handleOrderUpdate);
-      socketService.offNewNotification(handleNewNotification);
-      socketService.offAdminBroadcast(handleAdminBroadcast);
+      void sb.removeChannel(ordersChannel);
+      void sb.removeChannel(notificationsChannel);
+      void sb.removeChannel(announcementsChannel);
     };
   }, [isAuthenticated, user]);
 

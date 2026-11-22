@@ -1,0 +1,71 @@
+# Build outputs
+dist/
+dist-ssr/
+build/
+.next/
+out/
+
+# Dependencies
+node_modules/
+backend/node_modules/
+
+# Documentation files (too many in root - causing slowness)
+*.md
+!README.md
+
+# Cache and temp files
+.cache/
+.temp/
+*.cache
+*.tmp
+*.timestamp*.mjs
+
+# Logs
+*.log
+logs/
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# IDE files
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Large media files that don't need indexing
+public/images/
+src/assets/
+
+# Backend build
+backend/dist/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

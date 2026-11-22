@@ -4,7 +4,7 @@ import { Search, TrendingUp, Sparkles, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSearchUI } from './hooks/useSearchUI';
 import { Product } from '../../../types';
-import { searchProducts, products } from '../../../data/products';
+import { searchProducts } from '../../../data/products';
 
 interface HeaderSearchProps {
   isAuthenticated: boolean;
@@ -121,7 +121,7 @@ export const HeaderSearch: React.FC<HeaderSearchProps> = ({
             onBlur={handleSearchBlur}
             placeholder={isSearchFocused ? "Search products..." : ""}
             className={`
-              relative w-full px-5 py-2.5 lg:py-3 rounded-full
+              relative w-full px-3 py-1 lg:py-1.5 rounded-full
               ${isSearchFocused
                 ? 'bg-white/25 backdrop-blur-xl border-white/40 shadow-lg shadow-white/10'
                 : 'bg-black/15 backdrop-blur-md border-white/15 hover:bg-black/20'
@@ -201,7 +201,7 @@ export const HeaderSearch: React.FC<HeaderSearchProps> = ({
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
-            className="absolute top-full left-0 mt-2 w-80 md:w-96 bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl rounded-xl overflow-hidden z-[100] border border-gray-200 dark:border-gray-700 shadow-2xl"
+            className="absolute top-full left-0 mt-2 w-80 md:w-96 bg-white/95 backdrop-blur-xl rounded-xl overflow-hidden z-[100] border border-gray-200 shadow-2xl"
             onMouseMove={handleMouseMove}
             onMouseLeave={handleMouseLeave}
           >
@@ -210,7 +210,7 @@ export const HeaderSearch: React.FC<HeaderSearchProps> = ({
                 // Search results
                 <div className="p-4">
                   <div className="flex items-center justify-between mb-3">
-                    <h3 className={`text-sm font-semibold ${isScrolled ? 'text-gray-800' : 'text-gray-200'}`}>
+                    <h3 className="text-sm font-semibold text-gray-800">
                       Search Results
                     </h3>
                     <button
@@ -218,9 +218,10 @@ export const HeaderSearch: React.FC<HeaderSearchProps> = ({
                         setSearchQuery('');
                         setShowSearchDropdown(false);
                       }}
-                      className="p-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-full transition-colors"
+                      className="p-1 hover:bg-gray-200 rounded-full transition-colors"
+                      aria-label="Close search"
                     >
-                      <X size={16} className={isScrolled ? 'text-gray-600' : 'text-gray-400'} />
+                      <X size={16} className="text-gray-600" />
                     </button>
                   </div>
                   
@@ -233,19 +234,24 @@ export const HeaderSearch: React.FC<HeaderSearchProps> = ({
                           className="group cursor-pointer"
                           onClick={() => handleSuggestionClick(product.id)}
                         >
-                          <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-200">
-                            <div className="w-12 h-12 bg-gray-200 dark:bg-gray-700 rounded-md overflow-hidden flex-shrink-0">
+                          <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-100 transition-all duration-200">
+                            <div className="w-12 h-12 bg-gray-200 rounded-md overflow-hidden flex-shrink-0">
                               <img
-                                src={product.images[0]}
+                                src={product.images?.[0] || '/images/placeholder.png'}
                                 alt={product.name}
                                 className="w-full h-full object-cover"
+                                loading="lazy"
+                                onError={(e) => {
+                                  const target = e.target as HTMLImageElement;
+                                  target.src = '/images/placeholder.png';
+                                }}
                               />
                             </div>
                             <div className="flex-1 min-w-0">
-                              <h4 className={`text-sm font-medium truncate ${isScrolled ? 'text-gray-800' : 'text-gray-200'}`}>
+                              <h4 className="text-sm font-medium truncate text-gray-800">
                                 {product.name}
                               </h4>
-                              <p className={`text-xs ${isScrolled ? 'text-gray-600' : 'text-gray-400'}`}>
+                              <p className="text-xs text-gray-600">
                                 R{(product.price / 100).toFixed(2)}
                               </p>
                             </div>
@@ -261,7 +267,7 @@ export const HeaderSearch: React.FC<HeaderSearchProps> = ({
                     </div>
                   ) : (
                     <div className="text-center py-8">
-                      <p className={`text-sm ${isScrolled ? 'text-gray-600' : 'text-gray-400'}`}>
+                      <p className="text-sm text-gray-600">
                         No products found
                       </p>
                     </div>
@@ -272,10 +278,10 @@ export const HeaderSearch: React.FC<HeaderSearchProps> = ({
                 <div className="p-4">
                   <div className="flex items-center gap-2 mb-4">
                     <div className="relative">
-                      <TrendingUp size={18} className={isScrolled ? 'text-gray-800' : 'text-gray-200'} />
-                      <Sparkles size={12} className={`absolute -top-1 -right-1 ${isScrolled ? 'text-yellow-500' : 'text-yellow-400'} animate-pulse`} />
+                      <TrendingUp size={18} className="text-gray-800" />
+                      <Sparkles size={12} className="absolute -top-1 -right-1 text-yellow-500 animate-pulse" />
                     </div>
-                    <h3 className={`font-medium ${isScrolled ? 'text-gray-800' : 'text-gray-200'}`}>
+                    <h3 className="font-medium text-gray-800">
                       Popular Products
                     </h3>
                   </div>
@@ -287,20 +293,25 @@ export const HeaderSearch: React.FC<HeaderSearchProps> = ({
                         className="group cursor-pointer"
                         onClick={() => handleSuggestionClick(product.id)}
                       >
-                        <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-200">
-                          <div className="w-12 h-12 bg-gray-200 dark:bg-gray-700 rounded-md overflow-hidden flex-shrink-0">
+                        <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-100 transition-all duration-200">
+                          <div className="w-12 h-12 bg-gray-200 rounded-md overflow-hidden flex-shrink-0">
                             <img
-                              src={product.images[0]}
+                              src={product.images?.[0] || '/images/placeholder.png'}
                               alt={product.name}
                               className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                              loading="lazy"
+                              onError={(e) => {
+                                const target = e.target as HTMLImageElement;
+                                target.src = '/images/placeholder.png';
+                              }}
                             />
                           </div>
                           <div className="flex-1 min-w-0">
-                            <h4 className={`text-sm font-medium truncate ${isScrolled ? 'text-gray-800' : 'text-gray-200'}`}>
+                            <h4 className="text-sm font-medium truncate text-gray-800">
                               {product.name}
                             </h4>
                             <div className="flex items-center gap-2">
-                              <p className={`text-sm font-semibold ${isScrolled ? 'text-gray-800' : 'text-gray-200'}`}>
+                              <p className="text-sm font-semibold text-gray-800">
                                 R{(product.price / 100).toFixed(2)}
                               </p>
                               <span className="text-xs font-medium bg-gradient-to-r from-amber-400 to-yellow-500 text-amber-900 px-2 py-0.5 rounded-full">

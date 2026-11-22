@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 interface SkeletonProps {
   className?: string;
   count?: number;
-  type?: 'product' | 'text' | 'image' | 'button' | 'card' | 'list' | 'header' | 'checkout';
+  type?: 'product' | 'text' | 'image' | 'button' | 'card' | 'list' | 'header' | 'checkout' | 'grid' | 'hero' | 'product-list';
   theme?: 'light' | 'dark';
 }
 
@@ -191,6 +191,65 @@ const Skeleton: React.FC<SkeletonProps> = ({
                   <div className={`h-3 w-1/2 ${shimmer} rounded`}></div>
                 </div>
                 <div className={`w-20 h-8 ${shimmer} rounded`}></div>
+              </div>
+            ))}
+          </motion.div>
+        );
+
+      case 'grid':
+        return (
+          <motion.div 
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.3 }}
+          >
+            {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
+              <div key={i} className="space-y-3">
+                <div className={`aspect-square ${shimmer} rounded-xl`}></div>
+                <div className={`h-4 w-3/4 ${shimmer} rounded`}></div>
+                <div className={`h-4 w-1/2 ${shimmer} rounded`}></div>
+              </div>
+            ))}
+          </motion.div>
+        );
+
+      case 'hero':
+        return (
+          <motion.div 
+            className="relative w-full h-[60vh] sm:h-[70vh] md:h-[80vh] overflow-hidden rounded-2xl"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.4 }}
+          >
+            <div className={`absolute inset-0 ${shimmer}`}>
+              <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
+            </div>
+            <div className="absolute bottom-0 left-0 right-0 p-8 space-y-4">
+              <div className={`h-12 w-3/4 ${shimmer} rounded`}></div>
+              <div className={`h-6 w-1/2 ${shimmer} rounded`}></div>
+              <div className={`h-12 w-40 ${shimmer} rounded-full`}></div>
+            </div>
+          </motion.div>
+        );
+
+      case 'product-list':
+        return (
+          <motion.div 
+            className="space-y-6"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.3 }}
+          >
+            {[1, 2, 3, 4, 5].map((i) => (
+              <div key={i} className="flex gap-4 p-4 bg-white/5 rounded-xl">
+                <div className={`w-24 h-24 sm:w-32 sm:h-32 ${shimmer} rounded-lg flex-shrink-0`}></div>
+                <div className="flex-1 space-y-3">
+                  <div className={`h-5 w-2/3 ${shimmer} rounded`}></div>
+                  <div className={`h-4 w-1/2 ${shimmer} rounded`}></div>
+                  <div className={`h-6 w-1/4 ${shimmer} rounded`}></div>
+                </div>
+                <div className={`w-24 h-10 ${shimmer} rounded-full`}></div>
               </div>
             ))}
           </motion.div>

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { adminAPI } from '../../services/api';
+import { createAdminAnnouncement } from '../../services/adminAnnouncements';
 import { 
   Send, 
   Megaphone, 
@@ -56,26 +56,23 @@ const AdminNotificationPanel: React.FC = () => {
     setErrorMessage(null);
 
     try {
-      const response = await adminAPI.sendBroadcast({
+      await createAdminAnnouncement({
         title: broadcastForm.title,
         message: broadcastForm.message,
+        type: 'info',
         priority: broadcastForm.priority,
         actionRequired: broadcastForm.actionRequired,
-        actionUrl: broadcastForm.actionUrl || undefined
+        actionUrl: broadcastForm.actionUrl || undefined,
+        persistent: false,
       });
-
-      if (response.success) {
-        setSuccessMessage('Broadcast notification sent successfully!');
-        setBroadcastForm({
-          title: '',
-          message: '',
-          priority: 'medium',
-          actionRequired: false,
-          actionUrl: ''
-        });
-      } else {
-        throw new Error(response.message || 'Failed to send broadcast');
-      }
+      setSuccessMessage('Broadcast announcement published successfully!');
+      setBroadcastForm({
+        title: '',
+        message: '',
+        priority: 'medium',
+        actionRequired: false,
+        actionUrl: '',
+      });
     } catch (error: any) {
       setErrorMessage(error.message || 'Failed to send broadcast notification');
     } finally {
@@ -90,24 +87,20 @@ const AdminNotificationPanel: React.FC = () => {
     setErrorMessage(null);
 
     try {
-      const response = await adminAPI.sendAnnouncement({
+      await createAdminAnnouncement({
         title: announcementForm.title,
         message: announcementForm.message,
         type: announcementForm.type,
-        persistent: announcementForm.persistent
+        priority: 'medium',
+        persistent: announcementForm.persistent,
       });
-
-      if (response.success) {
-        setSuccessMessage('System announcement sent successfully!');
-        setAnnouncementForm({
-          title: '',
-          message: '',
-          type: 'info',
-          persistent: false
-        });
-      } else {
-        throw new Error(response.message || 'Failed to send announcement');
-      }
+      setSuccessMessage('System announcement published successfully!');
+      setAnnouncementForm({
+        title: '',
+        message: '',
+        type: 'info',
+        persistent: false,
+      });
     } catch (error: any) {
       setErrorMessage(error.message || 'Failed to send system announcement');
     } finally {

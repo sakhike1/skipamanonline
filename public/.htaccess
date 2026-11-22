@@ -1,0 +1,141 @@
+# Apache Configuration for React SPA on Afrihost
+# This file should be uploaded to public_html/ on your server
+
+# Enable Rewrite Engine
+RewriteEngine On
+
+# Force HTTPS (optional but recommended)
+RewriteCond %{HTTPS} off
+RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+# Set correct MIME types for JavaScript modules (CRITICAL - Must be first)
+<IfModule mod_mime.c>
+    # JavaScript files - MUST be application/javascript for ES modules
+    AddType application/javascript .js
+    AddType application/javascript .mjs
+    AddType application/javascript .jsx
+    AddType application/javascript .tsx
+    AddType application/javascript .ts
+    AddType text/javascript .js
+    AddType text/javascript .mjs
+    AddType text/javascript .tsx
+    AddType text/javascript .ts
+    
+    # Other file types
+    AddType application/json .json
+    AddType application/wasm .wasm
+    AddType text/css .css
+    AddType image/svg+xml .svg
+    AddType image/png .png
+    AddType image/jpeg .jpg .jpeg
+    AddType image/gif .gif
+    AddType image/webp .webp
+    AddType font/woff .woff
+    AddType font/woff2 .woff2
+    AddType font/ttf .ttf
+    AddType font/otf .otf
+    AddType application/x-font-ttf .ttf
+    AddType application/font-woff .woff
+    AddType application/font-woff2 .woff2
+</IfModule>
+
+# Enable CORS for assets (if needed)
+<IfModule mod_headers.c>
+    # Allow cross-origin requests for assets
+    <FilesMatch "\.(js|mjs|css|json|wasm|woff|woff2|ttf|eot|svg|png|jpg|jpeg|gif|ico)$">
+        Header set Access-Control-Allow-Origin "*"
+    </FilesMatch>
+    
+    # Force correct content types for JavaScript (override server defaults)
+    <FilesMatch "\.js$">
+        Header set Content-Type "application/javascript; charset=utf-8"
+        Header unset Content-Type
+        Header set Content-Type "application/javascript; charset=utf-8"
+    </FilesMatch>
+    
+    <FilesMatch "\.mjs$">
+        Header set Content-Type "application/javascript; charset=utf-8"
+        Header unset Content-Type
+        Header set Content-Type "application/javascript; charset=utf-8"
+    </FilesMatch>
+    
+    <FilesMatch "\.jsx$">
+        Header set Content-Type "application/javascript; charset=utf-8"
+    </FilesMatch>
+    
+    <FilesMatch "\.tsx$">
+        Header set Content-Type "application/javascript; charset=utf-8"
+        Header unset Content-Type
+        Header set Content-Type "application/javascript; charset=utf-8"
+    </FilesMatch>
+    
+    <FilesMatch "\.ts$">
+        Header set Content-Type "application/javascript; charset=utf-8"
+    </FilesMatch>
+    
+    <FilesMatch "\.json$">
+        Header set Content-Type "application/json; charset=utf-8"
+    </FilesMatch>
+    
+    <FilesMatch "\.wasm$">
+        Header set Content-Type "application/wasm"
+    </FilesMatch>
+    
+    # Don't cache JavaScript files - Force no cache for immediate updates
+    <FilesMatch "\.js$">
+        Header set Cache-Control "no-cache, no-store, must-revalidate, max-age=0"
+        Header set Pragma "no-cache"
+        Header set Expires "0"
+    </FilesMatch>
+    
+    # Don't cache service worker
+    <FilesMatch "sw\.js$">
+        Header set Cache-Control "no-cache, no-store, must-revalidate, max-age=0"
+        Header set Pragma "no-cache"
+        Header set Expires "0"
+    </FilesMatch>
+    
+    # Cache other static assets
+    <FilesMatch "\.(jpg|jpeg|png|gif|ico|css|woff|woff2|ttf|eot|svg)$">
+        Header set Cache-Control "public, max-age=31536000, immutable"
+    </FilesMatch>
+    
+    # Don't cache HTML files - Force no cache for immediate updates
+    <FilesMatch "\.html$">
+        Header set Cache-Control "no-cache, no-store, must-revalidate, max-age=0"
+        Header set Pragma "no-cache"
+        Header set Expires "0"
+        Header set Last-Modified "Thu, 01 Jan 1970 00:00:00 GMT"
+    </FilesMatch>
+</IfModule>
+
+# SPA Routing - Redirect all requests to index.html
+# This allows React Router to handle client-side routing
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_URI} !^/api/
+RewriteCond %{REQUEST_URI} !^/assets/
+RewriteCond %{REQUEST_URI} !^/images/
+RewriteRule . /index.html [L]
+
+# Prevent directory listing
+Options -Indexes
+
+# Security headers
+<IfModule mod_headers.c>
+    Header set X-Content-Type-Options "nosniff"
+    Header set X-Frame-Options "SAMEORIGIN"
+    Header set X-XSS-Protection "1; mode=block"
+    Header set Referrer-Policy "strict-origin-when-cross-origin"
+    
+    # Content Security Policy - Secure but allows React/Vite to work
+    # Note: 'unsafe-eval' is needed for some React libraries (like Framer Motion) in production
+    # If you want stricter security, you may need to remove Framer Motion or use a different animation library
+    Header set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https: blob:; connect-src 'self' https: wss: ws:; media-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'; upgrade-insecure-requests;"
+</IfModule>
+
+# Gzip compression (if mod_deflate is available)
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css text/javascript application/javascript application/json application/xml
+</IfModule>
+

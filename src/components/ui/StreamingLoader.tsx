@@ -23,7 +23,7 @@ export default function StreamingLoader({
         transition={{ duration: 0.5 }}
       >
         <motion.div
-          className="w-8 h-8 border-4 border-purple-200 border-t-purple-600 rounded-full"
+          className="w-8 h-8 border-4 border-white/20 border-t-white rounded-full"
           animate={{ rotate: 360 }}
           transition={{
             duration: 1,
@@ -32,7 +32,7 @@ export default function StreamingLoader({
           }}
         />
         <motion.p
-          className="text-gray-600 text-sm"
+          className="text-white/70 text-sm uppercase tracking-wider"
           animate={{ opacity: [0.5, 1, 0.5] }}
           transition={{
             duration: 1.5,

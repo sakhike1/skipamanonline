@@ -1,11 +1,10 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { motion } from 'framer-motion';
-import { CreditCard, Shield, Lock, AlertCircle, CheckCircle } from 'lucide-react';
-import paypalService, { OrderData } from '../../services/paypalService';
-import { strapiOrders } from '../../services/strapiOrders';
-import { StrapiOrderCreateInput } from '../../types';
-import { useCart } from '../../context/CartContext';
-import { useAuth } from '../../context/AuthContext';
+import { CreditCard, Shield, CheckCircle } from 'lucide-react';
+import type { OrderData } from '../../services/paypalService';
+import { useNavigate } from 'react-router-dom';
+import PayPalSmartButtons from './PayPalSmartButtons';
+import { PayPalCheckoutBoundary } from './PayPalCheckoutBoundary';
 
 interface PaymentFormProps {
   orderData: OrderData;
@@ -18,83 +17,7 @@ const PaymentForm: React.FC<PaymentFormProps> = ({
   onPaymentStart, 
   onPaymentComplete 
 }) => {
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const { clearCart } = useCart();
-  const { user } = useAuth();
-
-  const buildStrapiOrderPayload = (): StrapiOrderCreateInput => {
-    const subtotal = orderData.subtotal ?? orderData.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-    const totalAmount = orderData.amount ?? subtotal;
-    const shippingAmount = orderData.shippingAmount ?? Math.max(totalAmount - subtotal, 0);
-    const currency = orderData.currency || 'ZAR';
-
-    const orderPayload: StrapiOrderCreateInput = {
-      orderNumber: orderData.orderId,
-      paymentStatus: 'pending',
-      subtotal,
-      shippingTotal: shippingAmount,
-      total: totalAmount,
-      currency,
-      customer: {
-        firstName: orderData.customerName,
-        lastName: orderData.customerLastName,
-        email: orderData.customerEmail,
-        phone: orderData.customerPhone || '',
-        userId: user?.id,
-      },
-      shippingAddress: {
-        line1: orderData.shippingAddress.line1,
-        line2: orderData.shippingAddress.line2 || '',
-        city: orderData.shippingAddress.city,
-        postalCode: orderData.shippingAddress.postal_code,
-        country: orderData.shippingAddress.country,
-      },
-      orderItems: orderData.items.map(item => ({
-        name: item.name,
-        description: item.description || '',
-        quantity: item.quantity,
-        unitPrice: item.price,
-        lineTotal: item.price * item.quantity,
-      })),
-      metadata: {
-        source: 'frontend',
-      },
-    };
-
-    const orderStatusField = import.meta.env.VITE_STRAPI_ORDER_STATUS_FIELD;
-    if (orderStatusField) {
-      (orderPayload as Record<string, unknown>)[orderStatusField] = 'pending';
-    }
-
-    return orderPayload;
-  };
-
-  const handlePayment = async () => {
-    try {
-      setIsProcessing(true);
-      setError(null);
-      onPaymentStart();
-
-      // Store order in Strapi before redirecting to PayPal
-      const orderPayload = buildStrapiOrderPayload();
-      await strapiOrders.createOrder(orderPayload);
-
-      // Process payment through PayPal
-      await paypalService.processPayment(orderData);
-
-      onPaymentComplete(true);
-
-      // Clear cart after successful payment initiation
-      clearCart();
-      
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Payment processing failed');
-      onPaymentComplete(false);
-    } finally {
-      setIsProcessing(false);
-    }
-  };
+  const navigate = useNavigate();
 
   const formatAmount = (amount: number, currency: string = 'R') => {
     return `${currency}${amount.toFixed(2)}`;
@@ -184,40 +107,14 @@ const PaymentForm: React.FC<PaymentFormProps> = ({
         </div>
       </div>
 
-      {/* Error Message */}
-      {error && (
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="bg-red-50 border border-red-200 rounded-xl p-4 mb-6"
-        >
-          <div className="flex items-center">
-            <AlertCircle className="w-5 h-5 text-red-600 mr-3" />
-            <p className="text-red-800">{error}</p>
-          </div>
-        </motion.div>
-      )}
-
-      {/* Payment Button */}
-      <motion.button
-        onClick={handlePayment}
-        disabled={isProcessing}
-        className="w-full bg-[#FFD140] hover:bg-[#f7c632] disabled:bg-gray-400 text-black py-4 px-6 rounded-xl font-bold text-lg transition-all duration-300 flex items-center justify-center space-x-3"
-        whileHover={{ scale: 1.02 }}
-        whileTap={{ scale: 0.98 }}
-      >
-        {isProcessing ? (
-          <>
-            <Lock className="w-5 h-5 text-black" />
-            <span>Redirecting to PayPal...</span>
-          </>
-        ) : (
-          <>
-            <CreditCard className="w-5 h-5 text-black" />
-            <span>Pay with PayPal</span>
-          </>
-        )}
-      </motion.button>
+      <PayPalCheckoutBoundary>
+        <PayPalSmartButtons
+          orderData={orderData}
+          onPaymentStart={onPaymentStart}
+          onPaymentComplete={onPaymentComplete}
+          onPaid={() => navigate('/payment/success')}
+        />
+      </PayPalCheckoutBoundary>
 
       {/* Payment Methods Info */}
       <div className="mt-6 text-center">

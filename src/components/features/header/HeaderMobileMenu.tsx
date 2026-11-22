@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Search, X, User, ShoppingBag, Heart, Settings, LogOut, Shield } from 'lucide-react';
+import { ArrowUpRight, LogOut, Settings, Shield, ShoppingBag, User } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useAuth } from '../../../context/AuthContext';
+import { useAuth } from '../../../context/useAuth';
 import { useCart } from '../../../context/CartContext';
 import { useWishlist } from '../../../context/WishlistContext';
 
@@ -15,19 +16,16 @@ interface NavItem {
 interface HeaderMobileMenuProps {
   showMobileMenu: boolean;
   setShowMobileMenu: (show: boolean) => void;
-  searchQuery: string;
-  setSearchQuery: (query: string) => void;
-  handleSearch: (e: React.FormEvent) => void;
   navItems: NavItem[];
 }
+
+const overlayTransition = { type: 'spring' as const, stiffness: 300, damping: 32, mass: 0.9 };
+const linkSpring = { type: 'spring' as const, stiffness: 400, damping: 30 };
 
 export const HeaderMobileMenu: React.FC<HeaderMobileMenuProps> = ({
   showMobileMenu,
   setShowMobileMenu,
-  searchQuery,
-  setSearchQuery,
-  handleSearch,
-  navItems
+  navItems,
 }) => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -36,6 +34,15 @@ export const HeaderMobileMenu: React.FC<HeaderMobileMenuProps> = ({
   const { getWishlistCount } = useWishlist();
 
   const cartItemCount = cart?.items?.reduce((total, item) => total + item.quantity, 0) || 0;
+
+  useEffect(() => {
+    if (!showMobileMenu) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [showMobileMenu]);
 
   const handleLogout = async () => {
     try {
@@ -47,318 +54,239 @@ export const HeaderMobileMenu: React.FC<HeaderMobileMenuProps> = ({
     }
   };
 
-  return (
+  const primaryLinkClass = (active: boolean) =>
+    [
+      'block border-b border-white/[0.08] py-4 text-[1.65rem] font-bold leading-tight tracking-tight transition-colors duration-200 sm:text-3xl',
+      active ? 'text-white' : 'text-white/45 hover:text-white',
+    ].join(' ');
+
+  const secondaryLinkClass = (active: boolean) =>
+    [
+      'block py-2.5 text-lg font-semibold tracking-tight transition-colors',
+      active ? 'text-white' : 'text-white/50 hover:text-white',
+    ].join(' ');
+
+  return createPortal(
     <AnimatePresence>
       {showMobileMenu && (
-        <>
-          {/* Backdrop */}
+        <motion.div
+          id="mobile-menu"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Mobile navigation"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.2 }}
+          className="mobile-nav-fullscreen fixed inset-0 z-[100] m-0 flex h-[100dvh] max-h-none w-screen max-w-none flex-col overflow-hidden bg-black p-0 md:hidden"
+        >
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/60 backdrop-blur-md z-40 md:hidden"
-            onClick={() => setShowMobileMenu(false)}
-          />
-
-          {/* Mobile Menu Panel */}
-          <motion.div
-            id="mobile-menu"
-            initial={{ opacity: 0, y: -20, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -20, scale: 0.95 }}
-            transition={{
-              type: 'spring',
-              stiffness: 300,
-              damping: 30,
-              mass: 0.8
-            }}
-            className="absolute top-full left-0 right-0 mx-4 mt-2 bg-gradient-to-br from-gray-900/95 via-black/95 to-purple-900/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/10 z-50 md:hidden overflow-hidden"
-            style={{
-              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.05)'
-            }}
-            role="navigation"
-            aria-label="Mobile navigation"
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 8 }}
+            transition={overlayTransition}
+            className="flex h-full min-h-0 flex-1 flex-col bg-black text-white"
           >
-            {/* Header */}
-            <div className="relative p-6 bg-gradient-to-r from-purple-600/20 via-pink-600/20 to-purple-600/20">
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent animate-pulse" />
-              <div className="relative flex items-center justify-between">
-                <motion.div
-                  className="text-xl font-black text-white"
-                  animate={{
-                    textShadow: [
-                      '0 0 20px rgba(168, 85, 247, 0.8)',
-                      '0 0 30px rgba(236, 72, 153, 0.8)',
-                      '0 0 20px rgba(168, 85, 247, 0.8)'
-                    ]
-                  }}
-                  transition={{
-                    duration: 2,
-                    repeat: Infinity,
-                    ease: "easeInOut"
-                  }}
-                >
-                  <span className="tracking-tighter bg-gradient-to-r from-purple-300 to-pink-300 bg-clip-text text-transparent">SKIPA</span>
-                  <span className="tracking-tighter bg-gradient-to-r from-pink-300 to-purple-300 bg-clip-text text-transparent">MAN</span>
-                </motion.div>
-                <motion.button
-                  whileHover={{ scale: 1.1, rotate: 90 }}
-                  whileTap={{ scale: 0.9 }}
+            {/* Top bar — logo + primary CTA + close */}
+            <header className="flex shrink-0 items-center justify-between gap-3 px-5 pt-[max(0.75rem,env(safe-area-inset-top))] pb-2 sm:px-7">
+              <Link
+                to="/"
+                className="inline-flex shrink-0 translate-y-1 items-center py-2 text-2xl font-black leading-none tracking-[0.1em] text-white sm:text-3xl"
+                onClick={() => setShowMobileMenu(false)}
+              >
+                SKIPAMAN
+              </Link>
+              <div className="flex items-center gap-2 sm:gap-3">
+                <Link
+                  to="/shop"
                   onClick={() => setShowMobileMenu(false)}
-                  className="p-2 rounded-full bg-white/10 text-white hover:bg-white/20 transition-all backdrop-blur-sm border border-white/20"
-                  aria-label="Close menu"
+                  className="inline-flex items-center gap-1.5 rounded-full bg-white px-3.5 py-2 text-xs font-semibold text-black sm:px-4 sm:text-sm"
                 >
-                  <X size={20} />
-                </motion.button>
+                  Shop now
+                  <ArrowUpRight className="h-3.5 w-3.5 shrink-0" strokeWidth={2.25} aria-hidden />
+                </Link>
+                <button
+                  type="button"
+                  onClick={() => setShowMobileMenu(false)}
+                  className="px-1 py-2 text-sm font-medium text-white/70 transition-colors hover:text-white"
+                >
+                  Close
+                </button>
               </div>
-            </div>
+            </header>
 
-            {/* Search Bar */}
-            <div className="px-6 py-4 border-b border-white/5">
-              <form onSubmit={handleSearch}>
-                <motion.div
-                  className="relative"
-                  whileFocus={{ scale: 1.02 }}
-                >
-                  <input
-                    type="text"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Search products..."
-                    className="w-full px-5 py-3 pl-12 bg-gradient-to-r from-white/10 to-white/5 border border-white/20 rounded-2xl text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-purple-400/60 focus:border-purple-400/60 transition-all backdrop-blur-sm"
-                  />
-                  <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/60" />
-                  <motion.button
-                    type="submit"
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.9 }}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 p-2 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl text-white shadow-lg"
-                  >
-                    <Search size={14} />
-                  </motion.button>
-                </motion.div>
-              </form>
-            </div>
-
-            {/* Navigation Links */}
-            <nav className="p-6">
-              <div className="space-y-1">
-                {navItems.map((item, index) => (
-                  <motion.div
-                    key={item.name}
-                    initial={{ opacity: 0, y: 20, scale: 0.9 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    transition={{
-                      delay: index * 0.1,
-                      type: 'spring',
-                      stiffness: 200,
-                      damping: 20
-                    }}
-                  >
-                    <Link
-                      to={item.path}
-                      className={`
-                        group relative flex items-center justify-between py-3 px-4 rounded-2xl text-lg font-semibold transition-all duration-300 overflow-hidden
-                        ${location.pathname === item.path
-                          ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg shadow-purple-500/30'
-                          : 'text-white/90 hover:bg-gradient-to-r hover:from-white/10 hover:to-white/5 hover:text-white'
-                        }
-                      `}
-                      onClick={() => setShowMobileMenu(false)}
-                      aria-label={item.ariaLabel}
-                      aria-current={location.pathname === item.path ? 'page' : undefined}
-                    >
-                      <div className={`absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 ${
-                        location.pathname !== item.path ? 'bg-gradient-to-r from-purple-600/20 to-pink-600/20' : ''
-                      }`} />
-                      <div className="absolute inset-0 opacity-0 group-hover:opacity-100 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
-                      <span className="relative z-10 tracking-wide">{item.name}</span>
-                      {location.pathname === item.path ? (
-                        <motion.div
-                          initial={{ scale: 0, rotate: 0 }}
-                          animate={{ scale: 1, rotate: 360 }}
-                          transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
-                          className="relative z-10 w-2 h-2 bg-white rounded-full shadow-lg"
-                        />
-                      ) : (
-                        <motion.div
-                          className="relative z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                          animate={{ x: [0, 5, 0] }}
-                          transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-                        >
-                          <div className="w-1.5 h-1.5 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full" />
-                        </motion.div>
-                      )}
-                    </Link>
-                  </motion.div>
-                ))}
-
-                {/* Authenticated User Links */}
-                {isAuthenticated && (
-                  <>
-                    <div className="my-4 h-px bg-white/20" />
+            <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+              <nav
+                className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 sm:px-7"
+                aria-label="Primary"
+              >
+                <div className="pb-6 pt-4">
+                  {navItems.map((item, index) => (
                     <motion.div
-                      initial={{ opacity: 0, y: 20, scale: 0.9 }}
-                      animate={{ opacity: 1, y: 0, scale: 1 }}
-                      transition={{
-                        delay: navItems.length * 0.1 + 0.1,
-                        type: 'spring',
-                        stiffness: 200,
-                        damping: 20
-                      }}
+                      key={item.name}
+                      initial={{ opacity: 0, y: 14 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ ...linkSpring, delay: index * 0.04 }}
                     >
+                      <Link
+                        to={item.path}
+                        className={primaryLinkClass(location.pathname === item.path)}
+                        onClick={() => setShowMobileMenu(false)}
+                        aria-label={item.ariaLabel}
+                        aria-current={location.pathname === item.path ? 'page' : undefined}
+                      >
+                        {item.name}
+                      </Link>
+                    </motion.div>
+                  ))}
+
+                  {cartItemCount > 0 ? (
+                    <motion.div
+                      initial={{ opacity: 0, y: 14 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ ...linkSpring, delay: navItems.length * 0.04 }}
+                    >
+                      <Link
+                        to="/checkout"
+                        className="flex items-center gap-2 border-b border-white/[0.08] py-4 text-[1.35rem] font-bold tracking-tight text-white transition-opacity hover:opacity-90 sm:text-2xl"
+                        onClick={() => setShowMobileMenu(false)}
+                      >
+                        <ShoppingBag className="h-6 w-6 shrink-0 opacity-90" strokeWidth={2} aria-hidden />
+                        Checkout ({cartItemCount})
+                      </Link>
+                    </motion.div>
+                  ) : null}
+
+                  {isAuthenticated ? (
+                    <div className="mt-8 space-y-0 border-t border-white/[0.08] pt-6">
+                      <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.2em] text-white/40">
+                        Account
+                      </p>
                       <Link
                         to="/orders"
-                        className={`
-                          group relative flex items-center justify-between py-3 px-4 rounded-2xl text-lg font-semibold transition-all duration-300 overflow-hidden
-                          ${location.pathname === '/orders'
-                            ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg shadow-blue-500/30'
-                            : 'text-white/90 hover:bg-gradient-to-r hover:from-white/10 hover:to-white/5 hover:text-white'
-                          }
-                        `}
+                        className={secondaryLinkClass(location.pathname === '/orders')}
                         onClick={() => setShowMobileMenu(false)}
                       >
-                        <div className={`absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 ${
-                          location.pathname !== '/orders' ? 'bg-gradient-to-r from-blue-600/20 to-purple-600/20' : ''
-                        }`} />
-                        <span className="relative z-10 tracking-wide">My Orders</span>
+                        My orders
                       </Link>
-                    </motion.div>
-                    <motion.div
-                      initial={{ opacity: 0, y: 20, scale: 0.9 }}
-                      animate={{ opacity: 1, y: 0, scale: 1 }}
-                      transition={{
-                        delay: navItems.length * 0.1 + 0.2,
-                        type: 'spring',
-                        stiffness: 200,
-                        damping: 20
-                      }}
-                    >
                       <Link
                         to="/wishlist"
-                        className={`
-                          group relative flex items-center justify-between py-3 px-4 rounded-2xl text-lg font-semibold transition-all duration-300 overflow-hidden
-                          ${location.pathname === '/wishlist'
-                            ? 'bg-gradient-to-r from-pink-600 to-red-600 text-white shadow-lg shadow-pink-500/30'
-                            : 'text-white/90 hover:bg-gradient-to-r hover:from-white/10 hover:to-white/5 hover:text-white'
-                          }
-                        `}
+                        className={secondaryLinkClass(location.pathname === '/wishlist')}
                         onClick={() => setShowMobileMenu(false)}
                       >
-                        <div className={`absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 ${
-                          location.pathname !== '/wishlist' ? 'bg-gradient-to-r from-pink-600/20 to-red-600/20' : ''
-                        }`} />
-                        <span className="relative z-10 tracking-wide">
-                          Wishlist {getWishlistCount() > 0 && `(${getWishlistCount()})`}
+                        Wishlist
+                        {getWishlistCount() > 0 ? ` (${getWishlistCount()})` : ''}
+                      </Link>
+                      <Link
+                        to="/profile"
+                        className={secondaryLinkClass(location.pathname === '/profile')}
+                        onClick={() => setShowMobileMenu(false)}
+                      >
+                        Profile
+                      </Link>
+                      <Link
+                        to="/settings"
+                        className={secondaryLinkClass(location.pathname === '/settings')}
+                        onClick={() => setShowMobileMenu(false)}
+                      >
+                        <span className="inline-flex items-center gap-2">
+                          <Settings className="h-4 w-4 opacity-60" aria-hidden />
+                          Settings
                         </span>
                       </Link>
-                    </motion.div>
-                  </>
-                )}
-
-                {/* Cart Link */}
-                {cartItemCount > 0 && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 20, scale: 0.9 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    transition={{
-                      delay: (isAuthenticated ? navItems.length + 2 : navItems.length) * 0.1 + 0.1,
-                      type: 'spring',
-                      stiffness: 200,
-                      damping: 20
-                    }}
-                  >
-                    <Link
-                      to="/checkout"
-                      className="group relative flex items-center justify-between py-3 px-4 rounded-2xl text-lg font-semibold bg-gradient-to-r from-green-600 to-emerald-600 text-white shadow-lg shadow-green-500/30 transition-all duration-300 overflow-hidden"
-                      onClick={() => setShowMobileMenu(false)}
-                    >
-                      <span className="relative z-10 tracking-wide">
-                        <ShoppingBag size={20} className="inline-block mr-2" />
-                        Checkout ({cartItemCount} items)
-                      </span>
-                    </Link>
-                  </motion.div>
-                )}
-
-                {/* User Actions */}
-                {isAuthenticated ? (
-                  <>
-                    <div className="my-4 h-px bg-white/20" />
+                      {user?.role === 'admin' ? (
+                        <Link
+                          to="/admin"
+                          className={secondaryLinkClass(location.pathname.startsWith('/admin'))}
+                          onClick={() => setShowMobileMenu(false)}
+                        >
+                          <span className="inline-flex items-center gap-2">
+                            <Shield className="h-4 w-4 opacity-60" aria-hidden />
+                            Admin
+                          </span>
+                        </Link>
+                      ) : null}
+                      <button
+                        type="button"
+                        onClick={handleLogout}
+                        className="mt-2 flex w-full items-center gap-2 py-2.5 text-left text-lg font-semibold text-white/45 transition-colors hover:text-white/80"
+                      >
+                        <LogOut className="h-4 w-4" aria-hidden />
+                        Sign out
+                      </button>
+                    </div>
+                  ) : (
                     <motion.div
-                      initial={{ opacity: 0, y: 20 }}
+                      initial={{ opacity: 0, y: 14 }}
                       animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.3 }}
-                      className="px-4 py-3 bg-white/5 rounded-2xl"
+                      transition={{ ...linkSpring, delay: navItems.length * 0.04 + 0.06 }}
+                      className="mt-8 border-t border-white/[0.08] pt-6"
                     >
-                      <div className="flex items-center gap-3 mb-3">
-                        <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-white font-bold">
-                          {user?.firstName?.[0]}{user?.lastName?.[0]}
-                        </div>
-                        <div>
-                          <p className="text-white font-semibold">{user?.firstName} {user?.lastName}</p>
-                          <p className="text-white/70 text-sm">{user?.email}</p>
-                        </div>
-                      </div>
-                    </motion.div>
-                    <Link
-                      to="/profile"
-                      className="flex items-center gap-3 py-3 px-4 text-white/90 hover:text-white hover:bg-white/10 rounded-2xl transition-all"
-                      onClick={() => setShowMobileMenu(false)}
-                    >
-                      <User size={20} />
-                      <span>My Profile</span>
-                    </Link>
-                    <Link
-                      to="/settings"
-                      className="flex items-center gap-3 py-3 px-4 text-white/90 hover:text-white hover:bg-white/10 rounded-2xl transition-all"
-                      onClick={() => setShowMobileMenu(false)}
-                    >
-                      <Settings size={20} />
-                      <span>Settings</span>
-                    </Link>
-                    {user?.role === 'admin' && (
                       <Link
-                        to="/admin"
-                        className="flex items-center gap-3 py-3 px-4 text-purple-300 hover:text-purple-200 hover:bg-purple-500/20 rounded-2xl transition-all"
+                        to="/login"
+                        className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-transparent px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:border-white/50 hover:bg-white/5"
                         onClick={() => setShowMobileMenu(false)}
                       >
-                        <Shield size={20} />
-                        <span>Admin Dashboard</span>
+                        <User className="h-4 w-4" aria-hidden />
+                        Sign in
                       </Link>
-                    )}
-                    <button
-                      onClick={handleLogout}
-                      className="w-full flex items-center gap-3 py-3 px-4 text-red-400 hover:text-red-300 hover:bg-red-500/20 rounded-2xl transition-all mt-2"
-                    >
-                      <LogOut size={20} />
-                      <span>Sign Out</span>
-                    </button>
-                  </>
-                ) : (
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: navItems.length * 0.1 + 0.2 }}
-                    className="pt-4"
+                    </motion.div>
+                  )}
+                </div>
+
+                {/* Location */}
+                <div className="pb-8 pt-2">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-white/40">Location</p>
+                  <p className="mt-2 max-w-sm text-lg font-medium leading-snug text-white">
+                    Centurion, Gauteng — South Africa
+                  </p>
+                </div>
+
+                {/* Contacts */}
+                <div className="pb-10">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-white/40">Contacts</p>
+                  <div className="mt-2 flex flex-col gap-1.5 text-base text-white/90">
+                    <a href="mailto:sales@skipaman.co.za" className="transition-colors hover:text-white">
+                      sales@skipaman.co.za
+                    </a>
+                    <a href="mailto:admin@skipaman.co.za" className="transition-colors hover:text-white">
+                      admin@skipaman.co.za
+                    </a>
+                    <a href="tel:0744702010" className="transition-colors hover:text-white">
+                      074 470 2010
+                    </a>
+                  </div>
+                </div>
+              </nav>
+
+              {/* Bottom CTA card */}
+              <div className="shrink-0 border-t border-white/[0.06] bg-black px-5 pt-4 sm:px-7 sm:pt-5 pb-[max(1.25rem,env(safe-area-inset-bottom))]">
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ ...linkSpring, delay: 0.12 }}
+                  className="rounded-xl bg-neutral-200 px-5 py-5 text-black shadow-sm"
+                >
+                  <p className="text-[0.7rem] font-bold uppercase tracking-[0.18em] text-black/80">
+                    New arrivals
+                  </p>
+                  <p className="mt-2 text-base font-semibold leading-snug text-black">
+                    Fresh drops and custom printing — explore what just landed.
+                  </p>
+                  <Link
+                    to="/new-arrivals"
+                    onClick={() => setShowMobileMenu(false)}
+                    className="mt-4 inline-flex items-center justify-center rounded-md bg-black px-5 py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-90"
                   >
-                    <Link
-                      to="/login"
-                      className="block w-full py-3 px-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white text-center rounded-2xl font-semibold shadow-lg hover:shadow-xl transition-all"
-                      onClick={() => setShowMobileMenu(false)}
-                    >
-                      Sign In
-                    </Link>
-                  </motion.div>
-                )}
+                    Explore now
+                  </Link>
+                </motion.div>
               </div>
-            </nav>
+            </div>
           </motion.div>
-        </>
+        </motion.div>
       )}
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body,
   );
 };
-
-
-

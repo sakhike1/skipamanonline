@@ -123,6 +123,35 @@ const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
         );
 
       case 'gradient':
+        // Use black/white gradient when color is white, otherwise use original
+        if (color === 'white') {
+          return (
+            <div className="relative">
+              <motion.div
+                className={`${sizeClasses[size]} rounded-full bg-gradient-to-r from-white via-gray-300 to-white bg-[length:200%_100%]`}
+                animate={{
+                  backgroundPosition: ['0% 50%', '100% 50%', '0% 50%']
+                }}
+                transition={{
+                  duration: 2,
+                  repeat: Infinity,
+                  ease: "linear"
+                }}
+              />
+              <motion.div
+                className={`${sizeClasses[size]} rounded-full bg-gradient-to-r from-transparent via-white/20 to-transparent absolute inset-0`}
+                animate={{
+                  rotate: [0, 360]
+                }}
+                transition={{
+                  duration: 3,
+                  repeat: Infinity,
+                  ease: "linear"
+                }}
+              />
+            </div>
+          );
+        }
         return (
           <div className="relative">
             <motion.div
@@ -165,12 +194,17 @@ const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
     }
   };
 
+  // Determine text color based on background context
+  const textColorClass = color === 'white' 
+    ? 'text-white' 
+    : 'text-gray-600 dark:text-gray-400';
+
   return (
     <div className={`flex flex-col items-center justify-center ${className}`}>
       {renderSpinner()}
       {text && (
         <motion.p
-          className="mt-3 text-sm text-gray-600 dark:text-gray-400 text-center"
+          className={`mt-3 text-sm ${textColorClass} text-center`}
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}

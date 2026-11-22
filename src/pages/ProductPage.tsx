@@ -1,10 +1,14 @@
 import React, { useEffect, useState, Suspense } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getProductById } from '../data/products';
-import { getReviewsByProductId, getReviewStats } from '../data/reviews';
+import { reviewService, computeReviewStats } from '../services/reviewService';
+import { supabase } from '../lib/supabase';
 import ProductDetail from '../components/product/ProductDetail';
 import ReviewsSection from '../components/product/ReviewsSection';
 import LoadingSkeleton from '../components/ui/LoadingSkeleton';
+import { absolutizeUrl, getPublicSiteUrl } from '../seo/publicSiteUrl';
+import { buildProductJsonLd, truncateMetaDescription } from '../utils/productJsonLd';
 import { Product, Review, ReviewStats } from '../types';
 
 const ProductPage: React.FC = () => {
@@ -20,45 +24,46 @@ const ProductPage: React.FC = () => {
 
     const loadProduct = async () => {
       if (!id) return;
-      
+
+      setIsLoading(true);
+
       try {
         const foundProduct = getProductById(id);
         if (foundProduct && isMounted) {
           setProduct(foundProduct);
-          
-          
-          // Load reviews and stats
-          const productReviews = getReviewsByProductId(id);
-          const stats = getReviewStats(id);
-          
-          setReviews(productReviews);
-          setReviewStats(stats);
-        }
-        
-        if (isMounted) {
-          setIsLoading(false);
+
+          if (supabase) {
+            const productReviews = await reviewService.getProductReviews(id);
+            if (isMounted) {
+              setReviews(productReviews);
+              setReviewStats(computeReviewStats(productReviews));
+            }
+          } else if (isMounted) {
+            setReviews([]);
+            setReviewStats(computeReviewStats([]));
+          }
         }
       } catch (error) {
         console.error('Error loading product:', error);
         if (isMounted) {
-          setIsLoading(false);
+          setReviews([]);
+          setReviewStats(computeReviewStats([]));
         }
+      } finally {
+        if (isMounted) setIsLoading(false);
       }
     };
 
-    loadProduct();
+    void loadProduct();
 
     return () => {
       isMounted = false;
     };
   }, [id]);
 
-  // Scroll to top when component mounts or product ID changes
+  // Scroll to top instantly when component mounts or product ID changes
   useEffect(() => {
-    window.scrollTo({
-      top: 0,
-      behavior: 'smooth'
-    });
+    window.scrollTo(0, 0);
   }, [id]);
   
   const handleGoBack = () => {
@@ -74,7 +79,7 @@ const ProductPage: React.FC = () => {
       </div>
     );
   }
-  
+
   if (!product) {
     return (
       <div className="container mx-auto px-4 py-16 text-center">
@@ -89,29 +94,53 @@ const ProductPage: React.FC = () => {
       </div>
     );
   }
-  
+
+  const siteUrl = getPublicSiteUrl();
+  const canonicalUrl = `${siteUrl}/product/${product.id}`;
+  const primaryImagePath = product.images?.[0] ?? '/images/og-image.jpg';
+  const ogImageUrl = absolutizeUrl(primaryImagePath, siteUrl);
+  const pageTitle = `${product.name} | Skipaman Store`;
+  const metaDescription = truncateMetaDescription(product.description);
+  const productJsonLd = buildProductJsonLd(product, reviewStats, canonicalUrl, siteUrl);
+
   return (
-    <div className="pt-20">
+    <div className="pt-16 bg-white min-h-screen">
+      <Helmet prioritizeSeoTags>
+        <title>{pageTitle}</title>
+        <meta name="description" content={metaDescription} />
+        <link rel="canonical" href={canonicalUrl} />
+        <meta property="og:type" content="website" />
+        <meta property="og:title" content={pageTitle} />
+        <meta property="og:description" content={metaDescription} />
+        <meta property="og:url" content={canonicalUrl} />
+        <meta property="og:image" content={ogImageUrl} />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={pageTitle} />
+        <meta name="twitter:description" content={metaDescription} />
+        <meta name="twitter:image" content={ogImageUrl} />
+        <script type="application/ld+json">{JSON.stringify(productJsonLd)}</script>
+      </Helmet>
       <Suspense fallback={<LoadingSkeleton />}>
         <ProductDetail product={product} onGoBack={handleGoBack} />
         
         {/* Reviews Section */}
         {product && reviewStats && (
-          <div className="container mx-auto px-4 py-16">
-            <ReviewsSection
-              productId={product.id}
-              reviews={reviews}
-              stats={reviewStats}
-              productName={product.name}
-              onReviewSubmitted={(newReview) => {
-                // Add the new review to the existing reviews
-                setReviews(prev => [newReview, ...prev]);
-                
-                // Recalculate review stats
-                const updatedStats = getReviewStats(product.id);
-                setReviewStats(updatedStats);
-              }}
-            />
+          <div className="bg-white">
+            <div className="container mx-auto px-4 py-16">
+              <ReviewsSection
+                productId={product.id}
+                reviews={reviews}
+                stats={reviewStats}
+                productName={product.name}
+                onReviewSubmitted={(newReview) => {
+                  setReviews((prev) => {
+                    const next = [newReview, ...prev];
+                    setReviewStats(computeReviewStats(next));
+                    return next;
+                  });
+                }}
+              />
+            </div>
           </div>
         )}
       </Suspense>

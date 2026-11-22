@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Heart } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useWishlist } from '../../context/WishlistContext';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth } from '../../context/useAuth';
 import { Product } from '../../types';
 import AuthPrompt from '../auth/AuthPrompt';
 

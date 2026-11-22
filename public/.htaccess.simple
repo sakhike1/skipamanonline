@@ -1,0 +1,64 @@
+# SIMPLE .htaccess - Use this if the main one doesn't work
+# This is a minimal version that should work on most Apache servers
+
+RewriteEngine On
+
+# CRITICAL: Set MIME types for JavaScript/TypeScript files
+AddType application/javascript .js
+AddType application/javascript .mjs
+AddType application/javascript .jsx
+AddType application/javascript .tsx
+AddType application/javascript .ts
+
+# SPA Routing - All routes go to index.html
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_URI} !^/api/
+RewriteRule . /index.html [L]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

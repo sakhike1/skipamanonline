@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Skipaman - Emergency Fix</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #000;
+            color: #fff;
+        }
+        .container {
+            background: #111;
+            padding: 30px;
+            border-radius: 10px;
+            border: 1px solid #333;
+        }
+        .btn {
+            background: #fff;
+            color: #000;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 10px;
+            display: inline-block;
+        }
+        .btn:hover {
+            background: #f0f0f0;
+        }
+        .status {
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 5px;
+            background: #222;
+        }
+        .success { background: #2d5a2d; }
+        .error { background: #5a2d2d; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚨 Skipaman Emergency Fix</h1>
+        <p>Service worker is causing JavaScript errors. This page will clear all caches and service workers.</p>
+        
+        <button class="btn" onclick="clearAll()">Clear Everything & Reload</button>
+        <button class="btn" onclick="window.location.href='/'">Go to Main Site</button>
+        
+        <div id="status" class="status"></div>
+        
+        <h3>Manual Steps:</h3>
+        <ol>
+            <li>Click "Clear Everything & Reload" above</li>
+            <li>Wait for confirmation</li>
+            <li>Page will reload automatically</li>
+            <li>If still broken, clear browser cache manually</li>
+        </ol>
+    </div>
+
+    <script>
+        function updateStatus(message, isError = false) {
+            const status = document.getElementById('status');
+            status.innerHTML = message;
+            status.className = 'status ' + (isError ? 'error' : 'success');
+        }
+
+        async function clearAll() {
+            updateStatus('Clearing service workers and caches...');
+            
+            try {
+                // Clear service workers
+                if ('serviceWorker' in navigator) {
+                    const registrations = await navigator.serviceWorker.getRegistrations();
+                    for (let registration of registrations) {
+                        await registration.unregister();
+                        console.log('Unregistered:', registration.scope);
+                    }
+                }
+                
+                // Clear all caches
+                if ('caches' in window) {
+                    const cacheNames = await caches.keys();
+                    await Promise.all(cacheNames.map(name => caches.delete(name)));
+                    console.log('Cleared all caches');
+                }
+                
+                updateStatus('✅ All cleared! Reloading in 2 seconds...');
+                
+                setTimeout(() => {
+                    window.location.href = '/';
+                }, 2000);
+                
+            } catch (error) {
+                updateStatus('❌ Error: ' + error.message, true);
+                console.error('Clear error:', error);
+            }
+        }
+        
+        // Auto-run on page load
+        window.addEventListener('load', () => {
+            console.log('Emergency fix page loaded');
+        });
+    </script>
+</body>
+</html>

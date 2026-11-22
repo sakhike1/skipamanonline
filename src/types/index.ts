@@ -173,6 +173,42 @@ export interface StrapiOrderCreateInput {
   metadata?: Record<string, unknown>;
 }
 
+// New interface matching Strapi Order API format
+export interface StrapiOrderPayload {
+  customerName: string;
+  customerEmail: string;
+  customerPhone?: string;
+  shippingAddress: {
+    street: string;
+    city: string;
+    province: string;
+    postalCode: string;
+    country: string;
+  };
+  billingAddress?: {
+    street: string;
+    city: string;
+    province: string;
+    postalCode: string;
+    country: string;
+  };
+  items: Array<{
+    name: string;
+    quantity: number;
+    price: number;
+    productId?: string;
+  }>;
+  subtotal: number;
+  shippingCost?: number;
+  tax?: number;
+  total: number;
+  paymentMethod: string;
+  paymentStatus?: 'pending' | 'paid' | 'failed' | 'refunded';
+  notes?: string;
+  userId?: string;
+  source?: string;
+}
+
 export interface StrapiOrderAttributes extends StrapiOrderCreateInput {
   createdAt: string;
   updatedAt: string;
@@ -376,6 +412,8 @@ export interface User {
   role: 'buyer' | 'admin';
   createdAt: string;
   updatedAt: string;
+  phone?: string;
+  avatarUrl?: string;
   password?: string; // Optional for internal use, never exposed externally
 }
 

@@ -18,20 +18,28 @@ const CartPreview: React.FC<CartPreviewProps> = ({ onClose }) => {
     return `R${price.toFixed(2)}`;
   };
   
-  // Click outside handler
+  // Click outside handler & Scroll handler
   useEffect(() => {
+    const initialScrollY = window.scrollY;
+    
     const handleClickOutside = (event: MouseEvent) => {
       if (cartPanelRef.current && !cartPanelRef.current.contains(event.target as Node)) {
         onClose();
       }
     };
     
+    const handleScroll = () => {
+      if (Math.abs(window.scrollY - initialScrollY) > 20) { // Close if scrolled more than 20px from open position
+        onClose();
+      }
+    };
+
     document.addEventListener('mousedown', handleClickOutside);
-    document.body.style.overflow = 'hidden';
+    window.addEventListener('scroll', handleScroll, { passive: true });
     
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
-      document.body.style.overflow = '';
+      window.removeEventListener('scroll', handleScroll);
     };
   }, [onClose]);
   
@@ -47,20 +55,22 @@ const CartPreview: React.FC<CartPreviewProps> = ({ onClose }) => {
     indexFn(index, quantity);
   };
 
-  // Auto close when cart becomes empty
+  // Auto close when cart becomes empty (after removing last item)
+  const prevItemsLength = useRef(cart.items.length);
   useEffect(() => {
-    if (cart.items.length === 0) {
+    if (prevItemsLength.current > 0 && cart.items.length === 0) {
       const timer = setTimeout(() => {
         onClose();
-      }, 1000); // Wait for 1 second before closing
+      }, 2500); // Wait for 2.5 seconds to show the empty message
       return () => clearTimeout(timer);
     }
+    prevItemsLength.current = cart.items.length;
   }, [cart.items.length, onClose]);
   
   return (
     <AnimatePresence>
       <motion.div 
-        className="fixed inset-0 z-50 flex justify-end"
+        className="fixed inset-0 z-50 flex justify-start"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
@@ -73,6 +83,7 @@ const CartPreview: React.FC<CartPreviewProps> = ({ onClose }) => {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.3 }}
+          onClick={onClose}
         />
         
         {/* Cart panel */}
@@ -80,10 +91,10 @@ const CartPreview: React.FC<CartPreviewProps> = ({ onClose }) => {
           ref={cartPanelRef}
           className="relative w-full max-w-md bg-white h-screen shadow-xl flex flex-col overflow-hidden"
           onClick={handlePanelClick}
-          initial={{ x: "100%" }}
+          initial={{ x: "-100%" }}
           animate={{ x: 0 }}
-          exit={{ x: "100%" }}
-          transition={{ type: "spring", damping: 25, stiffness: 300 }}
+          exit={{ x: "-100%" }}
+          transition={{ type: "tween", ease: "easeInOut", duration: 0.4 }}
         >
           {/* Header */}
           <div className="p-4 border-b border-gray-200 flex items-center justify-between bg-white sticky top-0 z-10">
@@ -96,31 +107,80 @@ const CartPreview: React.FC<CartPreviewProps> = ({ onClose }) => {
                 e.stopPropagation();
                 onClose();
               }}
-              className="p-1 rounded-full hover:bg-gray-100 transition-colors"
+              className="p-1 rounded-full bg-white border-2 border-black text-black hover:bg-black hover:text-white transition-all duration-300 shadow-lg"
               aria-label="Close cart"
             >
-              <X size={20} />
+              <X size={20} strokeWidth={2.5} />
             </button>
           </div>
           
           {/* Cart items */}
           <div className="flex-1 overflow-y-auto py-4 px-4" style={{ maxHeight: 'calc(100vh - 180px)' }}>
             {cart.items.length === 0 ? (
-              <div className="flex flex-col items-center justify-center h-full text-gray-500">
-                <ShoppingBag size={48} className="mb-4 opacity-50" />
-                <p className="text-lg font-medium">Your cart is empty</p>
-                <p className="text-sm mt-2">Add some products to get started!</p>
-                <Button 
-                  variant="primary" 
-                  className="mt-6"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onClose();
-                  }}
+              <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+                className="flex flex-col items-center justify-center h-full px-6 text-center"
+              >
+                <motion.div
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
+                  className="w-28 h-28 bg-black rounded-2xl flex items-center justify-center mb-8 shadow-2xl"
                 >
-                  Continue Shopping
-                </Button>
-              </div>
+                  <ShoppingBag size={56} className="text-white" strokeWidth={1.5} />
+                </motion.div>
+                
+                <motion.h3 
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.3 }}
+                  className="text-3xl font-black text-black mb-4 tracking-tight"
+                >
+                  Your Collection Awaits
+                </motion.h3>
+                
+                <motion.p 
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.4 }}
+                  className="text-gray-700 leading-relaxed mb-8 max-w-sm font-medium"
+                >
+                  Curate your signature style. Discover pieces crafted for those who demand excellence and refuse to blend in.
+                </motion.p>
+                
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.5 }}
+                  className="flex flex-col gap-3 w-full max-w-xs"
+                >
+                  <Button 
+                    variant="primary" 
+                    fullWidth
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      window.location.href = '/shop';
+                    }}
+                    className="bg-black text-white hover:bg-gray-900 py-4 rounded-xl font-bold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02]"
+                  >
+                    Explore Collection
+                  </Button>
+                  
+                  <Button 
+                    variant="outline" 
+                    fullWidth
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      window.location.href = '/';
+                    }}
+                    className="border-2 border-black text-black hover:bg-black hover:text-white py-4 rounded-xl font-bold transition-all duration-300"
+                  >
+                    Return Home
+                  </Button>
+                </motion.div>
+              </motion.div>
             ) : (
               <ul className="divide-y divide-gray-200">
                 {cart.items.map((item, index) => {
@@ -152,16 +212,16 @@ const CartPreview: React.FC<CartPreviewProps> = ({ onClose }) => {
                         
                         {/* Quantity and remove */}
                         <div className="flex flex-1 items-end justify-between text-sm">
-                          <div className="flex items-center border rounded">
+                          <div className="flex items-center border-2 border-gray-300 rounded-lg bg-white">
                             <button 
-                              className="px-2 py-1 border-r"
+                              className="px-3 py-1 border-r-2 border-gray-300 text-black hover:bg-gray-100 transition-colors font-semibold"
                               onClick={(e) => handleQuantityClick(e, updateQuantity, index, Math.max(1, item.quantity - 1))}
                             >
                               -
                             </button>
-                            <span className="px-4 py-1">{item.quantity}</span>
+                            <span className="px-4 py-1 text-black font-medium">{item.quantity}</span>
                             <button 
-                              className="px-2 py-1 border-l"
+                              className="px-3 py-1 border-l-2 border-gray-300 text-black hover:bg-gray-100 transition-colors font-semibold"
                               onClick={(e) => handleQuantityClick(e, updateQuantity, index, item.quantity + 1)}
                             >
                               +

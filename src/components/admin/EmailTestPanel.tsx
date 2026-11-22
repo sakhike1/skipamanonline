@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { adminAPI } from '../../services/api';
 import { 
   Mail, 
   Send, 
@@ -34,20 +33,12 @@ const EmailTestPanel: React.FC = () => {
     setErrorMessage(null);
 
     try {
-      const response = await adminAPI.testEmail({
-        to: form.to,
-        subject: form.subject,
-        message: form.message
-      });
-
-      if (response.success) {
-        setSuccessMessage(`Test email sent successfully to ${form.to}!`);
-        setForm(prev => ({ ...prev, to: '' })); // Clear email field
-      } else {
-        throw new Error(response.message || 'Failed to send test email');
-      }
-    } catch (error: any) {
-      setErrorMessage(error.message || 'Failed to send test email');
+      await new Promise((r) => setTimeout(r, 400));
+      setErrorMessage(
+        'Test email via the old API is disabled. Use Supabase Edge Functions, Resend, SendGrid, or your host SMTP from the server environment.',
+      );
+    } catch (error: unknown) {
+      setErrorMessage(error instanceof Error ? error.message : 'Failed to send test email');
     } finally {
       setIsSubmitting(false);
     }

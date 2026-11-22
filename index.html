@@ -1,22 +1,132 @@
 <!doctype html>
-<html lang="en">
+<html lang="en-ZA">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="THREADAI - Premium t-shirts with AI-inspired designs">
-    <title>skipaman</title>
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/favicon.svg" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+
+    <!-- Primary SEO Meta Tags -->
+    <title>Skipaman Store | Custom T-Shirt Printing &amp; School Uniforms SA</title>
+    <meta name="description" content="Custom T-shirt printing, school uniforms &amp; branded merch in Centurion, Gauteng. Bulk orders, DTF printing &amp; fast delivery across South Africa. Get a quote!" />
+    <meta name="author" content="Skipaman Store" />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+    <meta name="theme-color" content="#000000" />
+
+    <!-- Geo targeting -->
+    <meta name="geo.region" content="ZA-GP" />
+    <meta name="geo.placename" content="Centurion, Gauteng, South Africa" />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://skipaman.com/" />
+    <meta property="og:title" content="Skipaman Store | Custom Printing &amp; Branded Merch" />
+    <meta property="og:description" content="Custom t-shirt printing, school uniforms &amp; branded merch in Centurion, Gauteng. Bulk orders &amp; fast delivery across South Africa." />
+    <meta property="og:image" content="https://skipaman.com/images/og-image.jpg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:site_name" content="Skipaman Store" />
+    <meta property="og:locale" content="en_ZA" />
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:url" content="https://skipaman.com/" />
+    <meta name="twitter:title" content="Skipaman Store | Custom Printing &amp; Branded Merch" />
+    <meta name="twitter:description" content="Custom t-shirt printing, school uniforms &amp; branded merch in Centurion, Gauteng. Bulk orders across South Africa." />
+    <meta name="twitter:image" content="https://skipaman.com/images/twitter-image.jpg" />
+
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://skipaman.com/" />
+
+    <!-- Structured Data (JSON-LD) — LocalBusiness + ClothingStore -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": ["ClothingStore", "LocalBusiness"],
+      "name": "Skipaman Store",
+      "description": "Skipaman (Centurion, Gauteng) sells premium t-shirts and streetwear online in South Africa, and offers custom printing & branding: uniform printing, bulk t-shirt printing, school t-shirts, corporate wear, embroidered caps, and branded drinkware.",
+      "url": "https://skipaman.com",
+      "logo": "https://skipaman.com/favicon.svg",
+      "image": "https://skipaman.com/images/og-image.jpg",
+      "telephone": "",
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": "Centurion",
+        "addressRegion": "Gauteng",
+        "postalCode": "0157",
+        "addressCountry": "ZA"
+      },
+      "geo": {
+        "@type": "GeoCoordinates",
+        "latitude": -25.8553,
+        "longitude": 28.1881
+      },
+      "areaServed": {
+        "@type": "Country",
+        "name": "South Africa"
+      },
+      "priceRange": "R200-R2000",
+      "currenciesAccepted": "ZAR",
+      "paymentAccepted": "Cash, Credit Card, EFT",
+      "knowsAbout": [
+        "Custom t-shirt printing",
+        "School uniform supply",
+        "Corporate branded clothing",
+        "Sports team jerseys",
+        "Embroidered caps",
+        "Branded drinkware and promotional cups",
+        "DTF printing",
+        "Screen printing",
+        "Vinyl printing",
+        "Bulk t-shirt printing"
+      ],
+      "sameAs": [
+        "https://www.facebook.com/skipaman",
+        "https://www.instagram.com/skipaman",
+        "https://twitter.com/skipaman"
+      ],
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": "https://skipaman.com/search?q={search_term_string}",
+        "query-input": "required name=search_term_string"
+      }
+    }
+    </script>
+
+    <!-- Breadcrumb schema for homepage -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Home",
+          "item": "https://skipaman.com/"
+        }
+      ]
+    }
+    </script>
+
+    <!-- Performance: Resource Hints -->
+    <link rel="dns-prefetch" href="https://fonts.googleapis.com">
+    <link rel="dns-prefetch" href="https://fonts.gstatic.com">
+    <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Google Fonts with display=swap for better performance -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Syncopate:wght@400;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+    <noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Syncopate:wght@400;700&display=swap" rel="stylesheet"></noscript>
+
     <style>
       /* Critical CSS to prevent white flash */
       html {
         margin: 0;
         padding: 0;
       }
-      
+
       body {
         margin: 0;
         padding: 0;
@@ -24,11 +134,11 @@
         color: white;
         font-family: 'Inter', sans-serif;
       }
-      
+
       #loading-screen {
         position: fixed;
         inset: 0;
-        background: linear-gradient(135deg, #000000 0%, #1a1a1a 50%, #000000 100%);
+        background: #000000;
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -36,211 +146,256 @@
         z-index: 9999;
         overflow: hidden;
       }
-      
-      /* Hide loading screen once React app loads */
+
       .app-loaded #loading-screen {
         display: none !important;
       }
-      
-      /* Additional safety - hide loading screen after a short delay */
+
       #loading-screen {
-        animation: fadeOut 0.1s ease-out 2s forwards;
+        animation: fadeOut 0.1s ease-out 5s forwards;
       }
-      
+
+      @keyframes forceHide {
+        0% { opacity: 1; }
+        100% { opacity: 0; visibility: hidden; display: none !important; }
+      }
+
+      #loading-screen.force-hide {
+        animation: forceHide 0.5s ease-out forwards;
+      }
+
       @keyframes fadeOut {
         to {
           opacity: 0;
           visibility: hidden;
         }
       }
-      
-      /* Animated background elements */
+
       #loading-screen::before {
         content: '';
         position: absolute;
         top: 25%;
         left: 25%;
-        width: 160px;
-        height: 160px;
-        background: radial-gradient(circle, rgba(147, 51, 234, 0.2) 0%, rgba(236, 72, 153, 0.2) 100%);
+        width: 200px;
+        height: 200px;
+        background: radial-gradient(circle, rgba(255, 255, 255, 0.05) 0%, transparent 70%);
         border-radius: 50%;
-        filter: blur(60px);
+        filter: blur(80px);
         animation: float1 12s ease-in-out infinite;
       }
-      
+
       #loading-screen::after {
         content: '';
         position: absolute;
         bottom: 25%;
         right: 25%;
-        width: 192px;
-        height: 192px;
-        background: radial-gradient(circle, rgba(59, 130, 246, 0.2) 0%, rgba(34, 211, 238, 0.2) 100%);
+        width: 240px;
+        height: 240px;
+        background: radial-gradient(circle, rgba(255, 255, 255, 0.03) 0%, transparent 70%);
         border-radius: 50%;
-        filter: blur(60px);
+        filter: blur(80px);
         animation: float2 15s ease-in-out infinite 2s;
       }
-      
+
       .loading-spinner {
         position: relative;
-        width: 112px;
-        height: 112px;
-        margin-bottom: 3rem;
+        width: 100px;
+        height: 100px;
+        margin-bottom: 2.5rem;
       }
-      
+
+      @media (min-width: 640px) {
+        .loading-spinner {
+          width: 120px;
+          height: 120px;
+        }
+      }
+
       .spinner-ring {
         position: absolute;
         border-radius: 50%;
-        border: 4px solid transparent;
+        border: 3px solid transparent;
       }
-      
+
       .spinner-ring-1 {
         inset: 0;
-        border-top-color: rgba(255, 255, 255, 0.1);
-        animation: spin 4s linear infinite;
+        border-top-color: rgba(255, 255, 255, 0.2);
+        border-right-color: rgba(255, 255, 255, 0.1);
+        animation: spin 3s linear infinite;
       }
-      
+
       .spinner-ring-2 {
-        inset: 8px;
-        border-top-color: #8b5cf6;
-        animation: spin 3s linear infinite reverse;
+        inset: 12px;
+        border-top-color: rgba(255, 255, 255, 0.4);
+        border-right-color: rgba(255, 255, 255, 0.2);
+        animation: spin 2.5s linear infinite reverse;
       }
-      
+
       .spinner-ring-3 {
-        inset: 16px;
-        border-top-color: #ec4899;
+        inset: 24px;
+        border-top-color: rgba(255, 255, 255, 0.6);
+        border-right-color: rgba(255, 255, 255, 0.3);
         animation: spin 2s linear infinite;
       }
-      
+
       .spinner-center {
         position: absolute;
-        inset: 24px;
-        background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%);
+        inset: 36px;
+        background: #000000;
+        border: 2px solid rgba(255, 255, 255, 0.3);
         border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
         animation: pulse 2s ease-in-out infinite;
-        box-shadow: 0 0 20px rgba(147, 51, 234, 0.3);
+        box-shadow: 0 0 30px rgba(255, 255, 255, 0.1), inset 0 0 20px rgba(255, 255, 255, 0.05);
       }
-      
+
       .brand-text {
         color: white;
         font-size: 3rem;
         font-weight: 900;
-        letter-spacing: 0.2em;
+        letter-spacing: 0.15em;
         text-align: center;
-        margin-bottom: 1rem;
+        margin-bottom: 1.5rem;
+        text-transform: uppercase;
+        position: relative;
       }
-      
+
+      @media (min-width: 640px) {
+        .brand-text {
+          font-size: 4rem;
+        }
+      }
+
+      @media (min-width: 1024px) {
+        .brand-text {
+          font-size: 5rem;
+        }
+      }
+
       .brand-text .skipa {
-        background: linear-gradient(90deg, #ffffff, #e5e7eb, #ffffff);
-        background-size: 200% 100%;
-        background-clip: text;
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        animation: shimmer 3s linear infinite;
+        color: #ffffff;
+        text-shadow: 0 0 20px rgba(255, 255, 255, 0.5), 0 0 40px rgba(255, 255, 255, 0.3);
+        animation: textGlow 2s ease-in-out infinite;
       }
-      
+
       .brand-text .man {
-        background: linear-gradient(90deg, #fbbf24, #f97316, #fbbf24);
-        background-size: 200% 100%;
-        background-clip: text;
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        animation: shimmer 3s linear infinite 0.5s;
+        color: #ffffff;
+        text-shadow: 0 0 20px rgba(255, 255, 255, 0.5), 0 0 40px rgba(255, 255, 255, 0.3);
+        animation: textGlow 2s ease-in-out infinite 0.3s;
       }
-      
+
       .loading-text {
-        color: rgba(255, 255, 255, 0.9);
-        font-size: 1.125rem;
-        font-weight: 500;
-        letter-spacing: 0.05em;
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 0.875rem;
+        font-weight: 400;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
         animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        margin-bottom: 2rem;
       }
-      
+
       .progress-bar {
-        width: 320px;
-        height: 12px;
+        width: 300px;
+        height: 2px;
         background: rgba(255, 255, 255, 0.1);
         border-radius: 9999px;
         overflow: hidden;
         margin: 1.5rem 0;
-        backdrop-filter: blur(4px);
+        position: relative;
       }
-      
+
+      .progress-bar::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+        animation: shimmer 2s linear infinite;
+      }
+
       .progress-fill {
         height: 100%;
-        background: linear-gradient(90deg, #8b5cf6, #ec4899, #8b5cf6);
-        background-size: 200% 100%;
+        background: #ffffff;
         border-radius: 9999px;
-        animation: progress 3s ease-out forwards, shimmer 2s linear infinite;
+        animation: progress 3s ease-out forwards;
+        box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
       }
-      
+
       .progress-text {
-        color: rgba(255, 255, 255, 0.7);
-        font-size: 0.875rem;
+        color: rgba(255, 255, 255, 0.5);
+        font-size: 0.75rem;
         font-family: 'Courier New', monospace;
-        font-weight: 600;
+        font-weight: 400;
+        letter-spacing: 0.1em;
+        margin-top: 1rem;
       }
-      
+
+      @keyframes textGlow {
+        0%, 100% {
+          text-shadow: 0 0 20px rgba(255, 255, 255, 0.5), 0 0 40px rgba(255, 255, 255, 0.3);
+        }
+        50% {
+          text-shadow: 0 0 30px rgba(255, 255, 255, 0.8), 0 0 60px rgba(255, 255, 255, 0.5);
+        }
+      }
+
       @keyframes spin {
         from { transform: rotate(0deg); }
         to { transform: rotate(360deg); }
       }
-      
+
       @keyframes pulse {
-        0%, 100% { 
+        0%, 100% {
           opacity: 1;
           transform: scale(1);
         }
-        50% { 
+        50% {
           opacity: 0.8;
           transform: scale(1.05);
         }
       }
-      
+
       @keyframes shimmer {
         0% { background-position: 0% 50%; }
         100% { background-position: 200% 50%; }
       }
-      
+
       @keyframes float1 {
-        0%, 100% { 
+        0%, 100% {
           transform: translate(0, 0) scale(1) rotate(0deg);
         }
-        33% { 
+        33% {
           transform: translate(100px, -60px) scale(1.3) rotate(180deg);
         }
-        66% { 
+        66% {
           transform: translate(50px, -30px) scale(0.8) rotate(360deg);
         }
       }
-      
+
       @keyframes float2 {
-        0%, 100% { 
+        0%, 100% {
           transform: translate(0, 0) scale(1) rotate(0deg);
         }
-        33% { 
+        33% {
           transform: translate(-80px, 80px) scale(0.8) rotate(-180deg);
         }
-        66% { 
+        66% {
           transform: translate(-40px, 40px) scale(1.2) rotate(-360deg);
         }
       }
-      
+
       @keyframes progress {
         0% { width: 0%; }
         100% { width: 95%; }
       }
-      
-      /* Particle effects */
+
       .particles {
         position: absolute;
         inset: 0;
         opacity: 0.3;
       }
-      
+
       .particle {
         position: absolute;
         width: 4px;
@@ -249,22 +404,21 @@
         border-radius: 50%;
         animation: particle 3s infinite;
       }
-      
+
       @keyframes particle {
-        0%, 100% { 
+        0%, 100% {
           opacity: 0;
           transform: scale(0);
         }
-        50% { 
+        50% {
           opacity: 1;
           transform: scale(1);
         }
       }
     </style>
   </head>
-  <body class="font-['Inter',sans-serif] text-gray-800 bg-gray-50">
-    <div id="loading-screen" style="display: none;">
-      <!-- Particle effects -->
+  <body class="font-['Inter',sans-serif] text-white bg-black">
+    <div id="loading-screen" aria-hidden="true">
       <div class="particles">
         <div class="particle" style="left: 10%; top: 20%; animation-delay: 0s;"></div>
         <div class="particle" style="left: 20%; top: 60%; animation-delay: 0.5s;"></div>
@@ -277,34 +431,125 @@
         <div class="particle" style="left: 90%; top: 65%; animation-delay: 1.3s;"></div>
         <div class="particle" style="left: 15%; top: 85%; animation-delay: 1.8s;"></div>
       </div>
-      
-      <!-- Enhanced spinner -->
+
       <div class="loading-spinner">
         <div class="spinner-ring spinner-ring-1"></div>
         <div class="spinner-ring spinner-ring-2"></div>
         <div class="spinner-ring spinner-ring-3"></div>
         <div class="spinner-center">
-          <span style="color: white; font-size: 1.5rem; font-weight: 900;">S</span>
+          <span style="color: white; font-size: 1.75rem; font-weight: 900; letter-spacing: 0.1em;">S</span>
         </div>
       </div>
-      
-      <!-- Brand name -->
+
       <div class="brand-text">
         <span class="skipa">SKIPA</span><span class="man">MAN</span>
       </div>
-      
-      <!-- Loading text -->
-      <div class="loading-text">Initializing...</div>
-      
-      <!-- Progress bar -->
+
+      <div class="loading-text">Loading...</div>
+
       <div class="progress-bar">
         <div class="progress-fill"></div>
       </div>
-      
-      <!-- Progress text -->
-      <div class="progress-text">0%</div>
+
+      <div class="progress-text" id="progress-text">Loading your experience</div>
     </div>
-    <div id="root"></div>
+
+    <div id="root">
+      <!-- SEO fallback: replaced when React loads; hidden from users -->
+      <div style="display:none">
+        <h1>Skipaman Store: Custom T-Shirt Printing &amp; School Uniforms South Africa</h1>
+        <p>Bulk t-shirt printing, corporate branding, and school uniforms in Centurion, Gauteng. We offer DTF, screen printing, and vinyl branding with nationwide delivery.</p>
+      </div>
+    </div>
+
+    <noscript>
+      <div style="padding: 20px; text-align: center; color: #f5f5f5; background: #000;">
+        <h2>Skipaman Store</h2>
+        <p>Custom t-shirt printing, school uniforms, and branded merchandise in Centurion, Gauteng. Please enable JavaScript to view our full catalog.</p>
+        <p>
+          <a href="/shop" style="color: #fff;">Shop</a> ·
+          <a href="/printing" style="color: #fff;">Printing services</a> ·
+          <a href="/support" style="color: #fff;">Contact</a>
+        </p>
+      </div>
+    </noscript>
+
+    <script>
+      (function() {
+        const progressText = document.getElementById('progress-text');
+        const messages = [
+          'Loading your experience',
+          'Preparing premium collection',
+          'Almost ready...'
+        ];
+        let currentIndex = 0;
+
+        if (progressText) {
+          const interval = setInterval(() => {
+            currentIndex = (currentIndex + 1) % messages.length;
+            progressText.textContent = messages[currentIndex];
+          }, 1000);
+
+          window.addEventListener('load', () => {
+            clearInterval(interval);
+          });
+        }
+      })();
+    </script>
+
+    <script>
+      // Unregister stale service workers and clear caches to prevent chunk mismatch errors.
+      (function () {
+        try {
+          if (!('serviceWorker' in navigator)) return;
+          var key = 'skipaman_sw_purged_v1';
+          if (sessionStorage.getItem(key) === '1') return;
+          if (!navigator.serviceWorker.controller) return;
+          sessionStorage.setItem(key, '1');
+          Promise.all([
+            navigator.serviceWorker.getRegistrations().then(function (regs) {
+              return Promise.all(regs.map(function (r) { return r.unregister(); }));
+            }),
+            'caches' in window
+              ? caches.keys().then(function (keys) {
+                  return Promise.all(keys.map(function (k) { return caches.delete(k); }));
+                })
+              : Promise.resolve(),
+          ])
+            .catch(function () {})
+            .finally(function () { location.reload(); });
+        } catch (_) {}
+      })();
+    </script>
+
     <script type="module" src="/src/main.tsx"></script>
+
+    <script>
+      setTimeout(function() {
+        const loadingScreen = document.getElementById('loading-screen');
+        if (loadingScreen && !document.body.classList.contains('app-loaded')) {
+          const hasErrors = window.performance && window.performance.getEntriesByType('resource').some(
+            entry => entry.name.includes('.js') && entry.responseStatus >= 400
+          );
+          if (hasErrors) {
+            loadingScreen.classList.add('force-hide');
+            const errorDiv = document.createElement('div');
+            errorDiv.style.cssText = 'position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #000; color: #fff; padding: 20px; border-radius: 8px; z-index: 10000; text-align: center; max-width: 90%;';
+            errorDiv.innerHTML = '<h2>Loading Error</h2><p>Please check your connection and try again.</p><button onclick="location.reload()" style="margin-top: 10px; padding: 10px 20px; background: #fff; color: #000; border: none; border-radius: 4px; cursor: pointer;">Reload Page</button>';
+            document.body.appendChild(errorDiv);
+          } else {
+            loadingScreen.classList.add('force-hide');
+          }
+        }
+      }, 15000);
+
+      window.addEventListener('error', function(e) {
+        console.error('JavaScript error:', e.message, e.filename, e.lineno);
+        const loadingScreen = document.getElementById('loading-screen');
+        if (loadingScreen) {
+          loadingScreen.classList.add('force-hide');
+        }
+      });
+    </script>
   </body>
 </html>

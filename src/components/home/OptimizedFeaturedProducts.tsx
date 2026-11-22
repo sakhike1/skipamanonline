@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { ArrowRight, ShoppingBag, Plus, Sparkles, Star, Zap, Crown } from 'lucide-react';
 import { products } from '../../data/products';
 import { Button } from '../ui/Button';
+import { FEATURED_PRIMARY_CTA_CLASS } from './featuredPrimaryCta';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface FeaturedProductsProps {
@@ -189,17 +190,41 @@ const OptimizedFeaturedProducts: React.FC<FeaturedProductsProps> = ({ onProductC
     return () => observer.disconnect();
   }, []);
 
+  // Auto-rotate images every 7 seconds when not hovered
+  useEffect(() => {
+    if (!featuredProducts.length) return;
+    
+    const interval = setInterval(() => {
+      setCurrentImageIndex(prev => {
+        const newState = { ...prev };
+        Object.keys(newState).forEach(id => {
+          // Only rotate if not currently hovered
+          if (hoveredProduct !== id) {
+            const product = featuredProducts.find(p => p.id === id);
+            if (product && product.images && product.images.length > 1) {
+              newState[id] = (newState[id] + 1) % product.images.length;
+            }
+          }
+        });
+        return newState;
+      });
+    }, 7000); // Change every 7 seconds
+
+    return () => clearInterval(interval);
+  }, [hoveredProduct, featuredProducts]);
+
   const handleMouseEnter = useCallback((productId: string) => {
     setHoveredProduct(productId);
-    setIsTransitioning(true);
     
+    // Immediately change image on hover
+    setIsTransitioning(true);
     setTimeout(() => {
       setCurrentImageIndex(prev => ({
         ...prev,
         [productId]: (prev[productId] + 1) % 3
       }));
       setIsTransitioning(false);
-    }, 200);
+    }, 300); // Smooth fade transition
   }, []);
 
   const handleMouseLeave = useCallback(() => {
@@ -422,13 +447,10 @@ const OptimizedFeaturedProducts: React.FC<FeaturedProductsProps> = ({ onProductC
         >
           <Button
             onClick={handleViewMore}
-            className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-8 py-4 rounded-xl font-semibold text-lg shadow-2xl hover:shadow-purple-500/25 transition-all duration-300 transform hover:scale-105"
+            className={FEATURED_PRIMARY_CTA_CLASS}
           >
-            <span className="flex items-center gap-3">
-              <Zap size={20} />
-              Explore All Products
-              <ArrowRight size={20} />
-            </span>
+            Browse Collection
+            <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
           </Button>
         </motion.div>
       </div>

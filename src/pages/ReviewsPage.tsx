@@ -20,6 +20,11 @@ const ReviewsPage: React.FC = () => {
   const { setIsHeaderDark } = useHeader();
   const navigate = useNavigate();
 
+  // Scroll to top when component mounts
+  React.useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   // Set header to dark when component mounts
   React.useEffect(() => {
     setIsHeaderDark(true);
@@ -60,17 +65,15 @@ const ReviewsPage: React.FC = () => {
     <div className="min-h-screen bg-white">
       {/* Hero Section with Video Background */}
       <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
-        {/* Video Background */}
+        {/* Video Background - Black & White Theme */}
         <div className="absolute inset-0 w-full h-full">
           <video
             autoPlay
             muted
             loop
             playsInline
-            className="absolute inset-0 w-full h-full object-cover"
-            style={{
-              filter: 'grayscale(100%) brightness(0.7) contrast(1.2)',
-            }}
+            className="absolute inset-0 w-full h-full object-cover grayscale"
+            style={{ filter: 'grayscale(100%) contrast(1.1)' }}
             poster="/images/background1.jpg"
           >
             <source src="/images/background.mp4" type="video/mp4" />
@@ -78,13 +81,13 @@ const ReviewsPage: React.FC = () => {
           </video>
           
           {/* Dark Overlay for Text Contrast */}
-          <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/60 to-black/80"></div>
+          <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/70 to-black/80"></div>
           
           {/* Subtle animated overlay for breathing effect */}
           <motion.div
-            className="absolute inset-0 bg-gradient-to-br from-white/10 via-transparent to-black/30"
+            className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-black/40"
             animate={{
-              opacity: [0.2, 0.4, 0.2],
+              opacity: [0.3, 0.5, 0.3],
             }}
             transition={{
               duration: 6,
@@ -97,10 +100,10 @@ const ReviewsPage: React.FC = () => {
           <motion.div
             className="absolute inset-0"
             style={{
-              background: 'radial-gradient(ellipse at center, transparent 0%, rgba(0,0,0,0.4) 100%)'
+              background: 'radial-gradient(ellipse at center, transparent 0%, rgba(0,0,0,0.6) 100%)'
             }}
             animate={{
-              opacity: [0.6, 0.8, 0.6],
+              opacity: [0.7, 0.9, 0.7],
             }}
             transition={{
               duration: 4,
@@ -465,4 +468,3 @@ const ReviewsPage: React.FC = () => {
 };
 
 export default ReviewsPage;
-

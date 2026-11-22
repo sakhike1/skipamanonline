@@ -1,104 +1,193 @@
 import React from 'react';
-import { Facebook, Twitter, Instagram, Mail, Phone, MapPin } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { useNewsletter } from '../../hooks/useNewsletter';
 
 const Footer: React.FC = () => {
+  const { email, setEmail, isSubscribing, handleSubscribe, status, message, resetStatus } = useNewsletter(
+    undefined,
+    undefined,
+    'footer_newsletter',
+  );
+
+  const shopLinks = [
+    { name: 'Shop All', path: '/shop' },
+    { name: 'New Arrivals', path: '/new-arrivals' },
+    { name: 'Best Sellers', path: '/shop?filter=bestsellers' },
+    { name: 'Sale', path: '/shop?filter=sale' },
+    { name: 'Branding', path: '/virtual-stylist' }
+  ];
+
+  const socialLinks = [
+    { name: 'Facebook', href: 'https://facebook.com/skipaman' },
+    { name: 'Instagram', href: 'https://instagram.com/skipaman' },
+    { name: 'Twitter', href: 'https://twitter.com/skipaman' },
+    { name: 'YouTube', href: 'https://youtube.com/skipaman' }
+  ];
+
   return (
-    <footer className="relative overflow-hidden">
-      {/* Animated gradient background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-red-900/40 via-black/50 to-red-800/90 animate-pulse"></div>
-      
-      {/* Content overlay */}
-      <div className="relative z-10 bg-black/80 backdrop-blur-sm text-white/70">
-        <div className="container mx-auto py-12 px-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {/* Company Info */}
-            <div>
-              <div className="space-y-1 mb-4">
-                <h3 className="text-2xl font-black text-white tracking-wide">Skipaman</h3>
-              </div>
-              <p className="mb-4 leading-relaxed">
-                Elevating your style with AI-inspired designs and premium quality t-shirts.
-                Sustainable fashion for the modern age.
-              </p>
-              <div className="flex space-x-4">
-                <a href="#" className="hover:text-white transition-colors">
-                  <Facebook size={20} className="text-white/70 hover:text-white" />
-                </a>
-                <a href="#" className="hover:text-white transition-colors">
-                  <Twitter size={20} className="text-white/70 hover:text-white" />
-                </a>
-                <a href="#" className="hover:text-white transition-colors">
-                  <Instagram size={20} className="text-white/70 hover:text-white" />
-                </a>
-              </div>
-            </div>
-
-            {/* Quick Links */}
-            <div>
-              <h3 className="text-lg font-semibold text-white mb-4">Quick Links</h3>
-              <ul className="space-y-2">
-                <li><a href="/" className="hover:text-white transition-colors">Home</a></li>
-                <li><a href="/shop" className="hover:text-white transition-colors">Shop All</a></li>
-                <li><a href="/new" className="hover:text-white transition-colors">New Arrivals</a></li>
-                <li><a href="/about" className="hover:text-white transition-colors">About Us</a></li>
-                <li><a href="/sustainability" className="hover:text-white transition-colors">Sustainability</a></li>
-                <li><a href="/customer-service" className="hover:text-white transition-colors">Customer Service</a></li>
-                <li><a href="/contact" className="hover:text-white transition-colors">Contact Us</a></li>
-                <li><a href="/faq" className="hover:text-white transition-colors">FAQs</a></li>
-                <li><a href="/shipping" className="hover:text-white transition-colors">Shipping & Returns</a></li>
-                <li><a href="/size-guide" className="hover:text-white transition-colors">Size Guide</a></li>
-                <li><a href="/privacy" className="hover:text-white transition-colors">Privacy Policy</a></li>
-              </ul>
-            </div>
-
-            {/* Contact Info */}
-            <div>
-              <h3 className="text-lg font-semibold text-white mb-4">Contact Us</h3>
-              <ul className="space-y-4">
-                <li className="flex items-start">
-                  <MapPin size={20} className="mr-2 text-white/70 flex-shrink-0 mt-1" />
-                  <span>123 Design District, Creative City, 12345</span>
-                </li>
-                <li className="flex items-center">
-                  <Phone size={20} className="mr-2 text-white/70 flex-shrink-0" />
-                  <span>+1 (555) 123-4567</span>
-                </li>
-                <li className="flex items-center">
-                  <Mail size={20} className="mr-2 text-white/70 flex-shrink-0" />
-                  <span>admin@skipaman.co.za</span>
-                </li>
-              </ul>
-            </div>
-
-            {/* Stay Connected */}
-            <div>
-              <h3 className="text-lg font-semibold text-white mb-4">Stay Connected</h3>
-              <p className="text-sm text-white/80 leading-relaxed">
-                Join the Skipaman community for exclusive drops, design inspiration, and sustainability updates.
-              </p>
-              <div className="mt-4 space-y-3">
-                <a
-                  href="mailto:admin@skipaman.co.za"
-                  className="flex items-center rounded-2xl border border-white/20 bg-white/10 px-4 py-3 text-sm font-medium text-white/80 transition-colors hover:border-white/40 hover:text-white"
-                >
-                  <Mail size={18} className="mr-3" />
-                  admin@skipaman.co.za
-                </a>
-                <a
-                  href="/shop"
-                  className="inline-flex items-center rounded-full border border-white/20 bg-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.35em] text-white/80 transition-all hover:border-white/40 hover:bg-white/10 hover:text-white"
-                >
-                  Explore Collections
-                </a>
-              </div>
+    <footer id="footer" className="bg-black px-4 py-14 sm:px-6 lg:px-8">
+      <div className="mx-auto w-full max-w-7xl">
+        <div className="grid grid-cols-1 gap-10 md:grid-cols-2 md:gap-12 lg:grid-cols-6 lg:gap-8">
+          
+          {/* Brand Section */}
+          <div className="flex flex-col items-start text-left lg:col-span-1">
+            <Link to="/" className="inline-flex items-center gap-2">
+              <span className="text-2xl font-black tracking-tight text-white">SKIPAMAN</span>
+            </Link>
+            <div className="mt-6 h-px w-full max-w-52 bg-gradient-to-r from-transparent via-white/25 to-transparent" />
+            <p className="mt-5 max-w-sm text-sm leading-relaxed text-white/60">
+              Elevating your style with premium quality fashion. Sustainable, modern, and made for you.
+            </p>
+            <div className="mt-5 flex flex-col gap-2">
+              <a href="tel:0744702010" className="text-sm text-white/60 transition-colors hover:text-white">
+                0744702010
+              </a>
+              <a
+                href="mailto:admin@skipaman.co.za"
+                className="text-sm text-white/60 transition-colors hover:text-white"
+              >
+                admin@skipaman.co.za
+              </a>
+              <a
+                href="mailto:sales@skipaman.co.za"
+                className="text-sm text-white/60 transition-colors hover:text-white"
+              >
+                sales@skipaman.co.za
+              </a>
             </div>
           </div>
 
-          <div className="border-t border-white/30 mt-12 pt-8 text-center text-sm text-white/70">
-            <p>&copy; {new Date().getFullYear()} Skipaman. All rights reserved.</p>
-            <p className="mt-2">
-              Made with care for both style and sustainability.
+          {/* Shop Links */}
+          <div className="flex flex-col items-start text-left">
+            <h3 className="text-sm font-semibold tracking-wide text-white">Shop</h3>
+            <div className="mt-5 flex flex-col gap-2">
+              {shopLinks.map((link, index) => (
+                <Link 
+                  key={index}
+                  to={link.path} 
+                  className="text-sm text-white/60 transition-colors hover:text-white"
+                >
+                  {link.name}
+                </Link>
+              ))}
+            </div>
+          </div>
+
+          {/* Help */}
+          <div className="flex flex-col items-start text-left">
+            <h3 className="text-sm font-semibold tracking-wide text-white">Help</h3>
+            <div className="mt-5 flex flex-col gap-2">
+              <Link to="/support" className="text-sm text-white/60 transition-colors hover:text-white">
+                Support / tickets
+              </Link>
+              <Link to="/design-brief" className="text-sm text-white/60 transition-colors hover:text-white">
+                Design brief
+              </Link>
+            </div>
+          </div>
+
+          {/* Printing / local SEO */}
+          <div className="flex flex-col items-start text-left">
+            <h3 className="text-sm font-semibold tracking-wide text-white">Printing</h3>
+            <div className="mt-5 flex flex-col gap-2">
+              <Link to="/printing" className="text-sm text-white/60 transition-colors hover:text-white">
+                Services &amp; areas
+              </Link>
+              <Link to="/locations/centurion" className="text-sm text-white/60 transition-colors hover:text-white">
+                Centurion
+              </Link>
+              <Link to="/locations/pretoria" className="text-sm text-white/60 transition-colors hover:text-white">
+                Pretoria
+              </Link>
+              <Link to="/locations/johannesburg" className="text-sm text-white/60 transition-colors hover:text-white">
+                Johannesburg
+              </Link>
+              <Link to="/virtual-stylist" className="text-sm text-white/60 transition-colors hover:text-white">
+                Request a quote
+              </Link>
+            </div>
+          </div>
+
+          {/* Social Links */}
+          <div className="flex flex-col items-start text-left">
+            <h3 className="text-sm font-semibold tracking-wide text-white">Follow</h3>
+            <div className="mt-5 flex flex-col gap-2">
+              {socialLinks.map((link, index) => (
+                <a 
+                  key={index}
+                  href={link.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm text-white/60 transition-colors hover:text-white"
+                >
+                  {link.name}
+                </a>
+              ))}
+            </div>
+          </div>
+
+          {/* Newsletter Section */}
+          <div className="flex flex-col items-start text-left">
+            <h3 className="text-sm font-semibold tracking-wide text-white">Newsletter</h3>
+            <p className="mt-3 text-sm leading-relaxed text-white/60">
+              New drops, restocks, and offers—one short email.
             </p>
+            <form onSubmit={handleSubscribe} className="mt-5 w-full min-w-0 max-w-sm" noValidate>
+              <div className="flex flex-col gap-2.5">
+                <label className="sr-only" htmlFor="footer-newsletter-email">
+                  Email address
+                </label>
+                <div className="w-full min-w-0 rounded-full border border-white/15 bg-white/[0.03] px-1 py-1">
+                  <input
+                    id="footer-newsletter-email"
+                    type="email"
+                    value={email}
+                    onChange={(e) => {
+                      if (message) resetStatus();
+                      setEmail(e.target.value);
+                    }}
+                    placeholder="Enter your email"
+                    className="box-border h-11 w-full min-w-0 rounded-full bg-transparent px-4 text-sm text-white placeholder:text-white/55 placeholder:text-sm outline-none"
+                    autoComplete="email"
+                    disabled={isSubscribing}
+                    required
+                  />
+                </div>
+                <button
+                  type="submit"
+                  disabled={isSubscribing}
+                  className="h-11 w-full shrink-0 rounded-full bg-white px-5 text-sm font-semibold text-neutral-950 transition hover:bg-neutral-100 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {isSubscribing ? 'Subscribing…' : 'Subscribe'}
+                </button>
+              </div>
+              {message && (
+                <p
+                  className={`mt-3 text-sm ${
+                    status === 'success' ? 'text-green-400' : 'text-red-300'
+                  }`}
+                  aria-live="polite"
+                >
+                  {message}
+                </p>
+              )}
+            </form>
+          </div>
+
+        </div>
+
+        <div className="my-10 h-px w-full bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+
+        <div className="flex flex-col items-start justify-between gap-4 text-left sm:flex-row sm:items-center">
+          <p className="text-xs text-white/60">© 2025 SKIPAMAN</p>
+          <div className="flex items-center gap-6">
+            <Link to="/terms" className="text-xs text-white/60 transition-colors hover:text-white">
+              Terms & Conditions
+            </Link>
+            <div className="h-4 w-px bg-white/20" />
+            <Link to="/privacy" className="text-xs text-white/60 transition-colors hover:text-white">
+              Privacy Policy
+            </Link>
           </div>
         </div>
       </div>

@@ -1,360 +1,379 @@
-import React, { createContext, useContext, useReducer, useEffect, useCallback, ReactNode, useMemo } from 'react';
-import { User, LoginCredentials, RegisterCredentials } from '../types';
-import { authAPI } from '../services/api';
-import strapiAuth from '../services/strapiAuth';
-import socketService from '../services/socket';
+import React, { createContext, useCallback, useEffect, useMemo, useState } from 'react';
+import type { User as SupabaseAuthUser } from '@supabase/supabase-js';
+import type { User as AppUser, LoginCredentials, RegisterCredentials } from '../types';
+import { supabase } from '../lib/supabase';
 
-// Determine which auth service to use based on environment variable
-// Note: Vite uses import.meta.env, not process.env
-const USE_STRAPI_AUTH = import.meta.env.VITE_USE_STRAPI_AUTH === 'true';
+type ProfileRow = {
+  id: string;
+  role: string;
+  full_name: string | null;
+  phone: string | null;
+  avatar_url: string | null;
+  created_at: string;
+};
 
-// Auth State Interface
-interface AuthState {
-  user: User | null;
+export type LoginOptions = {
+  /** When true (staff portal at `/admin/login`), non-admin accounts are signed out immediately and login fails. */
+  adminPortal?: boolean;
+};
+
+type AuthContextValue = {
+  user: AppUser | null;
   isAuthenticated: boolean;
   isLoading: boolean;
+  isSubmitting: boolean;
   error: string | null;
-}
-
-// Auth Action Types
-type AuthAction =
-  | { type: 'AUTH_START' }
-  | { type: 'AUTH_SUCCESS'; payload: User }
-  | { type: 'AUTH_FAILURE'; payload: string }
-  | { type: 'AUTH_LOGOUT' }
-  | { type: 'CLEAR_ERROR' }
-  | { type: 'AUTH_INIT_COMPLETE' };
-
-// Initial State - Check localStorage first for faster initial load
-const getInitialState = (): AuthState => {
-  const userData = localStorage.getItem('user_data');
-  const authToken = localStorage.getItem('auth_token');
-  
-  if (userData && authToken) {
-    try {
-      const user = JSON.parse(userData);
-      return {
-        user,
-        isAuthenticated: true,
-        isLoading: false, // Start with false since we have cached data
-        error: null,
-      };
-    } catch (error) {
-      // If parsing fails, clear localStorage and start fresh
-      localStorage.removeItem('user_data');
-      localStorage.removeItem('auth_token');
-      localStorage.removeItem('refresh_token');
-    }
-  }
-  
-  return {
-    user: null,
-    isAuthenticated: false,
-    isLoading: true,
-    error: null,
-  };
-};
-
-const initialState: AuthState = getInitialState();
-
-// Auth Reducer
-const authReducer = (state: AuthState, action: AuthAction): AuthState => {
-  switch (action.type) {
-    case 'AUTH_START':
-      return {
-        ...state,
-        isLoading: true,
-        error: null,
-      };
-    case 'AUTH_SUCCESS':
-      return {
-        ...state,
-        user: action.payload,
-        isAuthenticated: true,
-        isLoading: false,
-        error: null,
-      };
-    case 'AUTH_FAILURE':
-      return {
-        ...state,
-        user: null,
-        isAuthenticated: false,
-        isLoading: false,
-        error: action.payload,
-      };
-    case 'AUTH_LOGOUT':
-      return {
-        ...state,
-        user: null,
-        isAuthenticated: false,
-        isLoading: false,
-        error: null,
-      };
-    case 'CLEAR_ERROR':
-      return {
-        ...state,
-        error: null,
-      };
-    case 'AUTH_INIT_COMPLETE':
-      return {
-        ...state,
-        isLoading: false,
-      };
-    default:
-      return state;
-  }
-};
-
-// Auth Context Interface
-interface AuthContextType extends AuthState {
-  login: (credentials: LoginCredentials) => Promise<User | undefined>;
+  login: (credentials: LoginCredentials, options?: LoginOptions) => Promise<AppUser | null>;
   register: (credentials: RegisterCredentials) => Promise<void>;
   logout: () => Promise<void>;
   clearError: () => void;
-}
-
-// Create Context with HMR stability
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
-
-// Add display name for debugging
-AuthContext.displayName = 'AuthContext';
-
-// Global context reference for HMR stability
-let globalAuthContext: React.Context<AuthContextType | undefined> | null = null;
-
-// Get or create context instance
-const getAuthContext = (): React.Context<AuthContextType | undefined> => {
-  if (!globalAuthContext) {
-    globalAuthContext = createContext<AuthContextType | undefined>(undefined);
-    globalAuthContext.displayName = 'AuthContext';
-  }
-  return globalAuthContext;
 };
 
-// Reset context (useful for testing or HMR issues)
-export const resetAuthContext = (): void => {
-  globalAuthContext = null;
-};
+export const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
-// Auth Provider Props
-interface AuthProviderProps {
-  children: ReactNode;
+function mapDbRoleToAppRole(dbRole: string): AppUser['role'] {
+  if (dbRole === 'store_manager' || dbRole === 'admin') return 'admin';
+  return 'buyer';
 }
 
-// Auth Provider Component
-export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-  const [state, dispatch] = useReducer(authReducer, initialState);
-
-  // Initialize auth state on app load
-  useEffect(() => {
-    const initializeAuth = async () => {
-      try {
-        const token = localStorage.getItem('auth_token');
-        const userData = localStorage.getItem('user_data');
-        
-        if (token && userData) {
-          try {
-            let freshUser: User;
-
-            if (USE_STRAPI_AUTH) {
-              // Verify token with Strapi
-              strapiAuth.setAuthToken(token);
-              freshUser = await strapiAuth.getCurrentUser();
-            } else {
-              // Verify token with custom backend
-              const response = await authAPI.getCurrentUser();
-              if (response.success && response.data) {
-                freshUser = response.data.user;
-              } else {
-                throw new Error('Invalid token');
-              }
-            }
-
-            localStorage.setItem('user_data', JSON.stringify(freshUser));
-            
-            // Connect to Socket.IO (only if not using Strapi)
-            if (!USE_STRAPI_AUTH) {
-              socketService.connect(token);
-            }
-            
-            dispatch({ type: 'AUTH_SUCCESS', payload: freshUser });
-          } catch (error) {
-            // Token is invalid, clear auth
-            localStorage.removeItem('auth_token');
-            localStorage.removeItem('user_data');
-            dispatch({ type: 'AUTH_LOGOUT' });
-          }
-        } else {
-          dispatch({ type: 'AUTH_INIT_COMPLETE' });
-        }
-      } catch (error) {
-        console.error('Auth initialization error:', error);
-        dispatch({ type: 'AUTH_INIT_COMPLETE' });
-      }
-    };
-
-    initializeAuth();
-  }, []);
-
-  // Login function
-  const login = async (credentials: LoginCredentials) => {
-    try {
-      dispatch({ type: 'AUTH_START' });
-      
-      let user: User;
-      let token: string;
-
-      if (USE_STRAPI_AUTH) {
-        // Use Strapi authentication
-        console.log('Attempting Strapi login for:', credentials.email);
-        const result = await strapiAuth.login(credentials);
-        user = result.user;
-        token = result.token;
-        console.log('Strapi login successful:', user.role);
-      } else {
-        // Use custom backend authentication
-        console.log('Attempting backend login for:', credentials.email);
-        const response = await authAPI.login(credentials);
-        
-        if (response.success && response.data) {
-          user = response.data.user;
-          token = response.data.token;
-          console.log('Backend login successful:', user.role);
-        } else {
-          throw new Error(response.message || 'Login failed');
-        }
-      }
-      
-      // Store token and user data
-      localStorage.setItem('auth_token', token);
-      localStorage.setItem('user_data', JSON.stringify(user));
-      
-      // Connect to Socket.IO (only if not using Strapi or if you have Socket.IO in Strapi)
-      if (!USE_STRAPI_AUTH) {
-        socketService.connect(token);
-      }
-      
-      dispatch({ type: 'AUTH_SUCCESS', payload: user });
-      return user; // Return user data for redirect logic
-    } catch (error: any) {
-      const errorMessage = error.response?.data?.message || error.message || 'Login failed';
-      console.log('AuthContext: Login failed:', errorMessage);
-      dispatch({ 
-        type: 'AUTH_FAILURE', 
-        payload: errorMessage
-      });
-      // Re-throw the error so the LoginForm can catch it and prevent navigation
-      throw new Error(errorMessage);
-    }
-  };
-
-  // Register function
-  const register = async (credentials: RegisterCredentials) => {
-    try {
-      dispatch({ type: 'AUTH_START' });
-      
-      let user: User;
-      let token: string;
-
-      if (USE_STRAPI_AUTH) {
-        // Use Strapi registration
-        console.log('Attempting Strapi registration for:', credentials.email);
-        const result = await strapiAuth.register(credentials);
-        user = result.user;
-        token = result.token;
-        console.log('Strapi registration successful:', user.role);
-      } else {
-        // Use custom backend registration
-        console.log('Attempting backend registration for:', credentials.email);
-        const response = await authAPI.register(credentials);
-        
-        if (response.success && response.data) {
-          user = response.data.user;
-          token = response.data.token;
-          console.log('Backend registration successful:', user.role);
-        } else {
-          throw new Error(response.message || 'Registration failed');
-        }
-      }
-      
-      // Store token and user data
-      localStorage.setItem('auth_token', token);
-      localStorage.setItem('user_data', JSON.stringify(user));
-      
-      // Connect to Socket.IO (only if not using Strapi)
-      if (!USE_STRAPI_AUTH) {
-        socketService.connect(token);
-      }
-      
-      dispatch({ type: 'AUTH_SUCCESS', payload: user });
-      return;
-    } catch (error: any) {
-      // The error message is already enhanced in strapiAuth.register()
-      const errorMessage = error.message || 'Registration failed';
-      console.error('AuthContext: Registration failed:', errorMessage);
-      console.error('Full error details:', error);
-      dispatch({ 
-        type: 'AUTH_FAILURE', 
-        payload: errorMessage
-      });
-      throw error; // Re-throw the original error with enhanced message
-    }
-  };
-
-  // Logout function
-  const logout = async () => {
-    try {
-      if (USE_STRAPI_AUTH) {
-        // Strapi logout (just clears token locally)
-        await strapiAuth.logout();
-      } else {
-        // Custom backend logout
-        await authAPI.logout();
-      }
-    } catch (error) {
-      console.log('Logout API call failed:', error);
-    } finally {
-      // Always clear local state and disconnect socket
-      localStorage.removeItem('auth_token');
-      localStorage.removeItem('user_data');
-      localStorage.removeItem('refresh_token');
-      if (!USE_STRAPI_AUTH) {
-        socketService.disconnect();
-      }
-      dispatch({ type: 'AUTH_LOGOUT' });
-    }
-  };
-
-  // Clear error function
-  const clearError = useCallback(() => {
-    dispatch({ type: 'CLEAR_ERROR' });
-  }, []);
-
-  // Memoize the context value to prevent unnecessary re-renders
-  const value: AuthContextType = useMemo(() => ({
-    ...state,
-    login,
-    register,
-    logout,
-    clearError,
-  }), [state, login, register, logout, clearError]);
-
-  // Use the stable context
-  const StableAuthContext = getAuthContext();
+const isRetryableAuthFetchError = (e: unknown) => {
+  const err = e as { name?: unknown; status?: unknown; message?: unknown } | null;
+  const name = typeof err?.name === 'string' ? err.name : '';
+  const status = typeof err?.status === 'number' ? err.status : undefined;
+  const message = typeof err?.message === 'string' ? err.message : '';
+  const msg = message.toLowerCase();
 
   return (
-    <StableAuthContext.Provider value={value}>
-      {children}
-    </StableAuthContext.Provider>
+    name === 'AuthRetryableFetchError' ||
+    name === 'AbortError' ||
+    status === 504 ||
+    msg.includes('gateway timeout') ||
+    msg.includes('failed to fetch') ||
+    msg.includes('request timed out') ||
+    msg.includes('timed out') ||
+    msg.includes('aborted')
   );
 };
 
-// Custom hook to use auth context
-export const useAuth = (): AuthContextType => {
-  const StableAuthContext = getAuthContext();
-  const context = useContext(StableAuthContext);
-  if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+/** Prevents hung network calls from leaving the UI stuck on “Signing in…”. */
+async function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise<T> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const timeout = new Promise<never>((_, reject) => {
+    timer = setTimeout(() => reject(new Error(`${label} timed out after ${Math.round(ms / 1000)}s`)), ms);
+  });
+  try {
+    return await Promise.race([promise, timeout]);
+  } finally {
+    if (timer !== undefined) clearTimeout(timer);
   }
-  return context;
-}; 
+}
+
+const PROFILE_FETCH_MS = 12_000;
+const SIGN_IN_MS = 55_000;
+
+/** Map Supabase AuthApiError / network errors to a single UI string (avoid “timeout” for 422/400). */
+function mapAuthFailureToUserMessage(e: unknown, context: 'login' | 'register'): string {
+  if (e instanceof Error && e.message === 'Request timed out') {
+    return context === 'login'
+      ? 'Sign in is taking too long. Please try again.'
+      : 'Signup is taking too long. Please try again.';
+  }
+
+  const status =
+    typeof (e as { status?: unknown })?.status === 'number'
+      ? (e as { status: number }).status
+      : undefined;
+  const raw = e instanceof Error ? e.message : String(e ?? '');
+  const lower = raw.toLowerCase();
+  const name = typeof (e as { name?: unknown })?.name === 'string' ? (e as { name: string }).name : '';
+
+  if (name === 'AbortError' || lower.includes('aborted')) {
+    return 'The connection timed out. Check your network and try again.';
+  }
+
+  // Explicit credential / validation responses from Supabase (not “network down”).
+  if (
+    status === 400 ||
+    status === 401 ||
+    status === 422 ||
+    lower.includes('invalid login credentials') ||
+    lower.includes('invalid credentials')
+  ) {
+    if (lower.includes('invalid login') || lower.includes('invalid credentials')) {
+      return 'Wrong email or password. Please try again.';
+    }
+    if (lower.includes('user already registered') || lower.includes('already registered')) {
+      return 'This email is already registered. Please sign in instead.';
+    }
+    if (lower.includes('email not confirmed') || lower.includes('not confirmed')) {
+      return 'Please confirm your email address, then sign in.';
+    }
+    // Signup 400: weak password, invalid email, etc. — surface Supabase message when helpful
+    if (raw && raw !== 'Request timed out') {
+      return raw;
+    }
+    return context === 'login' ? 'Login failed.' : 'Registration failed. Check email and password.';
+  }
+
+  if (isRetryableAuthFetchError(e)) {
+    return context === 'login'
+      ? 'Sign in timed out. Please try again.'
+      : 'Signup timed out. Please try again in a moment.';
+  }
+
+  if (raw) return raw;
+  return context === 'login' ? 'Login failed.' : 'Registration failed.';
+}
+
+function toAppUser(supabaseUser: SupabaseAuthUser, profile: ProfileRow | null): AppUser {
+  const meta = (supabaseUser.user_metadata ?? {}) as Record<string, unknown>;
+  const metaFull =
+    (meta.full_name as string | undefined) ||
+    `${(meta.firstName as string) || ''} ${(meta.lastName as string) || ''}`.trim();
+  const fullName = profile?.full_name?.trim() || metaFull || '';
+  const parts = fullName.split(/\s+/).filter(Boolean);
+  const firstName =
+    ((meta.firstName ?? meta.first_name) as string | undefined) || parts[0] || '';
+  const lastName =
+    ((meta.lastName ?? meta.last_name) as string | undefined) || parts.slice(1).join(' ') || '';
+
+  const dbRole = profile?.role ?? 'customer';
+
+  return {
+    id: String(supabaseUser.id ?? ''),
+    email: String(supabaseUser.email ?? ''),
+    firstName,
+    lastName,
+    role: mapDbRoleToAppRole(dbRole),
+    phone: profile?.phone ?? (meta.phone as string | undefined),
+    avatarUrl: profile?.avatar_url ?? undefined,
+    createdAt: String(supabaseUser?.created_at ?? new Date().toISOString()),
+    updatedAt: String(
+      supabaseUser?.updated_at ?? profile?.created_at ?? supabaseUser?.created_at ?? new Date().toISOString(),
+    ),
+  };
+}
+
+async function fetchProfile(userId: string): Promise<ProfileRow | null> {
+  if (!supabase) return null;
+  try {
+    const { data, error } = await withTimeout(
+      supabase.from('profiles').select('*').eq('id', userId).maybeSingle(),
+      PROFILE_FETCH_MS,
+      'Profile fetch',
+    );
+    if (error) {
+      console.warn('[auth] profiles:', error.message);
+      return null;
+    }
+    return data as ProfileRow | null;
+  } catch (e) {
+    console.warn('[auth] profiles fetch failed or timed out:', e instanceof Error ? e.message : e);
+    return null;
+  }
+}
+
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [user, setUser] = useState<AppUser | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const hydrateUser = useCallback(async (sessionUser: SupabaseAuthUser | null): Promise<AppUser | null> => {
+    if (!sessionUser?.id) {
+      setUser(null);
+      return null;
+    }
+    const profile = await fetchProfile(sessionUser.id);
+    const appUser = toAppUser(sessionUser, profile);
+    setUser(appUser);
+    return appUser;
+  }, []);
+
+  useEffect(() => {
+    let mounted = true;
+
+    const init = async () => {
+      try {
+        if (!supabase) {
+          if (!mounted) return;
+          setUser(null);
+          setIsLoading(false);
+          return;
+        }
+
+        const { data } = await supabase.auth.getSession();
+        if (!mounted) return;
+
+        const sessionUser = data.session?.user ?? null;
+        if (sessionUser) await hydrateUser(sessionUser);
+        else setUser(null);
+      } catch {
+        if (!mounted) return;
+        setUser(null);
+      } finally {
+        if (mounted) {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    void init();
+
+    if (!supabase) return () => {};
+
+    const { data: sub } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      if (session?.user) await hydrateUser(session.user);
+      else setUser(null);
+      setIsLoading(false);
+    });
+
+    return () => {
+      mounted = false;
+      sub.subscription.unsubscribe();
+    };
+  }, [hydrateUser]);
+
+  const clearError = useCallback(() => setError(null), []);
+
+  const login = useCallback(async (credentials: LoginCredentials, options?: LoginOptions) => {
+    setError(null);
+    setIsSubmitting(true);
+    try {
+      if (!supabase) throw new Error('Supabase is not configured. Check VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY (anon public).');
+
+      let lastErr: unknown = null;
+      for (const delayMs of [0, 600, 1500]) {
+        if (delayMs) await sleep(delayMs);
+
+        const { error: signInError } = await withTimeout(
+          supabase.auth.signInWithPassword({
+            email: credentials.email,
+            password: credentials.password,
+          }),
+          SIGN_IN_MS,
+          'Sign in',
+        );
+
+        if (!signInError) {
+          lastErr = null;
+          break;
+        }
+
+        lastErr = signInError;
+        if (!isRetryableAuthFetchError(signInError)) break;
+      }
+
+      if (lastErr) throw lastErr;
+
+      const { data: sessionData } = await supabase.auth.getSession();
+      const sessionUser = sessionData.session?.user;
+      if (sessionUser) {
+        const appUser = await hydrateUser(sessionUser);
+        if (options?.adminPortal && appUser && appUser.role !== 'admin') {
+          await supabase.auth.signOut();
+          setUser(null);
+          const msg = 'Only admin accounts can sign in here.';
+          setError(msg);
+          throw new Error(msg);
+        }
+        return appUser;
+      }
+      return null;
+    } catch (e) {
+      setError(mapAuthFailureToUserMessage(e, 'login'));
+      throw e;
+    } finally {
+      setIsSubmitting(false);
+    }
+  }, [hydrateUser]);
+
+  const register = useCallback(async (credentials: RegisterCredentials) => {
+    setError(null);
+    setIsSubmitting(true);
+    try {
+      if (!supabase) throw new Error('Supabase is not configured. Check VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY (anon public).');
+      const fullName = `${credentials.firstName} ${credentials.lastName}`.trim();
+
+      // Supabase can sometimes return transient 504s; retry a couple times with backoff.
+      let lastErr: unknown = null;
+      let didCreateSession = false;
+      for (const delayMs of [0, 800, 2000]) {
+        if (delayMs) await sleep(delayMs);
+
+        const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+          email: credentials.email,
+          password: credentials.password,
+          options: {
+            data: {
+              full_name: fullName,
+              firstName: credentials.firstName,
+              lastName: credentials.lastName,
+            },
+          },
+        });
+
+        if (!signUpError) {
+          lastErr = null;
+          didCreateSession = !!signUpData?.session?.user;
+          if (signUpData?.session?.user) {
+            await hydrateUser(signUpData.session.user);
+          }
+          break;
+        }
+
+        lastErr = signUpError;
+        if (!isRetryableAuthFetchError(signUpError)) break;
+      }
+
+      if (lastErr) throw lastErr;
+      // If email confirmations are enabled, signup may succeed without a session.
+      // In that case we keep the user logged out and let the UI redirect to login.
+      void didCreateSession;
+    } catch (e) {
+      const msg = mapAuthFailureToUserMessage(e, 'register');
+      setError(msg);
+      throw e;
+    } finally {
+      setIsSubmitting(false);
+    }
+  }, [hydrateUser]);
+
+  const logout = useCallback(async () => {
+    setError(null);
+    setIsSubmitting(true);
+    try {
+      // Optimistic UI update: immediately clear local user state.
+      // We still attempt a Supabase signOut to invalidate the session.
+      setUser(null);
+
+      if (supabase) {
+        await supabase.auth.signOut();
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
+  }, []);
+
+  const value = useMemo<AuthContextValue>(
+    () => ({
+      user,
+      isAuthenticated: !!user,
+      isLoading,
+      isSubmitting,
+      error,
+      login,
+      register,
+      logout,
+      clearError,
+    }),
+    [user, isLoading, isSubmitting, error, login, register, logout, clearError],
+  );
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+};
+
+// `useAuth` lives in `src/context/useAuth.ts` to avoid React Refresh
+// context mismatch issues during HMR.

@@ -113,7 +113,7 @@ const LoginForm: React.FC = () => {
   const errorInfo = getErrorMessage(error);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 to-pink-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen flex items-center justify-center bg-white py-12 px-4 sm:px-6 lg:px-8 pt-24">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -125,7 +125,7 @@ const LoginForm: React.FC = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.2 }}
-            className="text-3xl font-bold text-gray-900 mb-2"
+            className="text-4xl font-black text-black mb-2"
           >
             Welcome Back
           </motion.h2>
@@ -133,7 +133,7 @@ const LoginForm: React.FC = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.3 }}
-            className="text-gray-600"
+            className="text-gray-600 text-lg"
           >
             Sign in to your account to continue
           </motion.p>
@@ -144,13 +144,13 @@ const LoginForm: React.FC = () => {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
-          className="bg-blue-50 border border-blue-200 rounded-lg p-4"
+          className="bg-gray-50 border-2 border-gray-200 rounded-2xl p-4"
         >
           <div className="flex items-start">
-            <Info className="h-5 w-5 text-blue-500 mt-0.5 mr-3 flex-shrink-0" />
-            <div className="text-sm text-blue-800">
-              <p className="font-medium">New here?</p>
-              <p>Don't have an account yet? <Link to="/register" className="font-semibold hover:underline">Create one now</Link></p>
+            <Info className="h-5 w-5 text-black mt-0.5 mr-3 flex-shrink-0" />
+            <div className="text-sm text-black">
+              <p className="font-bold">New here?</p>
+              <p>Don't have an account yet? <Link to="/register" className="font-bold hover:underline">Create one now</Link></p>
             </div>
           </div>
         </motion.div>
@@ -225,7 +225,7 @@ const LoginForm: React.FC = () => {
                 required
                 value={formData.email}
                 onChange={handleInputChange}
-                className="appearance-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 focus:z-10 sm:text-sm transition-colors duration-200"
+                className="appearance-none relative block w-full px-3 py-3 border-2 border-gray-200 placeholder-gray-400 text-black rounded-xl focus:outline-none focus:ring-2 focus:ring-black focus:border-black focus:z-10 sm:text-sm transition-colors duration-200 bg-white"
                 placeholder="Enter your email"
               />
             </div>
@@ -241,7 +241,7 @@ const LoginForm: React.FC = () => {
                 required
                 value={formData.password}
                 onChange={handleInputChange}
-                className="appearance-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 focus:z-10 sm:text-sm transition-colors duration-200"
+                className="appearance-none relative block w-full px-3 py-3 border-2 border-gray-200 placeholder-gray-400 text-black rounded-xl focus:outline-none focus:ring-2 focus:ring-black focus:border-black focus:z-10 sm:text-sm transition-colors duration-200 bg-white"
                 placeholder="Enter your password"
               />
             </div>
@@ -251,11 +251,11 @@ const LoginForm: React.FC = () => {
             <button
               type="submit"
               disabled={isSubmitting}
-              className={`group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white ${
+              className={`group relative w-full flex justify-center py-4 px-4 border border-transparent text-sm font-bold rounded-full text-white ${
                 isSubmitting
                   ? 'bg-gray-400 cursor-not-allowed'
-                  : 'bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500'
-              } transition-colors duration-200`}
+                  : 'bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black shadow-lg hover:shadow-xl'
+              } transition-all duration-200`}
             >
               {isSubmitting ? (
                 <div className="flex items-center">
@@ -273,7 +273,7 @@ const LoginForm: React.FC = () => {
               Don't have an account?{' '}
               <Link
                 to="/register"
-                className="font-medium text-purple-600 hover:text-purple-500 transition-colors duration-200"
+                className="font-bold text-black hover:text-gray-700 transition-colors duration-200 underline"
               >
                 Sign up here
               </Link>

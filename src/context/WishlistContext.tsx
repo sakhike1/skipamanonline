@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { useAuth } from './AuthContext';
+import { useAuth } from './useAuth';
 import { Product } from '../types';
 
 interface WishlistItem {
@@ -42,14 +42,19 @@ export const WishlistProvider: React.FC<WishlistProviderProps> = ({ children }) 
       if (savedWishlist) {
         try {
           const parsedWishlist = JSON.parse(savedWishlist);
-          // Convert date strings back to Date objects
-          const wishlistWithDates = parsedWishlist.map((item: any) => ({
-            ...item,
-            addedAt: new Date(item.addedAt)
-          }));
+          // Convert date strings back to Date objects and validate items
+          const wishlistWithDates = parsedWishlist
+            .filter((item: any) => item && item.product && item.product.id) // Filter out invalid items
+            .map((item: any) => ({
+              ...item,
+              addedAt: item.addedAt ? new Date(item.addedAt) : new Date()
+            }));
           setWishlist(wishlistWithDates);
         } catch (error) {
           console.error('Error parsing wishlist from localStorage:', error);
+          // Clear corrupted data
+          localStorage.removeItem(`wishlist_${user.id}`);
+          setWishlist([]);
         }
       }
     } else {
@@ -58,13 +63,18 @@ export const WishlistProvider: React.FC<WishlistProviderProps> = ({ children }) 
       if (tempWishlist) {
         try {
           const parsedWishlist = JSON.parse(tempWishlist);
-          const wishlistWithDates = parsedWishlist.map((item: any) => ({
-            ...item,
-            addedAt: new Date(item.addedAt)
-          }));
+          const wishlistWithDates = parsedWishlist
+            .filter((item: any) => item && item.product && item.product.id) // Filter out invalid items
+            .map((item: any) => ({
+              ...item,
+              addedAt: item.addedAt ? new Date(item.addedAt) : new Date()
+            }));
           setWishlist(wishlistWithDates);
         } catch (error) {
           console.error('Error parsing temp wishlist from localStorage:', error);
+          // Clear corrupted data
+          localStorage.removeItem('temp_wishlist');
+          setWishlist([]);
         }
       }
     }
@@ -80,9 +90,14 @@ export const WishlistProvider: React.FC<WishlistProviderProps> = ({ children }) 
   }, [wishlist, user]);
 
   const addToWishlist = (product: Product) => {
+    if (!product || !product.id) {
+      console.error('Cannot add invalid product to wishlist:', product);
+      return;
+    }
+
     setWishlist(prev => {
       // Check if product is already in wishlist
-      const existingItem = prev.find(item => item.product.id === product.id);
+      const existingItem = prev.find(item => item.product?.id === product.id);
       if (existingItem) {
         return prev; // Don't add duplicates
       }

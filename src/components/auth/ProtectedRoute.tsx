@@ -1,6 +1,6 @@
 import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth } from '../../context/useAuth';
 import { motion } from 'framer-motion';
 import { Loader2, Shield } from 'lucide-react';
 
@@ -23,7 +23,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   // Show loading spinner while checking authentication
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center">
+      <div className="min-h-screen bg-black flex items-center justify-center">
         <motion.div
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -32,11 +32,9 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
           <motion.div
             animate={{ rotate: 360 }}
             transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-            className="w-12 h-12 mx-auto mb-4"
-          >
-            <Loader2 className="w-full h-full text-purple-500" />
-          </motion.div>
-          <p className="text-gray-600 text-sm">Verifying access...</p>
+            className="w-12 h-12 mx-auto mb-4 border-2 border-white/30 border-t-white rounded-full"
+          />
+          <p className="text-white text-sm uppercase tracking-wider">Verifying access...</p>
         </motion.div>
       </div>
     );
@@ -49,9 +47,10 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 
   // If user is not authenticated, redirect to login
   if (!isAuthenticated) {
+    const loginPath = requireAdmin ? '/admin/login' : '/login';
     return (
       <Navigate 
-        to="/login" 
+        to={loginPath} 
         state={{ from: location }} 
         replace 
       />

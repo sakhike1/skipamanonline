@@ -1,20 +1,30 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Product, Size, Color } from '../../types';
-import { ChevronLeft, ChevronRight, Expand, ShoppingBag, X, ChevronDown, Sparkles, Ruler, Palette, CheckCircle, Truck, RotateCcw, LifeBuoy } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Expand, X, ChevronDown, Sparkles, Ruler, Truck, RotateCcw, LifeBuoy, ExternalLink } from 'lucide-react';
 import { useCart } from '../../context/CartContext';
 import { useHeader } from '../../context/HeaderContext';
-import { motion } from 'framer-motion';
 import SizeGuide from './SizeGuide';
 import WishlistButton from './WishlistButton';
+import { ProductWorkflowStrip } from './ProductWorkflowStrip';
+import { getHoodPayPalPaymentUrl, isHoodProduct } from '../../utils/hoodPayPalLink';
 
 interface ProductDetailProps {
   product: Product;
   onGoBack: () => void;
 }
 
+const hoodPayPalUrl = getHoodPayPalPaymentUrl();
+const hoodPayPalButtonLabel =
+  (import.meta.env.VITE_PAYPAL_HOOD_BUTTON_LABEL as string | undefined)?.trim() ||
+  'Pay with PayPal (USD)';
+const hoodPayPalNote =
+  (import.meta.env.VITE_PAYPAL_HOOD_CHECKOUT_NOTE as string | undefined)?.trim() ||
+  "Opens PayPal's checkout for this hoody (USD). Shipping address is collected by PayPal.";
+
+const DEFAULT_PRODUCT_COLOR: Color = { name: 'Standard', value: '#111111' };
+
 const ProductDetail: React.FC<ProductDetailProps> = ({ product, onGoBack }) => {
   const [selectedSize, setSelectedSize] = useState<Size | null>(null);
-  const [selectedColor, setSelectedColor] = useState<Color | null>(product.colors[0] || null);
   const [, setQuantity] = useState(1);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [showSizeGuide, setShowSizeGuide] = useState(false);
@@ -22,7 +32,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, onGoBack }) => {
   const [showAddedToCart, setShowAddedToCart] = useState(false);
   const [isHoveringImage, setIsHoveringImage] = useState(false);
   
-  const { addToCart, isInCart, cart } = useCart();
+  const { addToCart, isInCart } = useCart();
   const { setIsHeaderDark } = useHeader();
   
   // Control header background when component mounts/unmounts
@@ -35,11 +45,15 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, onGoBack }) => {
       setIsHeaderDark(false);
     };
   }, [setIsHeaderDark]);
-  
+
+  /** Cart always uses the primary catalog color (first entry). List separate products per color if you sell multiple. */
+  const resolvedColor = useMemo((): Color => {
+    return product.colors[0] ?? DEFAULT_PRODUCT_COLOR;
+  }, [product.colors]);
+
   // Reset states when product changes
   useEffect(() => {
     setSelectedSize(null);
-    setSelectedColor(product.colors[0] || null);
     setQuantity(1);
     setCurrentImageIndex(0);
     setShowAddedToCart(false);
@@ -60,7 +74,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, onGoBack }) => {
     e.stopPropagation();
     
     // Prevent multiple calls - more robust check
-    if (!selectedSize || !selectedColor || showAddedToCart) {
+    if (!selectedSize || showAddedToCart) {
       return;
     }
     
@@ -68,7 +82,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, onGoBack }) => {
     const quantityToAdd = 1;
     
     // Check if item is already in cart
-    const isAlreadyInCart = isInCart(product.id, selectedSize, selectedColor);
+    const isAlreadyInCart = isInCart(product.id, selectedSize, resolvedColor);
     
     if (isAlreadyInCart) {
       // Item already exists, just show feedback
@@ -78,16 +92,23 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, onGoBack }) => {
     }
     
     // Add new item to cart
-    addToCart(product.id, selectedSize, selectedColor, quantityToAdd);
+    addToCart(product.id, selectedSize, resolvedColor, quantityToAdd);
     setShowAddedToCart(true); // Show feedback
     setTimeout(() => setShowAddedToCart(false), 2000); // Hide after 2 seconds
-  }, [addToCart, product.id, selectedSize, selectedColor, showAddedToCart, isInCart]);
+  }, [addToCart, product.id, selectedSize, resolvedColor, showAddedToCart, isInCart]);
   
   // Check if the current selection is already in the cart
-  const isCurrentSelectionInCart = selectedSize && selectedColor
-    ? isInCart(product.id, selectedSize, selectedColor)
+  const isCurrentSelectionInCart = selectedSize
+    ? isInCart(product.id, selectedSize, resolvedColor)
     : false;
-    
+
+  const showHoodPayPalLink = Boolean(hoodPayPalUrl && isHoodProduct(product));
+
+  const openHoodPayPalCheckout = () => {
+    if (!hoodPayPalUrl) return;
+    window.open(hoodPayPalUrl, '_blank', 'noopener,noreferrer');
+  };
+
   
   return (
     <div className="w-full min-h-screen bg-gradient-to-br from-slate-50 via-white to-gray-100 relative overflow-hidden">
@@ -98,28 +119,50 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, onGoBack }) => {
         <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-gradient-to-r from-yellow-400/10 to-orange-400/10 rounded-full blur-3xl animate-pulse delay-500"></div>
       </div>
 
-      {/* Enhanced promo bar with modern design */}
-      <div className="relative bg-gradient-to-r from-purple-500 via-pink-500 to-purple-600 text-white text-xs py-4 px-4 overflow-hidden whitespace-nowrap backdrop-blur-sm border-b border-white/20 shadow-lg">
+      {/* Promo ticker — flush under global header; weight matches nav tone */}
+      <div className="relative -mt-px bg-black text-white text-xs py-3 px-4 overflow-hidden whitespace-nowrap shadow-md border-0">
+        {/* Animated gradient overlay */}
         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-shimmer"></div>
+        
+        {/* Floating particles effect */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          {[...Array(20)].map((_, i) => (
+            <div
+              key={i}
+              className="absolute w-1 h-1 bg-white rounded-full opacity-30"
+              style={{
+                left: `${Math.random() * 100}%`,
+                top: `${Math.random() * 100}%`,
+                animation: `float ${3 + Math.random() * 4}s ease-in-out infinite`,
+                animationDelay: `${Math.random() * 2}s`
+              }}
+            />
+          ))}
+        </div>
+        
+        {/* Bottom edge only — avoids a bright line between fixed header and bar */}
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 border-b border-white/10" aria-hidden />
+        
         <div className="relative z-10 inline-block animate-marquee-smooth">
-          <span className="mx-4 font-semibold tracking-wide">✨ FREE DELIVERY OVER €50 ✨</span>
-          <span className="text-white/80 font-bold">•</span>
-          <span className="mx-4 font-semibold tracking-wide">🔄 FREE RETURNS POLICY 🔄</span>
-          <span className="text-white/80 font-bold">•</span>
-          <span className="mx-4 font-semibold tracking-wide">🌍 WORLDWIDE DELIVERY 🌍</span>
-          <span className="text-white/80 font-bold">•</span>
-          <span className="mx-4 font-semibold tracking-wide">✨ FREE DELIVERY OVER €50 ✨</span>
-          <span className="text-white/80 font-bold">•</span>
-          <span className="mx-4 font-semibold tracking-wide">🔄 FREE RETURNS POLICY 🔄</span>
-          <span className="text-white/80 font-bold">•</span>
-          <span className="mx-4 font-semibold tracking-wide">🌍 WORLDWIDE DELIVERY 🌍</span>
+          <span className="mx-6 text-sm font-medium tracking-wide text-white/95">✨ Free delivery over R500 ✨</span>
+          <span className="text-white/45 font-normal text-sm px-1">•</span>
+          <span className="mx-6 text-sm font-medium tracking-wide text-white/95">🔄 Free returns policy 🔄</span>
+          <span className="text-white/45 font-normal text-sm px-1">•</span>
+          <span className="mx-6 text-sm font-medium tracking-wide text-white/95">Across South Africa</span>
+          <span className="text-white/45 font-normal text-sm px-1">•</span>
+          <span className="mx-6 text-sm font-medium tracking-wide text-white/95">✨ Free delivery over R500 ✨</span>
+          <span className="text-white/45 font-normal text-sm px-1">•</span>
+          <span className="mx-6 text-sm font-medium tracking-wide text-white/95">🔄 Free returns policy 🔄</span>
+          <span className="text-white/45 font-normal text-sm px-1">•</span>
+          <span className="mx-6 text-sm font-medium tracking-wide text-white/95">Across South Africa</span>
         </div>
       </div>
       
       {/* Glassmorphism header */}
-      <header className="relative backdrop-blur-md bg-white/80 border-b border-white/20 py-4 px-8 lg:px-12 flex items-center justify-between shadow-lg">
+      <header className="relative backdrop-blur-md bg-white/80 border-b border-white/20 py-4 px-8 lg:px-12 flex items-center shadow-lg">
         <div className="flex items-center">
           <button 
+            type="button"
             onClick={onGoBack} 
             className="group flex items-center text-gray-600 hover:text-black transition-all duration-300 mr-4 hover:scale-105"
           >
@@ -129,21 +172,6 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, onGoBack }) => {
             <span className="font-medium">Back</span>
           </button>
         </div>
-        <div className="flex items-center space-x-4">
-          <button className="relative group">
-            <div className="bg-black text-white p-3 rounded-full hover:bg-gray-800 transition-all duration-300 hover:scale-110 shadow-lg hover:shadow-xl">
-              <ShoppingBag size={18} />
-            </div>
-            {cart.items.length > 0 && (
-              <span className={`absolute -top-1 -right-1 bg-gradient-to-r from-red-500 to-pink-500 text-white text-xs font-bold rounded-full h-6 w-6 flex items-center justify-center transition-all duration-300 shadow-lg ${
-                showAddedToCart ? 'scale-125 animate-bounce' : 'scale-100'
-              }`}>
-                {cart.items.length}
-              </span>
-            )}
-          </button>
-          <div className="w-8 h-8 rounded-full bg-gradient-to-r from-gray-200 to-gray-300 shadow-inner"></div>
-        </div>
       </header>
       
       {/* Main content with glassmorphism */}
@@ -151,31 +179,40 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, onGoBack }) => {
         {/* Left column - Product details with glassmorphism */}
         <div className="w-full lg:w-1/3 p-6 lg:p-8">
           <div className="backdrop-blur-md bg-white/70 rounded-2xl p-6 shadow-xl border border-white/20 hover:shadow-2xl transition-all duration-500">
-            <div className="text-xs flex text-gray-500 mb-6">
-              <a href="/" className="text-black hover:text-gray-700 transition-colors font-medium">Home</a>
-              <span className="mx-2 text-gray-500">/</span>
-              <a href="/category" className="text-black hover:text-gray-700 transition-colors font-medium">Category</a>
-              <span className="mx-2 text-gray-500">/</span>
-              <span className="text-gray-900 font-semibold">Jackets</span>
+            <div className="flex flex-wrap items-center gap-2 text-[11px] text-gray-600 font-semibold uppercase tracking-[0.2em] mb-5">
+              <a href="/" className="px-3 py-1 rounded-full bg-gray-100 text-gray-800 hover:bg-black hover:text-white transition-colors">Home</a>
+              <span className="text-gray-400">/</span>
+              <a href="/category" className="px-3 py-1 rounded-full bg-gray-100 text-gray-800 hover:bg-black hover:text-white transition-colors">Category</a>
+              <span className="text-gray-400">/</span>
+              <span className="px-3 py-1 rounded-full bg-black text-white">Jackets</span>
             </div>
-            
-            <h1 className="text-3xl font-bold text-gray-900 mb-3 bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
-              {product.name}
-            </h1>
-            <p className="text-2xl font-bold text-gray-900 mb-8 flex items-center">
-              <span className="bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
-                R{(product.price / 100).toFixed(2)}
-              </span>
-              <Sparkles className="ml-2 text-yellow-500 animate-pulse" size={20} />
-            </p>
+
+            <div className="flex items-start justify-between gap-4 mb-4">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.25em] text-gray-500 mb-2">Skipaman Blues</p>
+                <h1 className="text-3xl lg:text-4xl font-black text-gray-900 leading-tight bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
+                  {product.name}
+                </h1>
+              </div>
+              <div className="shrink-0 text-right">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-gray-500 mb-1">Price</p>
+                <p className="text-3xl font-black text-gray-900 bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent flex items-center justify-end gap-2">
+                  R{(product.price / 100).toFixed(2)}
+                  <Sparkles className="text-yellow-500 animate-pulse" size={18} />
+                </p>
+              </div>
+            </div>
+            <div className="h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent mb-6" />
+
+            <ProductWorkflowStrip />
             
             {/* Enhanced product info accordion */}
             <div className="space-y-2 mb-6">
               <details className="group border border-gray-200/50 rounded-xl overflow-hidden backdrop-blur-sm bg-white/50">
                 <summary className="flex justify-between items-center cursor-pointer p-4 hover:bg-gray-50/50 transition-colors">
                   <span className="text-sm font-semibold text-gray-900">Product Info</span>
-                  <span className="transition-transform group-open:rotate-180">
-                    <ChevronDown size={16} />
+                  <span className="transition-transform group-open:rotate-180 text-black">
+                    <ChevronDown size={16} className="text-black" />
                   </span>
                 </summary>
                 <div className="p-4 text-sm text-gray-600 bg-white/30">
@@ -186,8 +223,8 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, onGoBack }) => {
               <details className="group border border-gray-200/50 rounded-xl overflow-hidden backdrop-blur-sm bg-white/50">
                 <summary className="flex justify-between items-center cursor-pointer p-4 hover:bg-gray-50/50 transition-colors">
                   <span className="text-sm font-semibold text-gray-900">Details</span>
-                  <span className="transition-transform group-open:rotate-180">
-                    <ChevronDown size={16} />
+                  <span className="transition-transform group-open:rotate-180 text-black">
+                    <ChevronDown size={16} className="text-black" />
                   </span>
                 </summary>
                 <div className="p-4 text-sm text-gray-600 bg-white/30 space-y-2">
@@ -201,58 +238,60 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, onGoBack }) => {
               <details className="group border border-gray-200/50 rounded-xl overflow-hidden backdrop-blur-sm bg-white/50">
                 <summary className="flex justify-between items-center cursor-pointer p-4 hover:bg-gray-50/50 transition-colors">
                   <span className="text-sm font-semibold text-gray-900">Delivery, Returns & Support</span>
-                  <span className="transition-transform group-open:rotate-180">
-                    <ChevronDown size={16} />
+                  <span className="transition-transform group-open:rotate-180 text-black">
+                    <ChevronDown size={16} className="text-black" />
                   </span>
                 </summary>
                 <div className="p-6 bg-white/40 border-t border-gray-200/60">
-                  <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-                    <div className="group/card relative overflow-hidden rounded-2xl border border-slate-200/60 bg-white/80 p-5 shadow-[0_20px_60px_-40px_rgba(15,23,42,0.25)] transition-all duration-300 hover:-translate-y-1.5 hover:border-slate-200 hover:shadow-[0_30px_90px_-40px_rgba(59,130,246,0.35)]">
-                      <div className="pointer-events-none absolute inset-0">
+                  <div className="flex flex-col gap-6">
+                    {/* Shipping Card */}
+                    <div className="group/card relative rounded-2xl border border-slate-200/60 bg-white p-6 shadow-[0_20px_60px_-40px_rgba(15,23,42,0.25)] transition-all duration-300 hover:-translate-y-1.5 hover:border-slate-200 hover:shadow-[0_30px_90px_-40px_rgba(59,130,246,0.35)] min-h-[280px]">
+                      <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-2xl">
                         <div className="absolute -top-16 -right-10 h-32 w-32 rounded-full bg-blue-400/20 blur-3xl opacity-0 transition-opacity duration-500 group-hover/card:opacity-100" />
                         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.4),_transparent_70%)]" />
                       </div>
-                      <div className="relative z-10 space-y-4">
-                        <div className="flex items-center gap-3">
-                          <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 text-white shadow-lg shadow-blue-500/30">
-                            <Truck size={20} />
+                      <div className="relative z-10 flex flex-col h-full">
+                        <div className="mb-5">
+                          <span className="inline-flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 text-white shadow-lg shadow-blue-500/30 mb-4">
+                            <Truck size={24} />
                           </span>
-                          <div>
-                            <p className="text-xs font-semibold uppercase tracking-[0.35em] text-slate-500">Shipping</p>
-                            <p className="text-base font-semibold text-slate-900">Delivered in 2-5 business days.</p>
-                          </div>
+                          <h3 className="text-sm font-bold uppercase tracking-[0.15em] text-slate-900 mb-4">Shipping</h3>
                         </div>
-                        <p className="text-sm leading-relaxed text-slate-600">
-                          R90 nationwide courier. Complimentary shipping automatically applies on orders over R900.
-                        </p>
+                        <div className="flex-1 space-y-4">
+                          <p className="text-base font-bold text-slate-900 leading-snug break-words">Delivered in 2-5 business days.</p>
+                          <p className="text-sm leading-relaxed text-slate-700 break-words">
+                            R90 nationwide courier. Complimentary shipping automatically applies on orders over R900.
+                          </p>
+                        </div>
                       </div>
                     </div>
 
-                    <div className="group/card relative overflow-hidden rounded-2xl border border-slate-200/60 bg-white/80 p-5 shadow-[0_20px_60px_-40px_rgba(15,23,42,0.25)] transition-all duration-300 hover:-translate-y-1.5 hover:border-slate-200 hover:shadow-[0_30px_90px_-40px_rgba(236,72,153,0.3)]">
-                      <div className="pointer-events-none absolute inset-0">
+                    {/* Returns Card */}
+                    <div className="group/card relative rounded-2xl border border-slate-200/60 bg-white p-6 shadow-[0_20px_60px_-40px_rgba(15,23,42,0.25)] transition-all duration-300 hover:-translate-y-1.5 hover:border-slate-200 hover:shadow-[0_30px_90px_-40px_rgba(236,72,153,0.3)] min-h-[280px]">
+                      <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-2xl">
                         <div className="absolute -bottom-16 -left-12 h-36 w-36 rounded-full bg-pink-400/20 blur-3xl opacity-0 transition-opacity duration-500 group-hover/card:opacity-100" />
                         <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom,_rgba(255,255,255,0.4),_transparent_70%)]" />
                       </div>
-                      <div className="relative z-10 space-y-4">
-                        <div className="flex items-center gap-3">
-                          <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 text-white shadow-lg shadow-pink-500/30">
-                            <RotateCcw size={20} />
+                      <div className="relative z-10 flex flex-col h-full">
+                        <div className="mb-5">
+                          <span className="inline-flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 text-white shadow-lg shadow-pink-500/30 mb-4">
+                            <RotateCcw size={24} />
                           </span>
-                          <div>
-                            <p className="text-xs font-semibold uppercase tracking-[0.35em] text-slate-500">Returns</p>
-                            <p className="text-base font-semibold text-slate-900">Return online orders in-store or online.</p>
-                          </div>
+                          <h3 className="text-sm font-bold uppercase tracking-[0.15em] text-slate-900 mb-4">Returns</h3>
                         </div>
-                        <div className="flex flex-wrap gap-2">
+                        <div className="flex-1 space-y-4 mb-5">
+                          <p className="text-base font-bold text-slate-900 leading-snug break-words">Return online orders in-store or online.</p>
+                        </div>
+                        <div className="flex flex-col gap-2.5 mt-auto">
                           <a
                             href="/faq"
-                            className="inline-flex items-center rounded-full border border-purple-200/60 bg-purple-50/60 px-4 py-2 text-xs font-semibold uppercase tracking-[0.3em] text-purple-600 transition-all duration-300 hover:border-purple-300 hover:text-purple-700"
+                            className="block w-full text-center rounded-lg border border-purple-200/60 bg-purple-50/80 px-4 py-2.5 text-xs font-semibold uppercase tracking-[0.15em] text-purple-700 transition-all duration-300 hover:border-purple-300 hover:bg-purple-100 hover:text-purple-800 whitespace-nowrap"
                           >
                             FAQ&apos;s
                           </a>
                           <a
                             href="/returns"
-                            className="inline-flex items-center rounded-full border border-purple-200/60 bg-white/70 px-4 py-2 text-xs font-semibold uppercase tracking-[0.3em] text-purple-600 transition-all duration-300 hover:border-purple-300 hover:text-purple-700"
+                            className="block w-full text-center rounded-lg border border-purple-200/60 bg-white px-4 py-2.5 text-xs font-semibold uppercase tracking-[0.15em] text-purple-700 transition-all duration-300 hover:border-purple-300 hover:bg-purple-50 hover:text-purple-800 whitespace-nowrap"
                           >
                             Log a Return
                           </a>
@@ -260,25 +299,26 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, onGoBack }) => {
                       </div>
                     </div>
 
-                    <div className="group/card relative overflow-hidden rounded-2xl border border-slate-200/60 bg-white/80 p-5 shadow-[0_20px_60px_-40px_rgba(15,23,42,0.25)] transition-all duration-300 hover:-translate-y-1.5 hover:border-slate-200 hover:shadow-[0_30px_90px_-40px_rgba(34,197,94,0.32)]">
-                      <div className="pointer-events-none absolute inset-0">
+                    {/* Support Card */}
+                    <div className="group/card relative rounded-2xl border border-slate-200/60 bg-white p-6 shadow-[0_20px_60px_-40px_rgba(15,23,42,0.25)] transition-all duration-300 hover:-translate-y-1.5 hover:border-slate-200 hover:shadow-[0_30px_90px_-40px_rgba(34,197,94,0.32)] min-h-[280px]">
+                      <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-2xl">
                         <div className="absolute -top-12 -left-12 h-32 w-32 rounded-full bg-emerald-400/20 blur-3xl opacity-0 transition-opacity duration-500 group-hover/card:opacity-100" />
                         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.4),_transparent_70%)]" />
                       </div>
-                      <div className="relative z-10 space-y-4">
-                        <div className="flex items-center gap-3">
-                          <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 text-white shadow-lg shadow-emerald-500/30">
-                            <LifeBuoy size={20} />
+                      <div className="relative z-10 flex flex-col h-full">
+                        <div className="mb-5">
+                          <span className="inline-flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 text-white shadow-lg shadow-emerald-500/30 mb-4">
+                            <LifeBuoy size={24} />
                           </span>
-                          <div>
-                            <p className="text-xs font-semibold uppercase tracking-[0.35em] text-slate-500">Support</p>
-                            <p className="text-base font-semibold text-slate-900">We uphold the Consumer Goods & Services Code.</p>
-                          </div>
+                          <h3 className="text-sm font-bold uppercase tracking-[0.15em] text-slate-900 mb-4">Support</h3>
                         </div>
-                        <div className="flex flex-wrap gap-2">
+                        <div className="flex-1 space-y-4 mb-5">
+                          <p className="text-base font-bold text-slate-900 leading-snug break-words">We uphold the Consumer Goods & Services Code.</p>
+                        </div>
+                        <div className="flex flex-col gap-2.5 mt-auto">
                           <a
                             href="/faq"
-                            className="inline-flex items-center rounded-full border border-emerald-200/60 bg-emerald-50/60 px-4 py-2 text-xs font-semibold uppercase tracking-[0.3em] text-emerald-600 transition-all duration-300 hover:border-emerald-300 hover:text-emerald-700"
+                            className="block w-full text-center rounded-lg border border-emerald-200/60 bg-emerald-50/80 px-4 py-2.5 text-xs font-semibold uppercase tracking-[0.15em] text-emerald-700 transition-all duration-300 hover:border-emerald-300 hover:bg-emerald-100 hover:text-emerald-800 whitespace-nowrap"
                           >
                             FAQ&apos;s
                           </a>
@@ -322,7 +362,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, onGoBack }) => {
                       className="absolute left-4 top-1/2 transform -translate-y-1/2 backdrop-blur-md bg-white/80 rounded-full p-3 shadow-lg hover:bg-white hover:shadow-xl transition-all duration-300 hover:scale-110 opacity-0 group-hover:opacity-100"
                       aria-label="Previous image"
                     >
-                      <ChevronLeft size={20} />
+                      <ChevronLeft size={20} className="text-black" />
                     </button>
                     
                     <button 
@@ -330,7 +370,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, onGoBack }) => {
                       className="absolute right-4 top-1/2 transform -translate-y-1/2 backdrop-blur-md bg-white/80 rounded-full p-3 shadow-lg hover:bg-white hover:shadow-xl transition-all duration-300 hover:scale-110 opacity-0 group-hover:opacity-100"
                       aria-label="Next image"
                     >
-                      <ChevronRight size={20} />
+                      <ChevronRight size={20} className="text-black" />
                     </button>
                   </>
                 )}
@@ -405,104 +445,6 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, onGoBack }) => {
 
             </div>
             
-            {/* Enhanced Color Selection */}
-            <div className="mb-8">
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6 }}
-              >
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg flex items-center justify-center">
-                    <Palette className="w-4 h-4 text-white" />
-                  </div>
-                  <h2 className="text-xl font-bold text-gray-900">Choose Color</h2>
-                </div>
-                
-                <div className="grid grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-3">
-                  {product.colors.map((color, index) => (
-                    <motion.button
-                      key={color.name}
-                      onClick={() => setSelectedColor(color)}
-                      className={`relative group w-16 h-16 rounded-2xl border-2 flex flex-col items-center justify-center transition-all duration-300 hover:scale-110 focus:outline-none shadow-lg overflow-hidden ${
-                        selectedColor?.name === color.name
-                          ? 'border-purple-500 ring-4 ring-purple-500 ring-opacity-30 shadow-2xl scale-105'
-                          : 'border-gray-200 hover:border-purple-300 hover:shadow-xl'
-                      }`}
-                      style={{ backgroundColor: color.value }}
-                      title={color.name}
-                      initial={{ opacity: 0, scale: 0.8 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      transition={{ duration: 0.4, delay: index * 0.05 }}
-                      whileHover={{ scale: 1.1, y: -2 }}
-                      whileTap={{ scale: 0.95 }}
-                    >
-                      {/* Shimmer Effect */}
-                      <motion.div
-                        className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
-                        animate={{
-                          x: ['-100%', '100%']
-                        }}
-                        transition={{
-                          duration: 2,
-                          repeat: Infinity,
-                          repeatDelay: 3,
-                          ease: "easeInOut"
-                        }}
-                      />
-                      
-                      {/* Color Circle */}
-                      <div className="relative z-10 w-8 h-8 rounded-full border-2 border-white/30 shadow-inner"></div>
-                      
-                      {/* Selection Indicator */}
-                      {selectedColor?.name === color.name && (
-                        <motion.div
-                          initial={{ scale: 0, rotate: -180 }}
-                          animate={{ scale: 1, rotate: 0 }}
-                          transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                          className="absolute inset-0 flex items-center justify-center"
-                        >
-                          <div className="w-6 h-6 bg-white/90 rounded-full flex items-center justify-center shadow-lg">
-                            <CheckCircle className="w-4 h-4 text-purple-600" />
-                          </div>
-                        </motion.div>
-                      )}
-                      
-                      {/* Color Name Tooltip */}
-                      <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap pointer-events-none z-20">
-                        {color.name}
-                      </div>
-                    </motion.button>
-                  ))}
-                </div>
-                
-                {/* Selected Color Info */}
-                {selectedColor && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.4 }}
-                    className="mt-4 p-4 bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl border border-purple-200"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div 
-                        className="w-6 h-6 rounded-full border-2 border-white shadow-lg"
-                        style={{ backgroundColor: selectedColor.value }}
-                      ></div>
-                      <div>
-                        <p className="font-semibold text-gray-800">
-                          Selected: <span className="text-purple-600">{selectedColor.name}</span>
-                        </p>
-                        <p className="text-sm text-gray-600">
-                          Perfect choice! This color will complement your style.
-                        </p>
-                      </div>
-                    </div>
-                  </motion.div>
-                )}
-              </motion.div>
-            </div>
-            
             {/* Enhanced disclaimer and checkout */}
             <div className="mb-6">
               <p className="text-xs text-gray-500 mb-6 text-center">
@@ -516,7 +458,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, onGoBack }) => {
                       ? 'bg-gradient-to-r from-green-500 via-emerald-500 to-teal-500 text-white animate-gradient-success' 
                       : 'bg-gradient-to-r from-black to-gray-800 text-white hover:from-gray-800 hover:to-black'
                   }`}
-                  disabled={!selectedSize || !selectedColor || showAddedToCart}
+                  disabled={!selectedSize || showAddedToCart}
                   onClick={handleAddToCart}
                   type="button"
                   aria-live="polite"
@@ -536,14 +478,26 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, onGoBack }) => {
                   className="px-4 py-4 shadow-lg"
                 />
               </div>
+
+              {showHoodPayPalLink && (
+                <div className="mb-6 rounded-xl border border-amber-200/80 bg-gradient-to-br from-amber-50 to-orange-50/80 p-4 shadow-inner">
+                  <p className="text-xs text-amber-950/80 mb-3 leading-relaxed">{hoodPayPalNote}</p>
+                  <button
+                    type="button"
+                    onClick={openHoodPayPalCheckout}
+                    className="w-full flex items-center justify-center gap-2 py-3.5 px-4 rounded-xl font-bold text-sm bg-[#FFD140] hover:bg-[#f7c632] text-black border-2 border-black/10 shadow-md transition-all duration-300 hover:scale-[1.01] active:scale-[0.99]"
+                  >
+                    <ExternalLink className="w-4 h-4 shrink-0" aria-hidden />
+                    {hoodPayPalButtonLabel}
+                  </button>
+                </div>
+              )}
               
               
-              {(!selectedSize || !selectedColor) && !showAddedToCart && (
+              {!selectedSize && !showAddedToCart && (
                 <div className="mt-6 p-4 bg-gradient-to-r from-red-50 to-pink-50 rounded-xl border border-red-200/50 backdrop-blur-sm">
                   <p className="text-sm text-red-600 font-semibold text-center">
-                    Please select {!selectedSize ? 'a size' : ''} 
-                    {!selectedSize && !selectedColor ? ' and ' : ''} 
-                    {!selectedColor ? 'a color' : ''} to add to cart.
+                    Please select a size to add to cart.
                   </p>
                 </div>
               )}
@@ -603,7 +557,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, onGoBack }) => {
           }
           .animate-marquee-smooth {
             display: inline-block;
-            animation: marqueeSmooth 20s linear infinite;
+            animation: marqueeSmooth 50s linear infinite;
             white-space: nowrap;
           }
           

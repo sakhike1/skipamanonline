@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { User, ShoppingBag, Heart, Settings, Shield, LogOut } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useAuth } from '../../../context/AuthContext';
+import { useAuth } from '../../../context/useAuth';
 import { useHeaderStyles } from './hooks/useHeaderStyles';
 import PointsDisplay from '../../ui/PointsDisplay';
 
@@ -74,8 +74,8 @@ export const HeaderUserMenu: React.FC<HeaderUserMenuProps> = ({
         aria-label="User menu"
       >
         <User size={16} className="sm:w-[18px] sm:h-[18px] [filter:drop-shadow(0px_0px_1px_rgba(255,255,255,0.5))]" />
-        <span className="hidden lg:block text-sm font-medium">
-          {user?.firstName}
+        <span className="text-sm font-medium max-w-[10rem] truncate">
+          {user?.firstName ? `${user.firstName}${user.lastName ? ` ${user.lastName}` : ''}` : user?.email}
         </span>
       </motion.button>
 
@@ -86,7 +86,19 @@ export const HeaderUserMenu: React.FC<HeaderUserMenuProps> = ({
             initial={{ opacity: 0, y: -10, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -10, scale: 0.95 }}
-            className={`absolute right-0 mt-2 w-64 backdrop-blur-xl rounded-lg overflow-hidden z-[100] shadow-[0_8px_32px_0_rgba(31,38,135,0.15)] ${dropdownBgClass}`}
+            className={[
+              'absolute right-0',
+              'mt-3', // bring it down a bit so it doesn't touch header
+              'w-72 sm:w-80', // slightly wider
+              'backdrop-blur-2xl',
+              'rounded-2xl',
+              'overflow-hidden',
+              'z-[100]',
+              // glassy card look
+              'shadow-[0_24px_60px_rgba(0,0,0,0.25)]',
+              'ring-1 ring-white/10',
+              dropdownBgClass,
+            ].join(' ')}
           >
             <div className="p-4">
               {/* Welcome Message */}
@@ -97,7 +109,7 @@ export const HeaderUserMenu: React.FC<HeaderUserMenuProps> = ({
               </div>
 
               {/* User Info */}
-              <div className={`px-3 py-3 border-b ${dropdownColors.border} mb-3`}>
+              <div className={`px-4 py-4 border-b ${dropdownColors.border} mb-3`}>
                 <p className={`${dropdownColors.primary} font-semibold text-lg`}>
                   {user?.firstName} {user?.lastName}
                 </p>

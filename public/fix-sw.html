@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Service Worker Fix</title>
+</head>
+<body>
+    <h1>Clearing Service Worker...</h1>
+    <script>
+        // Clear all service workers and caches
+        if ('serviceWorker' in navigator) {
+          navigator.serviceWorker.getRegistrations().then(function(registrations) {
+            for(let registration of registrations) {
+              registration.unregister();
+              console.log('Service worker unregistered');
+            }
+          });
+        }
+
+        if ('caches' in window) {
+          caches.keys().then(function(cacheNames) {
+            return Promise.all(
+              cacheNames.map(function(cacheName) {
+                console.log('Deleting cache:', cacheName);
+                return caches.delete(cacheName);
+              })
+            );
+          }).then(function() {
+            console.log('All caches cleared!');
+            alert('Service worker cleared! Redirecting to main site...');
+            setTimeout(() => {
+              window.location.href = '/';
+            }, 2000);
+          });
+        }
+    </script>
+</body>
+</html>

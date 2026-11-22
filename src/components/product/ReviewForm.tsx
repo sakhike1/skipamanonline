@@ -1,7 +1,7 @@
 import React, { useState, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Star, Camera, Upload, X, Image as ImageIcon, AlertCircle, CheckCircle, Gift, Trophy } from 'lucide-react';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth } from '../../context/useAuth';
 
 interface ReviewFormProps {
   productId: string;

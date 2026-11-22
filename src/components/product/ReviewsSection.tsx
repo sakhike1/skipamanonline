@@ -1,12 +1,25 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Review, ReviewStats } from '../../types';
 import ReviewSummary from './ReviewSummary';
 import ReviewCard from './ReviewCard';
 import ReviewForm from './ReviewForm';
 import AuthPrompt from '../auth/AuthPrompt';
 import { reviewService } from '../../services/reviewService';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth } from '../../context/useAuth';
 import { usePoints } from '../../context/PointsContext';
+import { supabase } from '../../lib/supabase';
+
+interface ReviewData {
+  rating: number;
+  title: string;
+  comment: string;
+  images: File[];
+  size: string;
+  color: string;
+  fit: 'Perfect' | 'Too Small' | 'Too Big' | 'Just Right';
+  quality: 'Excellent' | 'Good' | 'Average' | 'Poor';
+  wouldRecommend: boolean;
+}
 
 interface ReviewsSectionProps {
   productId: string;
@@ -21,7 +34,6 @@ const ReviewsSection: React.FC<ReviewsSectionProps> = ({
   productId,
   reviews,
   stats,
-  onWriteReview,
   productName = 'this product',
   onReviewSubmitted
 }) => {
@@ -33,6 +45,16 @@ const ReviewsSection: React.FC<ReviewsSectionProps> = ({
   const [showReviewForm, setShowReviewForm] = useState(false);
   const [isSubmittingReview, setIsSubmittingReview] = useState(false);
   const [showAuthPrompt, setShowAuthPrompt] = useState(false);
+  const [alreadyReviewed, setAlreadyReviewed] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!isAuthenticated || !user?.id || !supabase) {
+      setAlreadyReviewed(false);
+      return;
+    }
+    void reviewService.hasUserReviewed(productId, user.id).then(setAlreadyReviewed);
+  }, [isAuthenticated, user?.id, productId]);
 
   const filteredAndSortedReviews = useMemo(() => {
     let filtered = reviews;
@@ -68,28 +90,25 @@ const ReviewsSection: React.FC<ReviewsSectionProps> = ({
     setFilterRating(rating);
   };
 
-  const handleSort = (newSortBy: 'date' | 'rating' | 'helpful') => {
-    if (sortBy === newSortBy) {
-      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
-    } else {
-      setSortBy(newSortBy);
-      setSortOrder('desc');
-    }
-  };
-
   const handleWriteReview = () => {
     if (!isAuthenticated) {
       setShowAuthPrompt(true);
       return;
     }
+    if (alreadyReviewed) {
+      setSubmitError('You have already reviewed this product.');
+      return;
+    }
+    setSubmitError(null);
     setShowReviewForm(true);
   };
 
-  const handleReviewSubmit = async (reviewData: any) => {
+  const handleReviewSubmit = async (reviewData: ReviewData) => {
     if (!user) return;
 
     setIsSubmittingReview(true);
-    
+    setSubmitError(null);
+
     try {
       // Submit the review
       const newReview = await reviewService.submitReview({
@@ -97,7 +116,15 @@ const ReviewsSection: React.FC<ReviewsSectionProps> = ({
         userId: user.id,
         userName: `${user.firstName} ${user.lastName}`,
         userInitials: `${user.firstName[0]}${user.lastName[0]}`,
-        ...reviewData
+        rating: reviewData.rating,
+        title: reviewData.title,
+        comment: reviewData.comment,
+        images: reviewData.images,
+        size: reviewData.size,
+        color: reviewData.color,
+        fit: reviewData.fit,
+        quality: reviewData.quality,
+        wouldRecommend: reviewData.wouldRecommend
       });
 
       // Calculate and add points
@@ -112,10 +139,11 @@ const ReviewsSection: React.FC<ReviewsSectionProps> = ({
         onReviewSubmitted(newReview);
       }
 
-      // Hide the form
       setShowReviewForm(false);
-      
+      setAlreadyReviewed(true);
     } catch (error) {
+      const msg = error instanceof Error ? error.message : 'Failed to submit review';
+      setSubmitError(msg);
       console.error('Error submitting review:', error);
       throw error;
     } finally {
@@ -132,6 +160,18 @@ const ReviewsSection: React.FC<ReviewsSectionProps> = ({
           Read what our customers have to say about this product
         </p>
       </div>
+
+      {submitError ? (
+        <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+          {submitError}
+        </div>
+      ) : null}
+
+      {alreadyReviewed && !showReviewForm ? (
+        <p className="text-sm text-gray-600 rounded-lg bg-gray-50 border border-gray-200 px-4 py-3">
+          Thanks — you&apos;ve already reviewed this product.
+        </p>
+      ) : null}
 
       {/* Review Form */}
       {showReviewForm && (
@@ -185,23 +225,38 @@ const ReviewsSection: React.FC<ReviewsSectionProps> = ({
               </div>
 
               {/* Sort Options */}
-              <div className="flex items-center space-x-2">
-                <span className="text-sm font-medium text-gray-700">Sort by:</span>
-                <select
-                  value={`${sortBy}-${sortOrder}`}
-                  onChange={(e) => {
-                    const [newSortBy, newSortOrder] = e.target.value.split('-') as ['date' | 'rating' | 'helpful', 'asc' | 'desc'];
-                    setSortBy(newSortBy);
-                    setSortOrder(newSortOrder);
-                  }}
-                  className="px-3 py-1 rounded-md border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-gray-800"
-                >
-                  <option value="date-desc">Newest First</option>
-                  <option value="date-asc">Oldest First</option>
-                  <option value="rating-desc">Highest Rating</option>
-                  <option value="rating-asc">Lowest Rating</option>
-                  <option value="helpful-desc">Most Helpful</option>
-                </select>
+              <div className="flex items-center space-x-3">
+                <span className="text-sm font-semibold text-gray-900">Sort by:</span>
+                <div className="relative">
+                  <select
+                    value={`${sortBy}-${sortOrder}`}
+                    onChange={(e) => {
+                      const [newSortBy, newSortOrder] = e.target.value.split('-') as ['date' | 'rating' | 'helpful', 'asc' | 'desc'];
+                      setSortBy(newSortBy);
+                      setSortOrder(newSortOrder);
+                    }}
+                    className="appearance-none px-4 py-2.5 pr-10 rounded-full bg-white/95 backdrop-blur-sm border-[0.5px] border-gray-300/50 text-sm font-medium text-gray-900 
+                      focus:outline-none focus:ring-1 focus:ring-gray-900/20 focus:border-gray-400/70 
+                      hover:border-gray-400/70 hover:bg-white transition-all duration-200 cursor-pointer
+                      shadow-sm hover:shadow-lg"
+                    style={{
+                      backgroundImage: 'none',
+                      borderWidth: '0.5px'
+                    }}
+                  >
+                    <option value="date-desc" className="bg-white text-gray-900 py-2 hover:bg-gray-50">Newest First</option>
+                    <option value="date-asc" className="bg-white text-gray-900 py-2 hover:bg-gray-50">Oldest First</option>
+                    <option value="rating-desc" className="bg-white text-gray-900 py-2 hover:bg-gray-50">Highest Rating</option>
+                    <option value="rating-asc" className="bg-white text-gray-900 py-2 hover:bg-gray-50">Lowest Rating</option>
+                    <option value="helpful-desc" className="bg-white text-gray-900 py-2 hover:bg-gray-50">Most Helpful</option>
+                  </select>
+                  {/* Modern custom dropdown arrow */}
+                  <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                    <svg className="w-4 h-4 text-gray-600 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </div>
+                </div>
               </div>
             </div>
           </div>

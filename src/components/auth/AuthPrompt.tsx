@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, LogIn, UserPlus, Lock, AlertCircle } from 'lucide-react';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth } from '../../context/useAuth';
 import { useNavigate } from 'react-router-dom';
+import { resolvePostLoginPath } from '../../utils/loginRedirect';
 
 interface AuthPromptProps {
   isOpen: boolean;
@@ -50,14 +51,16 @@ const AuthPrompt: React.FC<AuthPromptProps> = ({
 
     try {
       if (isLoginMode) {
-        await login({
+        const loggedIn = await login({
           email: formData.email,
           password: formData.password
         });
 
         onClose();
         if (redirectTo) {
-          navigate(redirectTo);
+          navigate(resolvePostLoginPath(redirectTo, loggedIn));
+        } else if (loggedIn?.role === 'admin') {
+          navigate('/admin');
         }
       } else {
         if (formData.password !== formData.confirmPassword) {
