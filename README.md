@@ -435,4 +435,5 @@ SkipaMan Development Team
 
 **Note**: This project is actively maintained and follows modern React best practices. The codebase has been restructured for maintainability with all components following the < 250 lines guideline. For questions or issues, please contact the development team.
 #   s k i p a m a n - o n l i n e s t o r e  
+ #   s k i p a m a n o n l i n e  
  
