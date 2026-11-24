@@ -60,7 +60,7 @@ const DesignBriefPage: React.FC = () => {
           <Palette className="h-12 w-12 mx-auto text-violet-400 mb-4" aria-hidden />
           <h1 className="text-3xl font-black tracking-tight">Design brief</h1>
           <p className="mt-3 text-neutral-400 text-sm">
-            Submit a custom design request. You&apos;ll receive a reference number — our team reviews it in the admin
+            Submit a custom design request. You&apos;ll receive a reference number. Our team reviews it in the admin
             portal under Tickets.
           </p>
         </motion.div>

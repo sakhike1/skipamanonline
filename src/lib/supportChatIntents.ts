@@ -23,7 +23,7 @@ export function intentReply(intent: SupportIntent): string {
     case 'shipping':
       return 'Orders usually ship within a few business days after payment is confirmed. You’ll get tracking when your parcel is dispatched. Need a specific order? Tap “Track my order”.';
     case 'returns':
-      return 'For returns or exchanges, share your order reference and reason — our team will reply by email or WhatsApp. See our Terms page for the full policy.';
+      return 'For returns or exchanges, share your order reference and reason. Our team will reply by email or WhatsApp. See our Terms page for the full policy.';
     case 'printing':
       return 'For custom printing, uniforms, caps, and bulk orders, visit our Printing hub or message us on WhatsApp with your quantity and deadline.';
     case 'product':

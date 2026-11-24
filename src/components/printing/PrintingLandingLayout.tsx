@@ -26,7 +26,7 @@ function buildFaqJsonLd(page: PrintingLandingBlock, pageUrl: string) {
 function buildServiceJsonLd(page: PrintingLandingBlock, pageUrl: string) {
   const areaServed =
     page.kind === 'location'
-      ? `${page.slug.replace(/-/g, ' ')} — Gauteng & South Africa`
+      ? `${page.slug.replace(/-/g, ' ')}, Gauteng & South Africa`
       : 'South Africa';
   return {
     '@context': 'https://schema.org',
@@ -170,7 +170,7 @@ const PrintingLandingLayout: FC<PrintingLandingLayoutProps> = ({ page }) => {
               <p className="text-sm font-semibold uppercase tracking-wider text-white/70">Next step</p>
               <p className="mt-1 text-lg font-bold">Ready for a written quote?</p>
               <p className="mt-1 text-sm text-white/75">
-                Tell us quantities, sizes, and dates—we&apos;ll confirm method and pricing.
+                Tell us quantities, sizes, and dates, we&apos;ll confirm method and pricing.
               </p>
             </div>
             <div className="flex flex-wrap gap-3">

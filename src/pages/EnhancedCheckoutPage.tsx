@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
@@ -16,13 +16,13 @@ import {
 } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/useAuth';
-import { getProductById } from '../data/products';
-import PaymentForm from '../components/payment/PaymentForm';
-import { OrderData } from '../services/paypalService';
+import { useProductData } from '../context/ProductDataContext';
+import { SA_PROVINCES, placeOrder, priceCart, quoteShipping, submitToPayFast, type ShippingQuote } from '../services/shopApi';
 
 const EnhancedCheckoutPage: React.FC = () => {
-  const { cart, clearCart } = useCart();
+  const { cart } = useCart();
   const { user, isAuthenticated } = useAuth();
+  const { getProductById } = useProductData();
   const navigate = useNavigate();
   
   const [currentStep, setCurrentStep] = useState<'shipping' | 'payment'>('shipping');
@@ -30,13 +30,15 @@ const EnhancedCheckoutPage: React.FC = () => {
   const [paymentError, setPaymentError] = useState<string | null>(null);
   
   const [shippingData, setShippingData] = useState({
-    customerName: user?.name?.split(' ')[0] || '',
-    customerLastName: user?.name?.split(' ').slice(1).join(' ') || '',
+    customerName: user?.firstName || '',
+    customerLastName: user?.lastName || '',
     email: user?.email || '',
     phone: '',
     address: {
       line1: '',
       line2: '',
+      suburb: '',
+      province: '',
       city: '',
       postal_code: '',
       country: 'South Africa',
@@ -49,7 +51,9 @@ const EnhancedCheckoutPage: React.FC = () => {
     'email',
     'phone',
     'address.line1',
+    'address.suburb',
     'address.city',
+    'address.province',
     'address.postal_code',
   ] as const;
 
@@ -114,8 +118,12 @@ const EnhancedCheckoutPage: React.FC = () => {
       }
       case 'address.line1':
         return trimmed ? '' : 'Street address is required';
+      case 'address.suburb':
+        return trimmed ? '' : 'Suburb is required';
       case 'address.city':
         return trimmed ? '' : 'City is required';
+      case 'address.province':
+        return trimmed ? '' : 'Please choose your province';
       case 'address.postal_code': {
         if (!trimmed) return 'Postal code is required';
         const digits = trimmed.replace(/\D/g, '');
@@ -165,45 +173,49 @@ const EnhancedCheckoutPage: React.FC = () => {
     return !hasError;
   };
 
-  // Calculate totals
-  const subtotal = cart.items.reduce((total, item) => {
-    const product = getProductById(item.productId);
-    return total + ((product?.price || 0) / 100) * item.quantity;
-  }, 0);
-  
-  const shipping = subtotal >= 500 ? 0 : 15;
+  // Prices: bulk tiers are applied here for display; the server recalculates everything when the order is placed
+  const priced = priceCart(cart.items, getProductById);
+  const subtotal = priced.subtotalCents / 100;
+  const [quote, setQuote] = useState<ShippingQuote | null>(null);
+  const [referralCode, setReferralCode] = useState('');
+
+  useEffect(() => {
+    const province = shippingData.address.province;
+    if (!province) { setQuote(null); return; }
+    let cancelled = false;
+    quoteShipping(province, priced.subtotalCents).then((q) => { if (!cancelled) setQuote(q); }).catch(() => { if (!cancelled) setQuote(null); });
+    return () => { cancelled = true; };
+  }, [shippingData.address.province, priced.subtotalCents]);
+
+  const shipping = (quote?.shippingCents ?? 0) / 100;
   const total = subtotal + shipping;
 
-  // Generate order data for payment
-  const generateOrderData = (): OrderData => {
-    const orderId = `SKP-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-    
-    const items = cart.items.map(item => {
-      const product = getProductById(item.productId);
-      return {
-        name: product?.name || 'Unknown Product',
-        description: product?.description || '',
-        quantity: item.quantity,
-        price: (product?.price || 0) / 100,
-      };
-    });
-
-    const itemsSubtotal = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-    const shippingAmount = Math.max(total - itemsSubtotal, 0);
-
-    return {
-      orderId,
-      customerEmail: shippingData.email,
-      customerName: shippingData.customerName,
-      customerLastName: shippingData.customerLastName,
-      customerPhone: shippingData.phone,
-      amount: total,
-      subtotal: itemsSubtotal,
-      shippingAmount,
-      currency: 'ZAR',
-      items,
-      shippingAddress: shippingData.address,
-    };
+  const handlePayNow = async () => {
+    setIsProcessingPayment(true);
+    setPaymentError(null);
+    try {
+      const a = shippingData.address;
+      const result = await placeOrder(
+        cart.items,
+        getProductById,
+        {
+          name: `${shippingData.customerName} ${shippingData.customerLastName}`.trim(),
+          phone: shippingData.phone,
+          line1: [a.line1, a.line2].filter(Boolean).join(', '),
+          suburb: a.suburb,
+          city: a.city,
+          province: a.province,
+          postalCode: a.postal_code,
+        },
+        { referralCode: referralCode.trim() },
+      );
+      // The cart stays until PayFast confirms payment (the order page clears it)
+      sessionStorage.setItem('skipaman:pendingOrder', result.order.id);
+      submitToPayFast(result.payfast);
+    } catch (e) {
+      setIsProcessingPayment(false);
+      setPaymentError(e instanceof Error ? e.message : 'Could not start payment. Please try again.');
+    }
   };
 
   const handleShippingSubmit = (e: React.FormEvent) => {
@@ -219,18 +231,6 @@ const EnhancedCheckoutPage: React.FC = () => {
     setCurrentStep('payment');
   };
 
-  const handlePaymentStart = () => {
-    setIsProcessingPayment(true);
-    setPaymentError(null);
-  };
-
-  const handlePaymentComplete = (success: boolean) => {
-    setIsProcessingPayment(false);
-    if (!success) {
-      setPaymentError('Payment processing failed. Please try again.');
-    }
-  };
-
   const setFieldError = (field: string, message: string) => {
     setShippingErrors((prev) => {
       if (message) {
@@ -244,7 +244,7 @@ const EnhancedCheckoutPage: React.FC = () => {
     });
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name } = e.target;
     let { value } = e.target;
 
@@ -276,7 +276,7 @@ const EnhancedCheckoutPage: React.FC = () => {
     }
   };
 
-  const handleInputBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+  const handleInputBlur = (e: React.FocusEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name } = e.target;
     setShippingTouched(prev => ({ ...prev, [name]: true }));
     const error = validateField(name, getFieldValue(name));
@@ -557,6 +557,40 @@ const EnhancedCheckoutPage: React.FC = () => {
                             className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl bg-white text-black focus:border-black focus:ring-2 focus:ring-black/20"
                           />
                         </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-sm font-semibold text-black mb-2">Suburb *</label>
+                            <input
+                              type="text"
+                              name="address.suburb"
+                              value={shippingData.address.suburb}
+                              onChange={handleInputChange}
+                              onBlur={handleInputBlur}
+                              className={getInputClasses('address.suburb')}
+                              autoComplete="address-level3"
+                              aria-invalid={Boolean(shippingTouched['address.suburb'] && shippingErrors['address.suburb'])}
+                            />
+                            {renderFieldError('address.suburb')}
+                          </div>
+                          <div>
+                            <label className="block text-sm font-semibold text-black mb-2">Province *</label>
+                            <select
+                              name="address.province"
+                              value={shippingData.address.province}
+                              onChange={handleInputChange}
+                              onBlur={handleInputBlur}
+                              className={getInputClasses('address.province')}
+                              autoComplete="address-level1"
+                              aria-invalid={Boolean(shippingTouched['address.province'] && shippingErrors['address.province'])}
+                            >
+                              <option value="">Select province</option>
+                              {SA_PROVINCES.map((pr) => (
+                                <option key={pr} value={pr}>{pr}</option>
+                              ))}
+                            </select>
+                            {renderFieldError('address.province')}
+                          </div>
+                        </div>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                           <div>
                             <label className="block text-sm font-semibold text-black mb-2">
@@ -645,11 +679,59 @@ const EnhancedCheckoutPage: React.FC = () => {
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: 20 }}
                 >
-                  <PaymentForm
-                    orderData={generateOrderData()}
-                    onPaymentStart={handlePaymentStart}
-                    onPaymentComplete={handlePaymentComplete}
-                  />
+                  <div className="bg-white rounded-3xl shadow-lg p-6 border-2 border-gray-200 space-y-5">
+                    <h2 className="text-2xl font-bold text-black">Review and pay</h2>
+                    <div className="text-sm text-gray-700">
+                      <p className="font-semibold text-black">Delivering to</p>
+                      <p>{shippingData.customerName} {shippingData.customerLastName} · {shippingData.phone}</p>
+                      <p>{shippingData.address.line1}{shippingData.address.line2 ? ', ' + shippingData.address.line2 : ''}, {shippingData.address.suburb}</p>
+                      <p>{shippingData.address.city}, {shippingData.address.province}, {shippingData.address.postal_code}</p>
+                      {quote && (
+                        <p className="mt-2">
+                          Estimated delivery: <span className="font-semibold text-black">
+                            {new Date(quote.estimatedDeliveryFrom).toLocaleDateString('en-ZA', { day: 'numeric', month: 'short' })}, {new Date(quote.estimatedDeliveryTo).toLocaleDateString('en-ZA', { day: 'numeric', month: 'short' })}
+                          </span>
+                        </p>
+                      )}
+                    </div>
+                    {priced.savingCents > 0 && (
+                      <p className="text-sm font-semibold text-green-700">Bulk discount applied: you save R{(priced.savingCents / 100).toFixed(2)}</p>
+                    )}
+                    <div>
+                      <label className="block text-sm font-semibold text-black mb-2" htmlFor="referral">Referral code (optional, first orders only)</label>
+                      <input
+                        id="referral"
+                        value={referralCode}
+                        onChange={(ev) => setReferralCode(ev.target.value.toUpperCase())}
+                        placeholder="SKIP-XXXXXX"
+                        className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl bg-white text-black focus:border-black focus:ring-2 focus:ring-black/20"
+                      />
+                    </div>
+                    {!isAuthenticated && (
+                      <div className="p-4 rounded-xl bg-amber-50 border border-amber-200 text-sm text-amber-900">
+                        Please <a className="font-bold underline" href="/login">sign in</a> or <a className="font-bold underline" href="/register">create an account</a> to place your order. Your cart will be kept.
+                      </div>
+                    )}
+                    <div className="flex gap-3">
+                      <button
+                        type="button"
+                        onClick={() => setCurrentStep('shipping')}
+                        disabled={isProcessingPayment}
+                        className="px-6 py-4 rounded-xl border-2 border-gray-300 font-semibold text-black hover:bg-gray-50 disabled:opacity-50"
+                      >
+                        Back
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handlePayNow}
+                        disabled={isProcessingPayment || !isAuthenticated}
+                        className="flex-1 bg-black text-white py-4 px-6 rounded-xl font-bold hover:bg-gray-800 transition-all disabled:opacity-50 flex items-center justify-center space-x-2"
+                      >
+                        <Lock className="w-5 h-5" />
+                        <span>{isProcessingPayment ? 'Redirecting to PayFast…' : 'Pay R' + total.toFixed(2) + ' with PayFast'}</span>
+                      </button>
+                    </div>
+                  </div>
                 </motion.div>
               )}
             </AnimatePresence>
@@ -662,12 +744,12 @@ const EnhancedCheckoutPage: React.FC = () => {
               
               {/* Items */}
               <div className="space-y-4 mb-6">
-                {cart.items.map((item) => {
+                {cart.items.map((item, idx) => {
                   const product = getProductById(item.productId);
                   if (!product) return null;
                   
                   return (
-                    <div key={item.productId} className="flex items-center space-x-4">
+                    <div key={item.productId + '-' + item.size + '-' + item.color.name} className="flex items-center space-x-4">
                       <div className="w-16 h-16 bg-gray-100 rounded-lg overflow-hidden">
                         <img
                           src={product.images[0]}
@@ -683,7 +765,7 @@ const EnhancedCheckoutPage: React.FC = () => {
                         <p className="text-sm text-gray-600">Qty: {item.quantity}</p>
                       </div>
                       <p className="font-bold text-black">
-                        R{((product.price / 100) * item.quantity).toFixed(2)}
+                        R{((priced.lines[idx]?.cents ?? product.price * item.quantity) / 100).toFixed(2)}
                       </p>
                     </div>
                   );
@@ -698,7 +780,7 @@ const EnhancedCheckoutPage: React.FC = () => {
                 </div>
                 <div className="flex justify-between text-gray-600">
                   <span>Shipping</span>
-                  <span className="font-semibold">{shipping === 0 ? 'Free' : `R${shipping.toFixed(2)}`}</span>
+                  <span className="font-semibold">{!quote ? 'Choose province' : shipping === 0 ? 'Free' : 'R' + shipping.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between text-xl font-bold text-black pt-3 border-t-2 border-gray-200">
                   <span>Total</span>
@@ -710,7 +792,7 @@ const EnhancedCheckoutPage: React.FC = () => {
               <div className="mt-6 p-5 bg-black rounded-xl shadow-lg">
                 <div className="flex items-center text-sm text-white">
                   <Lock className="w-5 h-5 mr-2" />
-                  <span className="font-bold">Secure checkout powered by PayPal</span>
+                  <span className="font-bold">Secure checkout powered by PayFast</span>
                 </div>
                 <p className="text-xs text-gray-300 mt-2 ml-7">
                   Your payment information is encrypted and secure

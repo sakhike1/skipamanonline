@@ -28,8 +28,8 @@ export const ProductWorkflowStrip: React.FC = () => {
           <span className="block overflow-hidden">
             <strong className="text-gray-900">Pick</strong>
             <span className="text-gray-600">
-              {' '}
-              — Shop retail pieces in the{' '}
+              
+              : Shop retail pieces in the{' '}
               <Link
                 to="/shop"
                 className="font-semibold text-purple-700 underline-offset-2 hover:underline"
@@ -48,8 +48,8 @@ export const ProductWorkflowStrip: React.FC = () => {
           <span className="block overflow-hidden">
             <strong className="text-gray-900">Customize</strong>
             <span className="text-gray-600">
-              {' '}
-              — Quotes and artwork via the{' '}
+              
+              : Quotes and artwork via the{' '}
               <Link
                 to="/virtual-stylist"
                 className="font-semibold text-purple-700 underline-offset-2 hover:underline"
@@ -75,8 +75,8 @@ export const ProductWorkflowStrip: React.FC = () => {
           <span className="block overflow-hidden">
             <strong className="text-gray-900">Print</strong>
             <span className="text-gray-600">
-              {' '}
-              — Produced at our local{' '}
+              
+              : Produced at our local{' '}
               <Link
                 to="/printing"
                 className="font-semibold text-purple-700 underline-offset-2 hover:underline"
@@ -95,8 +95,8 @@ export const ProductWorkflowStrip: React.FC = () => {
           <span className="block overflow-hidden">
             <strong className="text-gray-900">Ship</strong>
             <span className="text-gray-600">
-              {' '}
-              — Track delivery in{' '}
+              
+              : Track delivery in{' '}
               <Link
                 to="/orders"
                 className="font-semibold text-purple-700 underline-offset-2 hover:underline"

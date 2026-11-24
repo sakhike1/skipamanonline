@@ -132,7 +132,7 @@ const QuickViewModal: React.FC<QuickViewModalProps> = ({
                   <div className="relative mx-auto aspect-[4/5] max-h-[42vh] w-full sm:max-h-[48vh] md:aspect-square md:max-h-none">
                     <img
                       src={product.images[currentImageIndex]}
-                      alt={`${product.name} — photo ${currentImageIndex + 1} of ${imageCount}`}
+                      alt={`${product.name}, photo ${currentImageIndex + 1} of ${imageCount}`}
                       className="h-full w-full object-cover"
                     />
 

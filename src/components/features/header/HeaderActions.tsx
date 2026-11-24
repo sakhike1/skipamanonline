@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ShoppingBag, Heart, User } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { useCart } from '../../../context/CartContext';
 import { useWishlist } from '../../../context/WishlistContext';
 import NotificationBell from '../../notifications/NotificationBell';
@@ -29,6 +29,8 @@ export const HeaderActions: React.FC<HeaderActionsProps> = ({
   const { cart } = useCart();
   const { getWishlistCount } = useWishlist();
   const navigate = useNavigate();
+  const reduceMotion = useReducedMotion();
+  const wishlistCount = getWishlistCount();
 
   const cartItemCount = cart?.items?.reduce((total, item) => total + item.quantity, 0) || 0;
   const badgeClassName = isDarkPage && !isScrolled 
@@ -37,7 +39,8 @@ export const HeaderActions: React.FC<HeaderActionsProps> = ({
 
   const iconBtnClass = `
     relative inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full
-    transition-opacity duration-200 ${textColor} ${hoverBgColor} hover:opacity-90
+    border border-transparent transition-[opacity,border-color,transform] duration-200
+    ${textColor} ${hoverBgColor} hover:opacity-100
   `;
 
   return (
@@ -45,13 +48,13 @@ export const HeaderActions: React.FC<HeaderActionsProps> = ({
       {/* Cart Button — fixed square + flex center so hover ring matches global 44px min touch */}
       <button
         type="button"
-        className={iconBtnClass}
+        className={`${iconBtnClass} group hover:scale-105 hover:border-white/40`}
         onClick={toggleCartPreview}
         aria-label={`Cart with ${cartItemCount} items`}
       >
         <ShoppingBag
           size={20}
-          className="pointer-events-none shrink-0 sm:h-[22px] sm:w-[22px] max-md:[filter:none] [filter:drop-shadow(0px_0px_1px_rgba(255,255,255,0.5))]"
+          className="pointer-events-none shrink-0 transition-transform duration-300 group-hover:-rotate-6 group-hover:scale-110 motion-reduce:transform-none sm:h-[22px] sm:w-[22px] max-md:[filter:none] [filter:drop-shadow(0px_0px_1px_rgba(255,255,255,0.5))]"
           aria-hidden
         />
         <AnimatePresence>
@@ -73,16 +76,33 @@ export const HeaderActions: React.FC<HeaderActionsProps> = ({
       {/* Wishlist — single <a> (no nested button) for correct hit target + centered hover */}
       <Link
         to="/wishlist"
-        className={iconBtnClass}
-        aria-label={`Wishlist with ${getWishlistCount()} items`}
+        className={`${iconBtnClass} group hover:scale-105 hover:border-[#8fb0ff]/70`}
+        aria-label={`Wishlist with ${wishlistCount} items`}
       >
-        <Heart
-          size={20}
-          className="pointer-events-none shrink-0 sm:h-[22px] sm:w-[22px] max-md:[filter:none] [filter:drop-shadow(0px_0px_1px_rgba(255,255,255,0.5))]"
-          aria-hidden
-        />
+        {/* Pops when an item is added, beats gently while the wishlist has items, turns blue on hover */}
+        <motion.span
+          key={wishlistCount}
+          className="pointer-events-none inline-flex"
+          initial={wishlistCount > 0 && !reduceMotion ? { scale: 1.5 } : false}
+          animate={{ scale: 1 }}
+          transition={{ type: 'spring', stiffness: 500, damping: 14 }}
+        >
+          <motion.span
+            className="inline-flex"
+            animate={wishlistCount > 0 && !reduceMotion ? { scale: [1, 1.18, 1, 1.12, 1] } : { scale: 1 }}
+            transition={{ duration: 1.1, repeat: Infinity, repeatDelay: 3 }}
+          >
+            <Heart
+              size={20}
+              className={`shrink-0 transition-all duration-300 group-hover:scale-110 group-hover:text-[#8fb0ff] ${
+                wishlistCount > 0 ? 'fill-[#fad0e1] text-[#fad0e1] group-hover:fill-[#8fb0ff]/40' : ''
+              } sm:h-[22px] sm:w-[22px] max-md:[filter:none] [filter:drop-shadow(0px_0px_1px_rgba(255,255,255,0.5))]`}
+              aria-hidden
+            />
+          </motion.span>
+        </motion.span>
         <AnimatePresence>
-          {getWishlistCount() > 0 && (
+          {wishlistCount > 0 && (
             <motion.span
               className={`absolute -right-0.5 -top-0.5 ${badgeClassName}
                 flex h-4 w-4 items-center justify-center rounded-full text-xs font-bold sm:h-5 sm:w-5`}
@@ -91,7 +111,7 @@ export const HeaderActions: React.FC<HeaderActionsProps> = ({
               exit={{ scale: 0 }}
               transition={{ type: 'spring', stiffness: 500, damping: 25 }}
             >
-              {getWishlistCount()}
+              {wishlistCount}
             </motion.span>
           )}
         </AnimatePresence>

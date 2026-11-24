@@ -21,6 +21,9 @@ export interface Product {
   };
   tags: string[]; // For better search
   isActive: boolean; // For soft delete
+  /** Present when the product comes from the Skipaman backend */
+  variants?: Array<{ id: string; size: string; color: string; stock: number }>;
+  priceBreaks?: Array<{ minQty: number; percentOff: number }>;
 }
 
 export type Size = 'S' | 'M' | 'L' | 'XL' | 'XXL';

@@ -39,7 +39,7 @@ type PanelView = 'chat' | 'track' | 'whatsapp';
 const WELCOME: ChatMessage = {
   id: 'welcome',
   role: 'assistant',
-  text: 'Welcome to Skipaman Support. Ask about orders, shipping, or products — we usually reply within a few hours on WhatsApp.',
+  text: 'Welcome to Skipaman Support. Ask about orders, shipping, or products. We usually reply within a few hours on WhatsApp.',
   at: Date.now(),
 };
 
@@ -189,13 +189,13 @@ const SupportChatWidget: React.FC = () => {
 
         setLastTicket(ticket_number);
         appendAssistant(
-          `Saved as ticket ${ticket_number}. Our team will follow up. For a faster reply, continue on WhatsApp — tap “WhatsApp support” below.`,
+          `Saved as ticket ${ticket_number}. Our team will follow up. For a faster reply, continue on WhatsApp. Tap “WhatsApp support” below.`,
         );
       } catch {
         appendAssistant('Couldn’t save your message right now. Use WhatsApp support below and we’ll help you directly.');
       }
     } else {
-      appendAssistant('Chat tickets are offline — use WhatsApp support below.');
+      appendAssistant('Chat tickets are offline. Use WhatsApp support below.');
     }
 
     setBusy(false);
@@ -300,7 +300,7 @@ const SupportChatWidget: React.FC = () => {
                 </p>
                 <p className="text-xs text-neutral-500 rounded-lg bg-neutral-900/80 border border-neutral-800 p-3">
                   You’ll send a message <em>to Skipaman</em>, not to yourself. If you’re testing on the store phone,
-                  WhatsApp may show your own number — that’s normal for owners only.
+                  WhatsApp may show your own number. That’s normal for owners only.
                 </p>
                 <pre className="max-h-40 overflow-y-auto rounded-xl bg-black/60 border border-neutral-800 p-3 text-[11px] text-neutral-400 whitespace-pre-wrap font-sans">
                   {whatsAppPreview}

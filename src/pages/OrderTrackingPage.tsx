@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { useAuth } from '../context/useAuth';
-import { supabase } from '../lib/supabase';
+import { useCart } from '../context/CartContext';
+import { ApiError } from '../lib/skipApi';
+import { displayStatus, getOrder, mapItem, orderRef } from '../services/shopApi';
 import { motion } from 'framer-motion';
 import {
   Package,
@@ -52,154 +54,68 @@ const OrderTrackingPage: React.FC = () => {
   );
   const [showNotifications, setShowNotifications] = useState(false);
 
-  const loadOrderDetails = useCallback(async () => {
-    if (!orderId || !supabase || !user?.id) return;
+  const lastStatus = React.useRef<string | null>(null);
+  const { clearCart } = useCart();
+  const [searchParams] = useSearchParams();
+
+  // PayFast sends the customer back here with ?paid=1 once they finish paying
+  useEffect(() => {
+    if (searchParams.get('paid') === '1') {
+      clearCart();
+      try { sessionStorage.removeItem('skipaman:pendingOrder'); } catch { /* ignore */ }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
+
+  const loadOrderDetails = useCallback(async (silent = false) => {
+    if (!orderId || !user?.id) return;
     try {
-      setLoading(true);
-      setError(null);
-
-      const { data: row, error: qErr } = await supabase
-        .from('orders')
-        .select(
-          `
-          id,
-          status,
-          total_amount,
-          created_at,
-          notes,
-          order_number,
-          order_items (
-            quantity,
-            size,
-            colour,
-            unit_price,
-            products ( name, image_urls )
-          ),
-          shipments (
-            tracking_number,
-            carrier,
-            status,
-            estimated_delivery,
-            shipped_at,
-            delivered_at
-          )
-        `,
-        )
-        .eq('id', orderId)
-        .eq('user_id', user.id)
-        .maybeSingle();
-
-      if (qErr) throw qErr;
-      if (!row) {
-        setError('Order not found');
-        setOrder(null);
-        return;
-      }
-
-      const r = row as Record<string, unknown>;
-      const itemsRaw = r.order_items as
-        | Array<{
-            quantity: number;
-            size: string | null;
-            colour: string | null;
-            unit_price: number | string;
-            products: { name?: string; image_urls?: string[] | null } | null;
-          }>
-        | null;
-
-      const shipmentsRaw = r.shipments as
-        | Array<{
-            tracking_number: string | null;
-            carrier: string | null;
-            status: string | null;
-            estimated_delivery: string | null;
-            shipped_at: string | null;
-            delivered_at: string | null;
-          }>
-        | null;
-
-      const id = String(r.id);
-      const ref = r.order_number as string | null | undefined;
+      if (!silent) { setLoading(true); setError(null); }
+      const o = await getOrder(orderId);
+      const status = displayStatus(o.status);
+      const hasShipment = Boolean(o.trackingNumber || o.courier || o.estimatedDeliveryTo);
       const mapped: TrackingOrder = {
-        id,
-        orderNumber:
-          (ref && String(ref).trim()) || id.replace(/-/g, '').slice(0, 12).toUpperCase(),
-        status: String(r.status ?? 'pending'),
-        total: Number(r.total_amount ?? 0),
-        createdAt: String(r.created_at ?? ''),
-        notes: r.notes as string | null | undefined,
-        items: (itemsRaw ?? []).map((oi) => {
-          const unit = Number(oi.unit_price ?? 0);
-          return {
-            productName: oi.products?.name ?? 'Product',
-            productImage: oi.products?.image_urls?.[0] ?? '/images/grey1.png',
-            quantity: oi.quantity,
-            size: oi.size ?? '',
-            colour: oi.colour ?? '',
-            lineTotalRand: unit * oi.quantity,
-          };
-        }),
-        shipment: shipmentsRaw?.[0]
+        id: o.id,
+        orderNumber: orderRef(o),
+        status,
+        total: o.totalCents / 100,
+        createdAt: o.createdAt,
+        notes: null,
+        items: o.items.map(mapItem),
+        shipment: hasShipment
           ? {
-              tracking_number: shipmentsRaw[0].tracking_number,
-              carrier: shipmentsRaw[0].carrier,
-              status: shipmentsRaw[0].status,
-              estimated_delivery: shipmentsRaw[0].estimated_delivery,
-              shipped_at: shipmentsRaw[0].shipped_at ?? null,
-              delivered_at: shipmentsRaw[0].delivered_at ?? null,
+              tracking_number: o.trackingNumber ?? null,
+              carrier: o.courier ?? null,
+              status: status === 'delivered' ? 'delivered' : status === 'shipped' || status === 'out_for_delivery' ? 'in_transit' : null,
+              estimated_delivery: o.estimatedDeliveryTo ?? null,
+              shipped_at: o.history?.find((h) => h.status === 'SHIPPED')?.createdAt ?? null,
+              delivered_at: o.history?.find((h) => h.status === 'DELIVERED')?.createdAt ?? null,
             }
           : null,
       };
-
+      if (lastStatus.current && lastStatus.current !== status) {
+        setRealtimeUpdates((prev) => [{ title: 'Order', message: 'This order is now: ' + status.replace(/_/g, ' '), timestamp: new Date().toISOString() }, ...prev].slice(0, 5));
+        setShowNotifications(true);
+        setTimeout(() => setShowNotifications(false), 4000);
+      }
+      lastStatus.current = status;
       setOrder(mapped);
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Failed to load order details');
-      setOrder(null);
+      if (!silent) {
+        setError(e instanceof ApiError && e.status === 404 ? 'Order not found' : e instanceof Error ? e.message : 'Failed to load order details');
+        setOrder(null);
+      }
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   }, [orderId, user?.id]);
 
   useEffect(() => {
     void loadOrderDetails();
-  }, [loadOrderDetails]);
-
-  useEffect(() => {
-    if (!supabase || !orderId || !user?.id) return () => {};
-
-    const sb = supabase;
-    const channel = sb
-      .channel(`order-detail:${orderId}`)
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'orders',
-          filter: `id=eq.${orderId}`,
-        },
-        () => {
-          setRealtimeUpdates((prev) =>
-            [
-              {
-                title: 'Order',
-                message: 'This order was updated.',
-                timestamp: new Date().toISOString(),
-              },
-              ...prev,
-            ].slice(0, 5),
-          );
-          setShowNotifications(true);
-          setTimeout(() => setShowNotifications(false), 4000);
-          void loadOrderDetails();
-        },
-      )
-      .subscribe();
-
-    return () => {
-      void sb.removeChannel(channel);
-    };
-  }, [orderId, user?.id, loadOrderDetails]);
+    if (!orderId || !user?.id) return () => {};
+    const timer = window.setInterval(() => void loadOrderDetails(true), 15000);
+    return () => window.clearInterval(timer);
+  }, [loadOrderDetails, orderId, user?.id]);
 
   const getStatusIcon = (status: string) => {
     const icons: Record<string, typeof Clock> = {
@@ -449,7 +365,7 @@ const OrderTrackingPage: React.FC = () => {
             </Link>{' '}
             and include your order number{' '}
             <span className="rounded bg-white/80 px-1.5 py-0.5 font-mono text-xs text-gray-900">{order.orderNumber}</span>
-            — we reply on tickets so nothing gets lost in social DMs.
+            . We reply on tickets so nothing gets lost in social DMs.
           </p>
         </div>
       </div>

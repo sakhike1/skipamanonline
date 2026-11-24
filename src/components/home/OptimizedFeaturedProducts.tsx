@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { ArrowRight, ShoppingBag, Plus, Sparkles, Star, Zap, Crown } from 'lucide-react';
-import { products } from '../../data/products';
+import { useProductData } from '../../context/ProductDataContext';
 import { Button } from '../ui/Button';
 import { FEATURED_PRIMARY_CTA_CLASS } from './featuredPrimaryCta';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -101,6 +101,7 @@ const LazyProductImage: React.FC<{
 };
 
 const OptimizedFeaturedProducts: React.FC<FeaturedProductsProps> = ({ onProductClick }) => {
+  const { products } = useProductData();
   const [colorIndex, setColorIndex] = useState(0);
   const [hoveredProduct, setHoveredProduct] = useState<string | null>(null);
   const [isGlowing, setIsGlowing] = useState(false);
@@ -123,7 +124,7 @@ const OptimizedFeaturedProducts: React.FC<FeaturedProductsProps> = ({ onProductC
   // Memoize featured products to prevent unnecessary recalculations
   const featuredProducts = useMemo(() => 
     products.filter(product => product.featured), 
-    []
+    [products]
   );
 
   // Optimized color animation with useCallback

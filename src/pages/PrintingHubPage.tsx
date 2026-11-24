@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
-import { ArrowRight, ArrowUpRight, MapPin, Printer, Sparkles } from 'lucide-react';
+import AnimatedHeading from '../components/ui/AnimatedHeading';
+import { ArrowRight, ArrowUpRight, MapPin, Printer } from 'lucide-react';
 import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import LazyImage from '../components/ui/LazyImage';
@@ -30,72 +31,113 @@ export default function PrintingHubPage() {
         aria-hidden
       />
 
-      <div className="relative mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-        {/* Extra offset below fixed header */}
-        <div className="pt-28 md:pt-36 lg:pt-40">
-          <div className="grid gap-10 lg:grid-cols-[minmax(0,1.08fr)_minmax(0,0.92fr)] lg:items-center lg:gap-12 xl:gap-16">
-            <motion.div
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-              className="mx-auto max-w-3xl text-center lg:mx-0 lg:max-w-none lg:text-left"
-            >
-              <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-neutral-200/90 bg-white/90 px-4 py-2 text-[11px] font-bold uppercase tracking-[0.22em] text-neutral-600 shadow-sm backdrop-blur-sm md:text-xs">
-                <Sparkles className="h-3.5 w-3.5 text-red-600" aria-hidden />
-                Custom printing
-              </div>
-              <div className="mb-6 flex flex-wrap justify-center gap-2 lg:justify-start">
-                {['DTF', 'Screen print', 'Embroidery', 'Uniforms'].map((tag) => (
-                  <span
-                    key={tag}
-                    className="rounded-full border border-neutral-200/80 bg-neutral-950 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.14em] text-white shadow-sm"
-                  >
-                    {tag}
-                  </span>
-                ))}
-              </div>
-              <h1 className="text-4xl font-black tracking-tight text-neutral-950 sm:text-5xl md:text-6xl lg:text-[3.25rem] lg:leading-[1.08]">
-                Printing &amp;{' '}
-                <span className="bg-gradient-to-r from-red-600 via-red-500 to-amber-600 bg-clip-text text-transparent">
-                  branding
-                </span>
-                <br className="hidden sm:block" />
-                <span className="text-neutral-900">services</span>
-              </h1>
-              <p className="mx-auto mt-6 max-w-2xl text-base leading-relaxed text-neutral-600 lg:mx-0 lg:max-w-xl lg:text-lg">
-                Bulk screen print, DTF, embroidery, school uniforms, and corporate wear—serving{' '}
-                <strong className="font-semibold text-neutral-800">
-                  Centurion, Pretoria, Johannesburg
-                </strong>
-                , and courier nationwide. Open a guide for minimums, lead times, artwork, and
-                delivery—then request a quote when you&apos;re ready.
+      {/* HERO: continues the black header */}
+      <section
+        aria-labelledby="printing-hero-heading"
+        className="relative z-10 flex flex-col bg-[#0b0b0c] text-white md:min-h-[min(100svh,54rem)]"
+      >
+        <div className="relative mx-auto flex w-full max-w-7xl flex-1 flex-col px-5 pb-10 pt-28 sm:px-8 md:pb-14 md:pt-32">
+          {/* product photo, sits behind the headline on desktop */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.98 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+            className="relative order-2 mt-8 h-72 overflow-hidden rounded-3xl bg-neutral-900 sm:h-96 md:absolute md:bottom-10 md:right-8 md:top-28 md:order-none md:mt-0 md:h-auto md:w-[42%] lg:right-14"
+          >
+            <LazyImage
+              src="/images/image6.jpg"
+              alt="Custom printed apparel and branding samples"
+              className="h-full w-full object-cover"
+            />
+            <div aria-hidden className="absolute inset-0 bg-gradient-to-r from-[#0b0b0c]/70 via-transparent to-transparent" />
+            <span className="absolute bottom-4 right-4 rounded-full bg-white px-3.5 py-1.5 text-[11px] font-bold uppercase tracking-[0.14em] text-black">
+              Gauteng + nationwide
+            </span>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 18 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+            className="relative z-10 flex flex-1 flex-col md:max-w-[64%] md:justify-center"
+          >
+            <p className="flex items-center gap-3 text-sm font-medium text-white/70">
+              <span aria-hidden className="h-px w-8 bg-white/50" />
+              Custom printing
+            </p>
+            <AnimatedHeading
+              id="printing-hero-heading"
+              variant="slide"
+              className="mt-4 text-[clamp(3.6rem,12.5vw,10.5rem)] font-bold leading-[0.88] tracking-[-0.05em]"
+              lines={[{ text: 'Printing' }, { text: '& branding', className: 'text-white/95 md:-mr-40' }]}
+            />
+            <p className="mt-8 max-w-lg text-lg leading-relaxed text-white/80 md:text-xl">
+              Bulk screen print, DTF, embroidery, school uniforms and corporate wear. Serving{' '}
+              <strong className="font-semibold text-white">Centurion, Pretoria, Johannesburg</strong>, and courier nationwide.
+            </p>
+            <div className="mt-8 flex flex-wrap items-center gap-3">
+              <Link
+                to="/virtual-stylist"
+                className="inline-flex min-h-12 items-center gap-2 rounded-full bg-white px-7 py-3 text-base font-semibold text-black transition hover:bg-neutral-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white"
+              >
+                Request a quote
+                <ArrowRight className="h-4 w-4" aria-hidden />
+              </Link>
+              <a
+                href="#print-guides"
+                className="inline-flex min-h-12 items-center rounded-full border border-white/40 px-7 py-3 text-base font-semibold transition hover:border-white hover:bg-white/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white"
+              >
+                Browse guides
+              </a>
+            </div>
+            <ul className="mt-8 flex flex-wrap gap-x-5 gap-y-1 text-xs font-semibold uppercase tracking-[0.16em] text-white/55">
+              {['DTF', 'Screen print', 'Embroidery', 'Uniforms'].map((tag) => (
+                <li key={tag}>{tag}</li>
+              ))}
+            </ul>
+          </motion.div>
+        </div>
+
+        {/* bottom strip: stats + quick links */}
+        <div className="grid md:grid-cols-[minmax(0,0.9fr)_minmax(0,1.3fr)]">
+          <div
+            className="flex flex-wrap items-center gap-x-10 gap-y-4 px-5 py-7 text-white sm:px-8 md:px-14"
+            style={{ backgroundImage: 'linear-gradient(120deg, #4a2bf0 0%, #8b4dff 55%, #c07bff 100%)' }}
+          >
+            <div>
+              <p className="text-5xl font-bold leading-none tracking-[-0.04em]">
+                {printingHubLinks.services.length}
+                <span className="ml-1.5 text-sm font-medium tracking-normal">guides</span>
               </p>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.06, ease: [0.22, 1, 0.36, 1] }}
-              className="relative mx-auto w-full max-w-md lg:mx-0 lg:max-w-none"
-            >
-              <div className="relative mx-auto aspect-[4/5] w-full max-w-[420px] overflow-hidden rounded-[2rem] border border-neutral-200/90 bg-neutral-900 shadow-[0_24px_80px_-28px_rgba(0,0,0,0.35)] sm:aspect-[5/4] sm:max-w-lg lg:aspect-[3/4] lg:max-h-[min(520px,70vh)] lg:max-w-none">
-                <LazyImage
-                  src="/images/image6.jpg"
-                  alt="Custom printed apparel and branding samples"
-                  className="h-full w-full object-cover opacity-95 transition duration-500 hover:scale-[1.02] hover:opacity-100"
-                />
-                <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/75 via-black/10 to-transparent" />
-                <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-red-600/25 via-transparent to-amber-500/15" />
-                <p className="pointer-events-none absolute bottom-5 left-5 right-5 text-left text-xs font-bold uppercase tracking-[0.18em] text-white/90 drop-shadow-sm">
-                  Street-ready finishes · bulk-friendly
-                </p>
-                <span className="pointer-events-none absolute right-4 top-4 rounded-full bg-white/95 px-3 py-1.5 text-[10px] font-black uppercase tracking-wider text-neutral-950 shadow-md backdrop-blur-sm">
-                  Gauteng + nationwide
-                </span>
-              </div>
-            </motion.div>
+              <p className="mt-2 max-w-[13rem] text-xs leading-snug text-white/80">Print methods and programmes, each with minimums and lead times.</p>
+            </div>
+            <div>
+              <p className="text-5xl font-bold leading-none tracking-[-0.04em]">
+                {printingHubLinks.locations.length}
+                <span className="ml-1.5 text-sm font-medium tracking-normal">areas</span>
+              </p>
+              <p className="mt-2 max-w-[13rem] text-xs leading-snug text-white/80">Local pages for Gauteng, with delivery South Africa-wide.</p>
+            </div>
           </div>
+          <ul className="grid grid-cols-2 sm:grid-cols-4">
+            {printingHubLinks.services.slice(0, 4).map((svc, i) => (
+              <li key={svc.slug}>
+                <Link
+                  to={`/services/${svc.slug}`}
+                  style={{ backgroundColor: ['#ffd21f', '#2b5cff', '#7c4dff', '#ffe45c'][i % 4], color: i % 4 === 1 || i % 4 === 2 ? '#fff' : '#14101f' }}
+                  className="group flex h-full min-h-28 flex-col justify-between p-4 text-base transition hover:brightness-110 focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-4 focus-visible:outline-white"
+                >
+                  <ArrowUpRight className="h-5 w-5 self-end transition group-hover:-translate-y-0.5 group-hover:translate-x-0.5" aria-hidden />
+                  <span className="text-base font-bold leading-tight">{svc.label}</span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </section>
 
+      <div id="print-guides" className="relative mx-auto max-w-6xl scroll-mt-20 px-4 sm:px-6 lg:px-8">
+        <div className="pt-14 md:pt-20">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -118,8 +160,8 @@ export default function PrintingHubPage() {
                     Cities &amp; areas
                   </h2>
                   <p className="mt-2 text-sm leading-relaxed text-neutral-600">
-                    Local landing pages with city-specific copy—Gauteng base, delivery South
-                    Africa–wide.
+                    Local landing pages with city-specific copy, Gauteng base, delivery South
+                    Africa-wide.
                   </p>
                 </div>
               </div>
@@ -157,7 +199,7 @@ export default function PrintingHubPage() {
                     Print methods &amp; programmes
                   </h2>
                   <p className="mt-2 text-sm leading-relaxed text-neutral-600">
-                    Deep dives per technique—ideal when you already know screen vs DTF vs
+                    Deep dives per technique, ideal when you already know screen vs DTF vs
                     embroidery.
                   </p>
                 </div>
@@ -185,29 +227,32 @@ export default function PrintingHubPage() {
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.45, delay: 0.16 }}
-            className="relative mt-14 overflow-hidden rounded-[1.75rem] border border-neutral-800 bg-neutral-950 px-6 py-12 text-center shadow-2xl shadow-neutral-900/30 sm:px-10 md:mt-16"
+            className="print-cta relative mt-14 overflow-hidden rounded-[2rem] px-6 py-14 text-center text-white sm:px-10 md:mt-16 md:py-16"
           >
-            <div
-              className="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full bg-red-600/20 blur-3xl"
-              aria-hidden
-            />
-            <div
-              className="pointer-events-none absolute -bottom-16 -left-16 h-56 w-56 rounded-full bg-amber-500/10 blur-3xl"
-              aria-hidden
-            />
-            <p className="relative text-xs font-bold uppercase tracking-[0.2em] text-white/50">
-              Next step
-            </p>
-            <p className="relative mt-3 text-2xl font-black tracking-tight text-white sm:text-3xl">
+            <style>{`
+              .print-cta {
+                background-image: linear-gradient(120deg, #4a2bf0, #8b4dff, #2b5cff, #c07bff, #4a2bf0);
+                background-size: 300% 300%;
+                animation: print-cta-shift 14s ease-in-out infinite;
+                box-shadow: 0 40px 80px -40px rgba(74, 43, 240, 0.8);
+              }
+              @keyframes print-cta-shift { 0%,100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
+              @media (prefers-reduced-motion: reduce) { .print-cta { animation: none; } }
+            `}</style>
+            <div aria-hidden className="pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full bg-[#ffd21f]/40 blur-3xl" />
+            <div aria-hidden className="pointer-events-none absolute -bottom-20 -left-12 h-56 w-56 rounded-full bg-white/25 blur-3xl" />
+
+            <p className="relative text-[11px] font-semibold uppercase tracking-[0.28em] text-white/80">Next step</p>
+            <p className="relative mt-3 text-[clamp(2rem,4.5vw,3.5rem)] font-black leading-[1] tracking-[-0.04em]">
               Have dates &amp; quantities?
             </p>
-            <p className="relative mx-auto mt-3 max-w-lg text-sm leading-relaxed text-white/75">
-              Use the branding quote form—we&apos;ll confirm method, timeline, and a clear written
+            <p className="relative mx-auto mt-4 max-w-lg text-base leading-relaxed text-white/90">
+              Use the branding quote form, we&apos;ll confirm method, timeline, and a clear written
               estimate.
             </p>
             <Link
               to="/virtual-stylist"
-              className="relative mt-8 inline-flex items-center gap-2 rounded-full bg-white px-8 py-3.5 text-sm font-bold text-neutral-950 shadow-lg transition hover:bg-neutral-100 active:scale-[0.98]"
+              className="relative mt-8 inline-flex items-center gap-2 rounded-full bg-[#ffd21f] px-8 py-4 text-sm font-bold text-[#14101f] shadow-[0_14px_30px_-12px_rgba(0,0,0,0.5)] transition hover:bg-[#ffe45c] active:scale-[0.98] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white"
             >
               Request a quote
               <ArrowRight className="h-4 w-4" aria-hidden />

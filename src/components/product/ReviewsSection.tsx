@@ -169,7 +169,7 @@ const ReviewsSection: React.FC<ReviewsSectionProps> = ({
 
       {alreadyReviewed && !showReviewForm ? (
         <p className="text-sm text-gray-600 rounded-lg bg-gray-50 border border-gray-200 px-4 py-3">
-          Thanks — you&apos;ve already reviewed this product.
+          Thanks, you&apos;ve already reviewed this product.
         </p>
       ) : null}
 

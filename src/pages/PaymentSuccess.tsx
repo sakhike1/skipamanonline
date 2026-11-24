@@ -328,7 +328,7 @@ const PaymentSuccess: React.FC = () => {
           animate={{ opacity: 1 }}
           transition={{ delay: 0.8 }}
         >
-          Keep your reference handy until you see tracking on your order — that is the source of truth while email
+          Keep your reference handy until you see tracking on your order. That is the source of truth while email
           automation finishes rollout.
         </motion.p>
       </motion.div>

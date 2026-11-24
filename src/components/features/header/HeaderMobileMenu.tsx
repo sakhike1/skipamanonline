@@ -238,7 +238,7 @@ export const HeaderMobileMenu: React.FC<HeaderMobileMenuProps> = ({
                 <div className="pb-8 pt-2">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-white/40">Location</p>
                   <p className="mt-2 max-w-sm text-lg font-medium leading-snug text-white">
-                    Centurion, Gauteng — South Africa
+                    Centurion, Gauteng, South Africa
                   </p>
                 </div>
 
@@ -271,7 +271,7 @@ export const HeaderMobileMenu: React.FC<HeaderMobileMenuProps> = ({
                     New arrivals
                   </p>
                   <p className="mt-2 text-base font-semibold leading-snug text-black">
-                    Fresh drops and custom printing — explore what just landed.
+                    Fresh drops and custom printing. Explore what just landed.
                   </p>
                   <Link
                     to="/new-arrivals"

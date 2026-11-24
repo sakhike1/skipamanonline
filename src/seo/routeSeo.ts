@@ -24,30 +24,35 @@ const BY_PATH: Record<string, RouteSeoPayload> = {
     description: SITE_DEFAULT_DESCRIPTION,
   },
   '/shop': {
-    title: 'Shop Collection — Skipaman Tees & Streetwear Online | South Africa',
+    title: 'Shop Collection | Skipaman Tees & Streetwear Online | South Africa',
     description:
       'Browse Skipaman retail: featured drops, filters by category and price, and fast checkout. Premium tees, graphics, and layers shipped across South Africa.',
   },
   '/new-arrivals': {
-    title: 'New Arrivals — Latest Skipaman Drops & Layers | South Africa',
+    title: 'New Arrivals | Latest Skipaman Drops & Layers | South Africa',
     description:
-      'Shop the newest Skipaman pieces—tees, graphics, and layers. Filter by category and price cap. Delivery across South Africa.',
+      'Shop the newest Skipaman pieces, tees, graphics, and layers. Filter by category and price cap. Delivery across South Africa.',
   },
   '/virtual-stylist': {
     title:
       'T-Shirt Printing Centurion | Uniform Printing & Corporate Branding | Skipaman South Africa',
     description:
-      'Request a quote for custom t-shirt printing, school uniforms, staff uniforms, caps, and branded mugs—DTF, screen printing, and vinyl. Based in Centurion, Gauteng; delivery nationwide.',
+      'Request a quote for custom t-shirt printing, school uniforms, staff uniforms, caps, and branded mugs, DTF, screen printing, and vinyl. Based in Centurion, Gauteng; delivery nationwide.',
+  },
+  '/design-studio': {
+    title: 'Design Studio | Design Your Own T-Shirt, Hoodie or Cap | Skipaman South Africa',
+    description:
+      'Design your own tee, hoodie or cap online: add text, shapes or your own image, share your design, and request a quote from Skipaman.',
   },
   '/lookbook': {
-    title: 'Lookbook — Retail Styling & Custom Branding (Schools, Teams, Business) | Skipaman',
+    title: 'Lookbook | Retail Styling & Custom Branding (Schools, Teams, Business) | Skipaman',
     description:
       'Explore Skipaman lookbook stories: retail collection and custom branding for schools, teams, and businesses.',
   },
   '/about': {
     title: 'About Skipaman Store | Premium Streetwear & Branding South Africa',
     description:
-      'Learn about Skipaman—premium apparel, custom printing, and branding for schools and businesses across South Africa.',
+      'Learn about Skipaman, premium apparel, custom printing, and branding for schools and businesses across South Africa.',
   },
   '/terms': {
     title: 'Terms & Conditions | Skipaman Store',
@@ -131,7 +136,7 @@ const BY_PATH: Record<string, RouteSeoPayload> = {
 
 const PRODUCT: RouteSeoPayload = {
   title: 'Product | Skipaman Store',
-  description: 'Shop this Skipaman product—sizes, colours, and secure checkout.',
+  description: 'Shop this Skipaman product, sizes, colours, and secure checkout.',
 };
 
 const ORDER_DETAIL: RouteSeoPayload = {

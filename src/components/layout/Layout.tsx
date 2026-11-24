@@ -7,6 +7,8 @@ import ToastNotification from '../notifications/ToastNotification';
 import CookieConsentBanner from '../marketing/CookieConsentBanner';
 import AnalyticsRouteListener from '../marketing/AnalyticsRouteListener';
 import SupportChatWidget from '../support/SupportChatWidget';
+import SitePromoPopup from '../ui/SitePromoPopup';
+import SkipamanRadio from '../ui/SkipamanRadio';
 // Promo popup (VIP100 / flash deals) disabled — re-enable: import PromoPopup and render <PromoPopup /> below.
 
 interface LayoutProps {
@@ -79,6 +81,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       <ScrollToTop />
       <ToastNotification position="top-right" maxNotifications={5} />
       <CookieConsentBanner />
+      <SitePromoPopup />
+      <SkipamanRadio />
       <SupportChatWidget />
     </div>
   );

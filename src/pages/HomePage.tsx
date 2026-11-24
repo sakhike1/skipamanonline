@@ -1,4 +1,5 @@
 import React, { useCallback, memo } from 'react';
+import './home-refresh.css';
 import Hero from '../components/home/Hero';
 import FeaturedProducts from '../components/home/FeaturedProducts';
 import NewArrivals from '../components/home/NewArrivals';
@@ -40,32 +41,22 @@ const HomePage: React.FC = () => {
   return (
     <div className="bg-gradient-to-b from-gray-50 via-white to-gray-50 min-h-screen">
       <Hero />
-      <HomeSectionReveal>
-        <HomeWorkflowSection />
-      </HomeSectionReveal>
-      <HomeSectionReveal delay={0.02}>
-        <NewArrivals />
-      </HomeSectionReveal>
-      <HomeSectionReveal delay={0.05}>
-        <FeaturedProducts onProductClick={handleProductClick} />
-      </HomeSectionReveal>
-
-      <HomeSectionReveal delay={0.06} variant="dark">
-        <NewsletterSection
-          onSubscribeSuccess={handleSubscribeSuccess}
-          onSubscribeError={handleSubscribeError}
-        />
-      </HomeSectionReveal>
-
-      <HomeSectionReveal delay={0.07} variant="dark">
-        <CustomerAssuranceSection />
-      </HomeSectionReveal>
-
+      <div className="skipaman-home">
+        <HomeSectionReveal className="skipaman-drops"><NewArrivals /></HomeSectionReveal>
+        <HomeSectionReveal className="skipaman-featured">
+          <FeaturedProducts onProductClick={handleProductClick} />
+        </HomeSectionReveal>
+        <HomeSectionReveal className="skipaman-workflow"><HomeWorkflowSection /></HomeSectionReveal>
+        <HomeSectionReveal variant="dark"><CustomerAssuranceSection /></HomeSectionReveal>
+        <HomeSectionReveal className="skipaman-reviews"><CustomerReviewSection /></HomeSectionReveal>
+        <HomeSectionReveal variant="dark" className="skipaman-newsletter">
+          <NewsletterSection
+            onSubscribeSuccess={handleSubscribeSuccess}
+            onSubscribeError={handleSubscribeError}
+          />
+        </HomeSectionReveal>
+      </div>
       <Toast show={toast.show} message={toast.message} type={toast.type} />
-
-      <HomeSectionReveal delay={0.08}>
-        <CustomerReviewSection />
-      </HomeSectionReveal>
     </div>
   );
 };

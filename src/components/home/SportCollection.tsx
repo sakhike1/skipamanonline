@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { products } from '../../data/products';
+import { useProductData } from '../../context/ProductDataContext';
 import { getHoodPayPalPaymentUrl } from '../../utils/hoodPayPalLink';
 
 const hoodPayPalUrl = getHoodPayPalPaymentUrl();
 
 const SportCollection: React.FC = () => {
+  const { products } = useProductData();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   // Get hoody products for the display

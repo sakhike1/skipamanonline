@@ -138,7 +138,7 @@ const WishlistPage: React.FC = () => {
             <RetailEmptyState
               icon={Heart}
               title="Your wishlist is empty"
-              description="Save pieces you love from the shop or lookbook—your wishlist syncs when you’re signed in."
+              description="Save pieces you love from the shop or lookbook, your wishlist syncs when you’re signed in."
               primaryAction={{ label: 'Browse the shop', to: '/shop' }}
               secondaryAction={{ label: 'View lookbook', to: '/lookbook' }}
               surface="hero"

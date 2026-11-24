@@ -116,34 +116,40 @@ const ShopPage: React.FC = () => {
         featuredProducts={featuredProducts}
       />
 
-      <section className="relative mt-0 w-full scroll-mt-24 overflow-hidden border-t border-neutral-200 bg-white text-black">
-        {/* Luxury minimal background overlays */}
-        <div className="pointer-events-none absolute inset-0">
-          <div className="absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-neutral-100/80 via-white to-transparent"></div>
-          <div className="absolute inset-0 opacity-[0.35] [background-image:radial-gradient(circle_at_1px_1px,rgba(0,0,0,0.06)_1px,transparent_0)] [background-size:18px_18px]"></div>
-        </div>
-
-        <div className="relative mx-auto max-w-7xl px-4 pb-16 pt-8 sm:px-6 md:pb-20 md:pt-10">
-          <div id="shop-collection" className="flex flex-col gap-3 md:flex-row md:justify-between md:items-end mb-8 md:mb-10 border-b border-neutral-200 pb-6">
-            <div className="space-y-2">
-              <p className="text-xs font-semibold uppercase tracking-[0.25em] text-neutral-500">Browse</p>
-              <h1 className="text-3xl md:text-4xl font-black text-black tracking-tight">Shop Collection</h1>
+      <section aria-labelledby="shop-collection-heading" className="w-full bg-white text-[#211527]">
+        <div className="mx-auto max-w-7xl px-4 pb-16 pt-8 sm:px-6 md:pb-20 md:pt-12 lg:px-8">
+          <header id="shop-collection" className="mb-8 scroll-mt-24 md:mb-12">
+            <div className="flex flex-wrap items-end justify-between gap-x-8 gap-y-5">
+              <div>
+                <p className="flex items-center gap-3 text-[11px] font-semibold uppercase tracking-[0.28em] text-[#6b4a7a]">
+                  <span aria-hidden className="h-px w-8 bg-[#6b4a7a]" />
+                  The collection
+                </p>
+                <h2
+                  id="shop-collection-heading"
+                  className="mt-3 text-[clamp(2.5rem,5.4vw,4.75rem)] font-black leading-[0.95] tracking-[-0.05em] text-[#211527]"
+                >
+                  Shop Collection
+                </h2>
+              </div>
+              <div className="flex w-full flex-wrap items-center justify-between gap-3 md:w-auto md:justify-end md:gap-6">
+                <p role="status" className="text-sm font-medium tabular-nums text-[#513a5c]">
+                  <span className="mr-1.5 text-2xl font-bold tracking-tight text-[#211527]">{filteredProducts.length}</span>
+                  {filteredProducts.length === 1 ? 'product' : 'products'}
+                </p>
+                <button
+                  type="button"
+                  aria-expanded={showFilters}
+                  onClick={toggleFilters}
+                  className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full border border-[#211527] px-5 py-2 text-sm font-semibold text-[#211527] transition-colors hover:bg-[#211527] hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#211527] md:hidden"
+                >
+                  {showFilters ? <X size={16} aria-hidden /> : <Filter size={16} aria-hidden />}
+                  {showFilters ? 'Hide filters' : 'Filters'}
+                </button>
+              </div>
             </div>
-            <p className="text-sm md:text-base text-neutral-600">{filteredProducts.length} products</p>
-          </div>
-
-          <div className="md:hidden mb-6">
-            <button
-              onClick={toggleFilters}
-              className="flex items-center justify-center w-full gap-2 py-3 bg-black text-white rounded-none text-sm font-medium hover:bg-neutral-800 transition-colors"
-            >
-              {showFilters ? (
-                <><X size={16} /><span>Close Filters</span></>
-              ) : (
-                <><Filter size={16} /><span>Show Filters</span></>
-              )}
-            </button>
-          </div>
+            <div aria-hidden className="mt-6 h-px w-full bg-gradient-to-r from-[#211527] via-[#d9cce1] to-transparent" />
+          </header>
 
           {/*
             KEY CHANGE: when no results, switch to stacked (flex-col) so the sidebar
@@ -156,7 +162,7 @@ const ShopPage: React.FC = () => {
             {showFilters && (
               /*
                 In no-results mode: full width, auto height (not self-stretch).
-                ShopFilterSidebar handles its own internal layout — we just override
+                ShopFilterSidebar handles its own internal layout, we just override
                 the wrapper width/alignment via a wrapping div.
               */
               <div className={hasNoResults ? 'w-full' : 'contents'}>

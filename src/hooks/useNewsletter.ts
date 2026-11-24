@@ -80,7 +80,7 @@ export const useNewsletter = (
       }
       if (result.duplicate) {
         setStatus('success');
-        setMessage('You’re already on the list — thanks for staying with us.');
+        setMessage('You’re already on the list. Thanks for staying with us.');
         setEmail('');
         return;
       }

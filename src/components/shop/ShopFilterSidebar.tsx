@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { ArrowRight, Sparkles, TrendingUp, Users, Zap, Star, Clock, ShoppingBag, Award } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Product } from '../../types';
-import { getFeaturedProducts } from '../../data/products';
+import { useProductData } from '../../context/ProductDataContext';
 
 interface ShopFilterSidebarProps {
   categories: string[];
@@ -28,6 +28,7 @@ const ShopFilterSidebar: React.FC<ShopFilterSidebarProps> = ({
   compact = false,
 }) => {
   const navigate = useNavigate();
+  const { featuredProducts } = useProductData();
 
   const handleCategoryToggle = (category: string) => {
     const newCategory = selectedCategory === category ? null : category;
@@ -225,7 +226,7 @@ const ShopFilterSidebar: React.FC<ShopFilterSidebarProps> = ({
                   <span className="text-xs text-gray-500">Hot</span>
                 </div>
                 <div className="space-y-3">
-                  {getFeaturedProducts().slice(0, 3).map((product, index) => (
+                  {featuredProducts.slice(0, 3).map((product, index) => (
                     <motion.div
                       key={product.id}
                       initial={{ opacity: 0, x: -20 }}
