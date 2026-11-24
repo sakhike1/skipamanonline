@@ -1,11 +1,10 @@
-import { AnimatePresence, motion } from 'framer-motion';
-import { ArrowRight, BookOpen, Eye, Filter, Palette, Search, ShoppingBag, X } from 'lucide-react';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { motion, useReducedMotion } from 'framer-motion';
+import AnimatedHeading from '../components/ui/AnimatedHeading';
+import { ArrowRight, BookOpen, Filter, Palette, Search, X } from 'lucide-react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import FilterResultsFillerBanner from '../components/ui/FilterResultsFillerBanner';
-import HeroAmbientEffects from '../components/ui/HeroAmbientEffects';
 import Skeleton from '../components/ui/LoadingSkeleton';
-import SearchBar from '../components/ui/SearchBar';
 import { useHeader } from '../context/HeaderContext';
 import { useProductData } from '../context/ProductDataContext';
 import { getFeaturedProducts } from '../data/products';
@@ -14,143 +13,40 @@ import { Product } from '../types';
 const PRODUCTS_PER_PAGE = 12;
 
 interface ProductCardProps {
-  product: {
-    id: string;
-    name: string;
-    price: number;
-    images: string[];
-    category: string;
-    tags?: string[];
-  };
+  product: Product;
   onClick: (id: string) => void;
 }
 
-/** Product tile aligned with Lookbook: rounded-2xl white card, neutral-900 CTA (rounded-md). */
 const ProductCard: React.FC<ProductCardProps> = ({ product, onClick }) => {
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [isHovered, setIsHovered] = useState(false);
-
-  useEffect(() => {
-    if (isHovered || product.images.length <= 1) return;
-    const interval = setInterval(() => {
-      setCurrentImageIndex((prev) => (prev === product.images.length - 1 ? 0 : prev + 1));
-    }, 7000);
-    return () => clearInterval(interval);
-  }, [isHovered, product.images.length]);
-
-  useEffect(() => {
-    if (!isHovered || product.images.length <= 1) return;
-    const interval = setInterval(() => {
-      setCurrentImageIndex((prev) => (prev === product.images.length - 1 ? 0 : prev + 1));
-    }, 2500);
-    return () => clearInterval(interval);
-  }, [isHovered, product.images.length]);
-
-  const handleMouseEnter = useCallback(() => {
-    setIsHovered(true);
-    if (product.images.length > 1) {
-      setCurrentImageIndex((prev) => (prev === product.images.length - 1 ? 0 : prev + 1));
-    }
-  }, [product.images.length]);
-
-  const handleMouseLeave = useCallback(() => {
-    setIsHovered(false);
-  }, []);
-
-  const goProduct = useCallback(
-    (e?: React.MouseEvent) => {
-      e?.stopPropagation();
-      onClick(product.id);
-    },
-    [onClick, product.id]
-  );
-
-  const tagLine =
-    product.tags && product.tags.length > 0
-      ? product.tags
-          .slice(0, 3)
-          .map((t) => t.charAt(0).toUpperCase() + t.slice(1))
-          .join(' · ')
-      : null;
+  const [cover, alternate] = product.images ?? [];
 
   return (
-    <motion.article
-      initial={{ opacity: 0, y: 16 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="group flex h-full cursor-pointer flex-col"
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
-      onClick={() => onClick(product.id)}
-    >
-      <div className="flex h-full flex-col overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-md transition duration-300 hover:-translate-y-1 hover:border-neutral-300 hover:shadow-lg">
-        <div className="relative aspect-[4/5] w-full overflow-hidden bg-neutral-100">
-          {product.images.map((imageSrc, index) => (
-            <img
-              key={`${product.id}-view-${index}-${imageSrc.slice(-32)}`}
-              src={imageSrc}
-              alt={product.name}
-              className={`absolute inset-0 h-full w-full object-cover object-center transition-opacity duration-300 ease-out ${
-                index === currentImageIndex ? 'z-10 opacity-100' : 'z-0 opacity-0'
-              }`}
-            />
-          ))}
-          {product.images.length > 1 && (
-            <div className="absolute bottom-3 left-1/2 z-20 flex -translate-x-1/2 gap-1">
-              {product.images.map((_, imgIndex) => (
-                <span
-                  key={`${product.id}-dot-${imgIndex}`}
-                  className={`h-1.5 w-1.5 rounded-full transition-colors ${
-                    imgIndex === currentImageIndex
-                      ? 'bg-neutral-900'
-                      : 'bg-white/70 ring-1 ring-neutral-900/20'
-                  }`}
-                />
-              ))}
-            </div>
-          )}
-          <AnimatePresence>
-            {isHovered && (
-              <motion.button
-                type="button"
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.9 }}
-                transition={{ duration: 0.15 }}
-                onClick={goProduct}
-                className="absolute bottom-3 right-3 z-20 flex h-10 w-10 items-center justify-center rounded-md border border-neutral-200 bg-white text-neutral-900 shadow-sm transition hover:bg-neutral-50"
-                aria-label={`View ${product.name}`}
-              >
-                <Eye size={18} aria-hidden />
-              </motion.button>
-            )}
-          </AnimatePresence>
-        </div>
-
-        <div className="flex flex-1 flex-col border-t border-neutral-100 p-5">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-neutral-500">
-            {product.category}
-          </p>
-          <div className="mt-2 flex flex-wrap items-start justify-between gap-2">
-            <h3 className="min-w-0 flex-1 text-lg font-bold leading-snug tracking-tight text-neutral-950">
-              {product.name}
-            </h3>
-            <span className="shrink-0 text-base font-bold text-red-600 tabular-nums">
-              R{(product.price / 100).toFixed(2)}
-            </span>
-          </div>
-          {tagLine && <p className="mt-2 line-clamp-2 text-xs text-neutral-600">{tagLine}</p>}
+    <article className="group relative flex h-full min-w-0 flex-col rounded-2xl border border-[#e9e2e3] bg-white p-2 hover:border-[#bfaeb8] focus-within:border-[#bfaeb8] sm:p-3">
+      <div className="relative aspect-[4/5] overflow-hidden rounded-xl bg-[#f0eeed]">
+        {cover ? (
+          <img src={cover} alt={product.name} loading="lazy" className="h-full w-full object-cover" />
+        ) : (
+          <span className="grid h-full place-items-center p-2 text-center text-sm text-neutral-600">Photo unavailable</span>
+        )}
+        {alternate && (
+          <img src={alternate} alt="" loading="lazy" className="absolute inset-0 h-full w-full object-cover opacity-0 motion-safe:transition-opacity [@media(hover:hover)]:group-hover:opacity-100" />
+        )}
+      </div>
+      <div className="flex flex-1 flex-col px-1 pb-1 pt-3 sm:px-2">
+        <h3 className="text-base font-semibold leading-snug text-[#241d21]">{product.name}</h3>
+        <p className="mt-1 text-sm tabular-nums text-[#5b5256]">R{(product.price / 100).toFixed(2)}</p>
+        <div className="mt-auto pt-3">
           <button
             type="button"
-            onClick={goProduct}
-            className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-md bg-neutral-900 px-4 py-3 text-sm font-semibold text-white transition hover:bg-neutral-800"
+            aria-label={'View ' + product.name}
+            onClick={() => onClick(product.id)}
+            className="min-h-11 w-full rounded-full border border-[#dbcdd5] px-2 py-2 text-sm font-semibold text-[#382634] transition-colors after:absolute after:inset-0 after:rounded-2xl hover:border-[#382634] hover:bg-[#382634] hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
           >
-            <ShoppingBag size={16} aria-hidden />
             View product
-            <ArrowRight size={16} className="opacity-80" aria-hidden />
           </button>
         </div>
       </div>
-    </motion.article>
+    </article>
   );
 };
 
@@ -158,6 +54,7 @@ const NewArrivalsPage: React.FC = () => {
   const navigate = useNavigate();
   const { products, loading: productsLoading } = useProductData();
   const { setIsHeaderDark } = useHeader();
+  const reduceMotion = useReducedMotion();
   const [showFilters, setShowFilters] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 50000]);
@@ -247,10 +144,6 @@ const NewArrivalsPage: React.FC = () => {
   const showingStart = filteredProducts.length === 0 ? 0 : startIndex + 1;
   const showingEnd = Math.min(startIndex + PRODUCTS_PER_PAGE, filteredProducts.length);
 
-  const heroImageSrc = useMemo(
-    () => displayedProducts[0]?.images?.[0] ?? '/images/4.jpg',
-    [displayedProducts]
-  );
 
   const isFilterActive = useMemo(
     () =>
@@ -373,9 +266,9 @@ const NewArrivalsPage: React.FC = () => {
               type="button"
               onClick={() => typeof page === 'number' && handlePageChange(page)}
               disabled={page === '...'}
-              className={`min-w-[2.5rem] rounded-md px-3 py-2 text-sm font-semibold transition ${
+              className={`min-w-[2.5rem] rounded-full px-3 py-2 text-sm font-semibold transition ${
                 page === currentPage
-                  ? 'bg-neutral-900 text-white shadow-md'
+                  ? 'bg-[#382634] text-white'
                   : page === '...'
                     ? 'cursor-default border border-transparent text-neutral-400'
                     : 'border border-neutral-200 bg-neutral-100 text-neutral-800 hover:bg-neutral-200'
@@ -399,134 +292,100 @@ const NewArrivalsPage: React.FC = () => {
 
   return (
     <div>
-      {/* Hero */}
-      <div className="relative overflow-hidden bg-black pb-20 pt-28 text-white md:pb-24 md:pt-32 lg:pb-28 lg:pt-36">
-        <HeroAmbientEffects />
-        <div
-          className="pointer-events-none absolute inset-x-0 top-0 z-[1] h-px bg-white/10"
-          aria-hidden
-        />
-
-        <div className="relative z-10 mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="grid items-center gap-10 md:grid-cols-[minmax(0,1fr)_minmax(0,1.12fr)] md:gap-12 lg:gap-16">
-            <motion.div
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
-              className="order-2 md:order-1"
-            >
-              <div className="inline-flex items-center gap-2.5">
-                <span
-                  className="h-1.5 w-1.5 shrink-0 rounded-full bg-white shadow-[0_0_10px_rgba(255,255,255,0.65)] animate-pulse"
-                  aria-hidden
-                />
-                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-neutral-500">
-                  New this season
-                </p>
-              </div>
-              <h1 className="mt-3 text-4xl font-black leading-[1.05] tracking-tight text-white sm:text-5xl lg:text-[3.25rem]">
-                New arrivals
-              </h1>
-              <p className="mt-4 max-w-md text-base leading-relaxed text-neutral-400 md:text-lg">
-                Fresh Skipaman drops—tees, graphics, and layers added to the store. Scroll to shop
-                the full list or jump to the main store.
-              </p>
-              <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
-                <button
-                  type="button"
-                  onClick={() => navigate('/shop')}
-                  className="inline-flex items-center justify-center gap-2 rounded-full bg-white px-7 py-3.5 text-sm font-semibold text-neutral-950 transition hover:bg-neutral-100"
-                >
-                  <ShoppingBag size={18} aria-hidden />
-                  Shop store
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    const el = document.getElementById('products-section');
-                    el?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                  }}
-                  className="inline-flex items-center justify-center gap-2 rounded-full border border-white/25 px-7 py-3.5 text-sm font-semibold text-white transition hover:border-white/50 hover:bg-white/5"
-                >
-                  View this page
-                  <ArrowRight size={18} aria-hidden />
-                </button>
-              </div>
-              <p className="mt-6 text-xs text-neutral-500">
-                {filteredProducts.length > 0
-                  ? `${filteredProducts.length} piece${filteredProducts.length === 1 ? '' : 's'} in this list`
-                  : 'Loading the latest…'}
-              </p>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.06, ease: [0.16, 1, 0.3, 1] }}
-              className="order-1 md:order-2"
-            >
-              <div className="aspect-[3/5] w-full overflow-hidden rounded-2xl border border-white/10 bg-neutral-950 shadow-none md:aspect-auto md:h-[min(76vh,44rem)]">
-                <img
-                  src={heroImageSrc}
-                  alt="Latest Skipaman arrival"
-                  className="h-full w-full object-cover object-center"
-                  loading="eager"
-                />
-              </div>
-            </motion.div>
-          </div>
-        </div>
-      </div>
-
-      <div
-        id="products-section"
-        className="min-h-screen scroll-mt-24 border-t border-neutral-200 bg-neutral-50 text-neutral-900"
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap');
+        .na-hero{font-family:'Poppins','Inter',system-ui,sans-serif}
+        @keyframes na-drift{0%,100%{transform:translateX(-50%) rotate(-2deg)}50%{transform:translateX(-50%) rotate(2deg)}}
+        .na-ring{animation:na-drift 14s ease-in-out infinite}
+        @media (prefers-reduced-motion:reduce){.na-ring{animation:none}}
+      `}</style>
+      <section
+        aria-labelledby="new-arrivals-hero-title"
+        className="na-hero relative isolate flex flex-col items-center justify-center overflow-hidden bg-[#05030f] px-4 pb-10 pt-28 text-white sm:px-6 md:min-h-[min(100svh,56rem)] md:pb-12 md:pt-28"
       >
-        <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 md:py-12 lg:px-8">
-          <div className="mb-8 flex flex-col gap-6 border-b border-neutral-200 pb-8 lg:flex-row lg:items-end lg:justify-between">
-            <div className="min-w-0 flex-1">
-              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-neutral-500">
-                Browse
-              </p>
-              <h2 className="mt-2 text-3xl font-black tracking-tight text-neutral-950 md:text-4xl">
+        {/* glowing orbit rings */}
+        <div aria-hidden className="pointer-events-none absolute inset-0 -z-10">
+          <div
+            className="na-ring absolute left-1/2 top-[-22%] h-[78%] w-[118%] rounded-[50%] border border-[#b9a8ff]/50"
+            style={{
+              background: 'radial-gradient(closest-side, #05030f 62%, rgba(70,48,200,0.35) 100%)',
+              boxShadow: '0 0 90px 18px rgba(104,74,255,0.55), inset 0 0 110px 16px rgba(122,96,255,0.55)',
+            }}
+          />
+          <div
+            className="na-ring absolute left-1/2 top-[-34%] h-[96%] w-[150%] rounded-[50%] border border-[#7a63ff]/25"
+            style={{ boxShadow: '0 0 120px 10px rgba(70,50,210,0.35)', animationDelay: '-6s' }}
+          />
+          <div
+            className="absolute inset-0 opacity-70"
+            style={{
+              backgroundImage:
+                'radial-gradient(1px 1px at 12% 22%, #fff 50%, transparent 51%), radial-gradient(1px 1px at 28% 8%, #cfc6ff 50%, transparent 51%), radial-gradient(1.5px 1.5px at 8% 48%, #fff 50%, transparent 51%), radial-gradient(1px 1px at 20% 64%, #cfc6ff 50%, transparent 51%), radial-gradient(1px 1px at 88% 30%, #fff 50%, transparent 51%), radial-gradient(1.5px 1.5px at 94% 58%, #cfc6ff 50%, transparent 51%), radial-gradient(1px 1px at 76% 12%, #fff 50%, transparent 51%)',
+            }}
+          />
+          <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-[#05030f] to-transparent" />
+        </div>
+
+        <div className="mx-auto flex w-full max-w-5xl flex-col items-center text-center">
+          <AnimatedHeading
+            id="new-arrivals-hero-title"
+            variant="drop"
+            className="text-[clamp(3rem,9.5vw,8rem)] leading-[0.98] tracking-[-0.045em]"
+            lines={[
+              { text: 'New arrivals,', className: 'font-semibold' },
+              {
+                text: 'shop the latest drops',
+                className: 'font-light',
+                wordClassName: 'bg-gradient-to-r from-[#c9bcff] via-[#f2ceff] to-[#ffd4c4] bg-clip-text text-transparent',
+              },
+            ]}
+          />
+          <motion.p
+            initial={reduceMotion ? false : { opacity: 0, y: -14 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.95, ease: [0.22, 1, 0.36, 1] }}
+            className="mt-7 max-w-[32rem] text-pretty text-base leading-[1.6] text-white/70 sm:text-lg"
+          >
+            New Skipaman tees, hoodies and long sleeves, added this season. Choose your size and colour, order online, and have it delivered to your door.
+          </motion.p>
+        </div>
+      </section>
+
+      <section
+        id="products-section"
+        aria-labelledby="latest-collection-heading"
+        className="min-h-screen scroll-mt-24 bg-[#fbfaf7] text-[#241d21]"
+      >
+        <div className="mx-auto max-w-7xl px-4 pb-12 pt-4 sm:px-6 md:pb-16 md:pt-6 lg:px-8">
+          <header className="mb-6 flex flex-wrap items-end justify-between gap-4 border-t border-[#e9e2e3] pt-7 md:mb-8 md:pt-9">
+            <div>
+              <h2 id="latest-collection-heading" className="font-serif text-[clamp(2.5rem,5.2vw,4.5rem)] leading-none tracking-[-0.045em]">
                 Latest collection
               </h2>
-              <p className="mt-2 text-sm text-neutral-600 md:text-base">
-                Showing {showingStart}–{showingEnd} of {filteredProducts.length} product
-                {filteredProducts.length !== 1 ? 's' : ''}
-                {totalFilteredPages > 1 ? ` · Page ${currentPage} of ${totalFilteredPages}` : ''}
+              <p role="status" className="mt-2 text-sm tabular-nums text-[#5b5256]">
+                Showing {showingStart}–{showingEnd} of {filteredProducts.length} {filteredProducts.length === 1 ? 'product' : 'products'}
               </p>
-              {searchQuery && (
-                <p className="mt-2 text-sm text-neutral-600">Results for "{searchQuery}"</p>
-              )}
             </div>
-            <div className="flex w-full flex-col gap-3 sm:flex-row sm:items-center sm:justify-end lg:max-w-xl">
-              <SearchBar
-                onSearch={handleSearch}
-                placeholder="Search products or categories…"
-                className="w-full sm:min-w-[280px]"
-              />
-              <div className="sm:hidden">
-                <button
-                  type="button"
-                  onClick={toggleFilters}
-                  className="inline-flex w-full items-center justify-center gap-2 rounded-md border border-neutral-300 bg-white px-4 py-2.5 text-sm font-semibold text-neutral-900 transition hover:bg-neutral-50"
-                >
-                  {showFilters ? (
-                    <>
-                      <X size={16} aria-hidden />
-                      Close filters
-                    </>
-                  ) : (
-                    <>
-                      <Filter size={16} aria-hidden />
-                      Filters
-                    </>
-                  )}
-                </button>
-              </div>
+            <div className="flex w-full min-w-0 flex-wrap items-center gap-2 md:w-auto">
+              <label className="flex min-h-11 min-w-0 flex-[1_1_12rem] items-center gap-2 rounded-full border border-[#e0d5dc] bg-white px-4 focus-within:ring-2 focus-within:ring-[#76576d] md:w-72">
+                <Search size={17} aria-hidden className="shrink-0 text-[#675560]" />
+                <span className="sr-only">Search the latest collection</span>
+                <input
+                  type="search"
+                  value={searchQuery}
+                  onChange={(event) => handleSearch(event.target.value)}
+                  placeholder="Search products"
+                  className="w-full min-w-0 bg-transparent text-base outline-none"
+                />
+              </label>
+              <button type="button" aria-expanded={showFilters} onClick={toggleFilters}
+                className="inline-flex min-h-11 items-center gap-2 rounded-full border border-[#dbcdd5] px-4 text-sm font-semibold text-[#382634] hover:bg-[#f4edf1] md:hidden"
+              >
+                {showFilters ? <X size={16} aria-hidden /> : <Filter size={16} aria-hidden />}
+                {showFilters ? 'Hide filters' : 'Filters'}
+              </button>
             </div>
-          </div>
+          </header>
 
           {/*
             KEY CHANGE: When there are no results, switch to a single-column stacked layout
@@ -534,18 +393,18 @@ const NewArrivalsPage: React.FC = () => {
             When results exist, keep the original side-by-side layout.
           */}
           <div
-            className={`flex gap-10 ${hasNoResults ? 'flex-col' : 'flex-col md:flex-row md:items-stretch'}`}
+            className={`flex gap-5 lg:gap-8 ${hasNoResults ? 'flex-col' : 'flex-col md:flex-row md:items-stretch'}`}
           >
             {/* Sidebar filters */}
             {(!isMobile || showFilters) && (
               <aside
-                className={`flex flex-col rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm
+                className={`flex flex-col rounded-2xl border border-neutral-200 bg-white p-5
                   ${
                     hasNoResults
                       ? // No results: full width, no self-stretch, no fixed md width
                         'w-full self-auto'
                       : // Normal: order-2 on mobile, fixed width column on desktop
-                        'order-2 self-stretch md:order-1 md:mb-0 md:w-72 md:shrink-0'
+                        'self-start md:w-56 md:shrink-0 md:self-stretch lg:w-64'
                   }
                 `}
               >
@@ -573,9 +432,9 @@ const NewArrivalsPage: React.FC = () => {
                       setSelectedCategory(null);
                       setCurrentPage(1);
                     }}
-                    className={`rounded-md px-3 py-2 text-sm font-semibold transition ${
+                    className={`rounded-full px-3 py-2 text-sm font-semibold transition ${
                       selectedCategory === null
-                        ? 'bg-neutral-900 text-white shadow-md'
+                        ? 'bg-[#382634] text-white'
                         : 'bg-neutral-100 text-neutral-700 hover:bg-neutral-200'
                     }`}
                   >
@@ -584,14 +443,15 @@ const NewArrivalsPage: React.FC = () => {
                   {categories.map((category) => (
                     <button
                       key={category}
+                      aria-pressed={selectedCategory === category}
                       type="button"
                       onClick={() => {
                         setSelectedCategory(selectedCategory === category ? null : category);
                         setCurrentPage(1);
                       }}
-                      className={`rounded-md px-3 py-2 text-sm font-semibold capitalize transition ${
+                      className={`rounded-full px-3 py-2 text-sm font-semibold capitalize transition ${
                         selectedCategory === category
-                          ? 'bg-neutral-900 text-white shadow-md'
+                          ? 'bg-[#382634] text-white'
                           : 'bg-neutral-100 text-neutral-700 hover:bg-neutral-200'
                       }`}
                     >
@@ -601,14 +461,13 @@ const NewArrivalsPage: React.FC = () => {
                 </div>
 
                 <div className={`mt-6 ${hasNoResults ? 'max-w-sm' : ''}`}>
-                  <p className="text-xs font-semibold uppercase tracking-wide text-neutral-500">
-                    Price cap
-                  </p>
+                  <label htmlFor="new-arrivals-price-cap" className="text-sm font-semibold text-[#382634]">Price cap</label>
                   <div className="mt-2 flex justify-between text-xs text-neutral-600">
                     <span>R{(priceRange[0] / 100).toFixed(0)}</span>
                     <span>R{(priceRange[1] / 100).toFixed(0)}</span>
                   </div>
                   <input
+                    id="new-arrivals-price-cap"
                     type="range"
                     min={0}
                     max={50000}
@@ -657,40 +516,21 @@ const NewArrivalsPage: React.FC = () => {
                       </Link>
                     </nav>
 
-                    <p className="mt-5 text-[11px] leading-relaxed text-neutral-500">
-                      Combine search with a category to narrow results. New pieces appear here as
-                      soon as they&apos;re live in the store.
-                    </p>
-
-                    <div className="relative mt-5 min-h-[11rem] flex-1 basis-0 overflow-hidden rounded-xl border border-neutral-200 bg-neutral-950 md:min-h-[13rem]">
+                    {/* Fills the empty space under the filters */}
+                    <div className="relative mt-5 hidden min-h-[12rem] flex-1 overflow-hidden rounded-xl bg-neutral-900 md:block">
                       <video
-                        autoPlay
+                        autoPlay={!window.matchMedia('(prefers-reduced-motion: reduce)').matches}
                         muted
                         loop
                         playsInline
-                        preload="auto"
+                        aria-hidden
+                        tabIndex={-1}
                         poster="/images/background1.jpg"
                         className="absolute inset-0 h-full w-full object-cover"
-                        aria-label="Skipaman collection preview"
-                        onLoadedData={(e) => {
-                          void e.currentTarget.play().catch(() => {});
-                        }}
                       >
                         <source src="/images/background.mp4" type="video/mp4" />
                       </video>
-                    </div>
-
-                    <div className="mt-4 flex shrink-0 flex-col gap-2">
-                      <div className="rounded-md border border-neutral-100 bg-neutral-50 px-3 py-2.5 text-[11px] leading-snug text-neutral-600">
-                        <p className="font-semibold text-neutral-800">Checkout</p>
-                        <p className="mt-0.5">Secure payment · Standard delivery nationwide</p>
-                      </div>
-                      <div className="rounded-md border border-neutral-100 bg-neutral-50 px-3 py-2.5 text-[11px] leading-snug text-neutral-600">
-                        <p className="font-semibold text-neutral-800">Returns</p>
-                        <p className="mt-0.5">
-                          Unworn items in original packaging—see our policy on the product page.
-                        </p>
-                      </div>
+                      <div aria-hidden className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
                     </div>
                   </div>
                 )}
@@ -711,7 +551,7 @@ const NewArrivalsPage: React.FC = () => {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -20 }}
                     transition={{ duration: 0.3 }}
-                    className="grid shrink-0 grid-cols-1 gap-8 sm:grid-cols-2 sm:gap-8 lg:grid-cols-3 lg:gap-10"
+                    className="grid shrink-0 gap-3 min-[360px]:grid-cols-2 md:gap-4 xl:grid-cols-3 xl:gap-6"
                   >
                     {paginatedProducts.map((product) => (
                       <ProductCard
@@ -782,7 +622,7 @@ const NewArrivalsPage: React.FC = () => {
             </section>
           </div>
         </div>
-      </div>
+      </section>
     </div>
   );
 };

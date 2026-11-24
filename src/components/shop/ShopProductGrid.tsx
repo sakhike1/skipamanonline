@@ -13,7 +13,7 @@ const ShopProductGrid: React.FC<ShopProductGridProps> = ({
   onProductClick
 }) => {
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-x-4 gap-y-10 sm:gap-x-6 lg:gap-x-8 lg:gap-y-12">
       {products.map((product, index) => (
         <motion.div
           key={product.id}
@@ -24,7 +24,7 @@ const ShopProductGrid: React.FC<ShopProductGridProps> = ({
             delay: index * 0.03,
             ease: [0.16, 1, 0.3, 1]
           }}
-          whileHover={{ y: -8 }}
+          whileHover={{ y: -4 }}
           className="h-full"
         >
           <ShopProductCard product={product} onClick={onProductClick} />

@@ -1,16 +1,6 @@
 import React, { createContext, useCallback, useEffect, useMemo, useState } from 'react';
-import type { User as SupabaseAuthUser } from '@supabase/supabase-js';
 import type { User as AppUser, LoginCredentials, RegisterCredentials } from '../types';
-import { supabase } from '../lib/supabase';
-
-type ProfileRow = {
-  id: string;
-  role: string;
-  full_name: string | null;
-  phone: string | null;
-  avatar_url: string | null;
-  created_at: string;
-};
+import { ApiError, refreshSession, setAccessToken, skip } from '../lib/skipApi';
 
 export type LoginOptions = {
   /** When true (staff portal at `/admin/login`), non-admin accounts are signed out immediately and login fails. */
@@ -31,148 +21,40 @@ type AuthContextValue = {
 
 export const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
-function mapDbRoleToAppRole(dbRole: string): AppUser['role'] {
-  if (dbRole === 'store_manager' || dbRole === 'admin') return 'admin';
-  return 'buyer';
-}
+type BackendUser = { id: string; email: string; name: string; phone?: string | null; role: 'CUSTOMER' | 'ADMIN' };
 
-const isRetryableAuthFetchError = (e: unknown) => {
-  const err = e as { name?: unknown; status?: unknown; message?: unknown } | null;
-  const name = typeof err?.name === 'string' ? err.name : '';
-  const status = typeof err?.status === 'number' ? err.status : undefined;
-  const message = typeof err?.message === 'string' ? err.message : '';
-  const msg = message.toLowerCase();
-
-  return (
-    name === 'AuthRetryableFetchError' ||
-    name === 'AbortError' ||
-    status === 504 ||
-    msg.includes('gateway timeout') ||
-    msg.includes('failed to fetch') ||
-    msg.includes('request timed out') ||
-    msg.includes('timed out') ||
-    msg.includes('aborted')
-  );
-};
-
-const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
-
-/** Prevents hung network calls from leaving the UI stuck on “Signing in…”. */
-async function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise<T> {
-  let timer: ReturnType<typeof setTimeout> | undefined;
-  const timeout = new Promise<never>((_, reject) => {
-    timer = setTimeout(() => reject(new Error(`${label} timed out after ${Math.round(ms / 1000)}s`)), ms);
-  });
-  try {
-    return await Promise.race([promise, timeout]);
-  } finally {
-    if (timer !== undefined) clearTimeout(timer);
-  }
-}
-
-const PROFILE_FETCH_MS = 12_000;
-const SIGN_IN_MS = 55_000;
-
-/** Map Supabase AuthApiError / network errors to a single UI string (avoid “timeout” for 422/400). */
-function mapAuthFailureToUserMessage(e: unknown, context: 'login' | 'register'): string {
-  if (e instanceof Error && e.message === 'Request timed out') {
-    return context === 'login'
-      ? 'Sign in is taking too long. Please try again.'
-      : 'Signup is taking too long. Please try again.';
-  }
-
-  const status =
-    typeof (e as { status?: unknown })?.status === 'number'
-      ? (e as { status: number }).status
-      : undefined;
-  const raw = e instanceof Error ? e.message : String(e ?? '');
-  const lower = raw.toLowerCase();
-  const name = typeof (e as { name?: unknown })?.name === 'string' ? (e as { name: string }).name : '';
-
-  if (name === 'AbortError' || lower.includes('aborted')) {
-    return 'The connection timed out. Check your network and try again.';
-  }
-
-  // Explicit credential / validation responses from Supabase (not “network down”).
-  if (
-    status === 400 ||
-    status === 401 ||
-    status === 422 ||
-    lower.includes('invalid login credentials') ||
-    lower.includes('invalid credentials')
-  ) {
-    if (lower.includes('invalid login') || lower.includes('invalid credentials')) {
-      return 'Wrong email or password. Please try again.';
-    }
-    if (lower.includes('user already registered') || lower.includes('already registered')) {
-      return 'This email is already registered. Please sign in instead.';
-    }
-    if (lower.includes('email not confirmed') || lower.includes('not confirmed')) {
-      return 'Please confirm your email address, then sign in.';
-    }
-    // Signup 400: weak password, invalid email, etc. — surface Supabase message when helpful
-    if (raw && raw !== 'Request timed out') {
-      return raw;
-    }
-    return context === 'login' ? 'Login failed.' : 'Registration failed. Check email and password.';
-  }
-
-  if (isRetryableAuthFetchError(e)) {
-    return context === 'login'
-      ? 'Sign in timed out. Please try again.'
-      : 'Signup timed out. Please try again in a moment.';
-  }
-
-  if (raw) return raw;
-  return context === 'login' ? 'Login failed.' : 'Registration failed.';
-}
-
-function toAppUser(supabaseUser: SupabaseAuthUser, profile: ProfileRow | null): AppUser {
-  const meta = (supabaseUser.user_metadata ?? {}) as Record<string, unknown>;
-  const metaFull =
-    (meta.full_name as string | undefined) ||
-    `${(meta.firstName as string) || ''} ${(meta.lastName as string) || ''}`.trim();
-  const fullName = profile?.full_name?.trim() || metaFull || '';
-  const parts = fullName.split(/\s+/).filter(Boolean);
-  const firstName =
-    ((meta.firstName ?? meta.first_name) as string | undefined) || parts[0] || '';
-  const lastName =
-    ((meta.lastName ?? meta.last_name) as string | undefined) || parts.slice(1).join(' ') || '';
-
-  const dbRole = profile?.role ?? 'customer';
-
+function toAppUser(u: BackendUser): AppUser {
+  const parts = (u.name || '').trim().split(/\s+/).filter(Boolean);
+  const now = new Date().toISOString();
   return {
-    id: String(supabaseUser.id ?? ''),
-    email: String(supabaseUser.email ?? ''),
-    firstName,
-    lastName,
-    role: mapDbRoleToAppRole(dbRole),
-    phone: profile?.phone ?? (meta.phone as string | undefined),
-    avatarUrl: profile?.avatar_url ?? undefined,
-    createdAt: String(supabaseUser?.created_at ?? new Date().toISOString()),
-    updatedAt: String(
-      supabaseUser?.updated_at ?? profile?.created_at ?? supabaseUser?.created_at ?? new Date().toISOString(),
-    ),
+    id: u.id,
+    email: u.email,
+    firstName: parts[0] ?? '',
+    lastName: parts.slice(1).join(' '),
+    role: u.role === 'ADMIN' ? 'admin' : 'buyer',
+    phone: u.phone ?? undefined,
+    createdAt: now,
+    updatedAt: now,
   };
 }
 
-async function fetchProfile(userId: string): Promise<ProfileRow | null> {
-  if (!supabase) return null;
-  try {
-    const { data, error } = await withTimeout(
-      supabase.from('profiles').select('*').eq('id', userId).maybeSingle(),
-      PROFILE_FETCH_MS,
-      'Profile fetch',
-    );
-    if (error) {
-      console.warn('[auth] profiles:', error.message);
-      return null;
+function friendlyMessage(e: unknown, context: 'login' | 'register'): string {
+  if (e instanceof ApiError) {
+    if (e.status === 0) return e.message;
+    if (e.status === 401) return 'Wrong email or password. Please try again.';
+    if (e.status === 409) return 'This email is already registered. Please sign in instead.';
+    if (e.status === 429) return 'Too many attempts. Please wait a minute and try again.';
+    if (e.status === 400) {
+      // zod validation: surface the first problem in plain words
+      const fe = (e.body as { details?: { fieldErrors?: Record<string, string[]> } } | undefined)?.details?.fieldErrors ?? {};
+      if (fe.password) return 'Password must be at least 8 characters.';
+      if (fe.email) return 'Please enter a valid email address.';
+      if (fe.name) return 'Please enter your name.';
+      return e.message;
     }
-    return data as ProfileRow | null;
-  } catch (e) {
-    console.warn('[auth] profiles fetch failed or timed out:', e instanceof Error ? e.message : e);
-    return null;
+    return e.message;
   }
+  return e instanceof Error && e.message ? e.message : context === 'login' ? 'Login failed.' : 'Registration failed.';
 }
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -181,60 +63,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const hydrateUser = useCallback(async (sessionUser: SupabaseAuthUser | null): Promise<AppUser | null> => {
-    if (!sessionUser?.id) {
-      setUser(null);
-      return null;
-    }
-    const profile = await fetchProfile(sessionUser.id);
-    const appUser = toAppUser(sessionUser, profile);
-    setUser(appUser);
-    return appUser;
-  }, []);
-
+  // On page load the access token is gone, but the refresh cookie may still be valid.
   useEffect(() => {
     let mounted = true;
-
-    const init = async () => {
+    (async () => {
       try {
-        if (!supabase) {
-          if (!mounted) return;
-          setUser(null);
-          setIsLoading(false);
-          return;
+        if (await refreshSession()) {
+          const me = await skip.get<BackendUser>('/auth/me');
+          if (mounted) setUser(toAppUser(me));
         }
-
-        const { data } = await supabase.auth.getSession();
-        if (!mounted) return;
-
-        const sessionUser = data.session?.user ?? null;
-        if (sessionUser) await hydrateUser(sessionUser);
-        else setUser(null);
       } catch {
-        if (!mounted) return;
-        setUser(null);
+        if (mounted) setUser(null);
       } finally {
-        if (mounted) {
-          setIsLoading(false);
-        }
+        if (mounted) setIsLoading(false);
       }
-    };
-
-    void init();
-
-    if (!supabase) return () => {};
-
-    const { data: sub } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      if (session?.user) await hydrateUser(session.user);
-      else setUser(null);
-      setIsLoading(false);
-    });
-
+    })();
     return () => {
       mounted = false;
-      sub.subscription.unsubscribe();
     };
-  }, [hydrateUser]);
+  }, []);
 
   const clearError = useCallback(() => setError(null), []);
 
@@ -242,133 +89,64 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setError(null);
     setIsSubmitting(true);
     try {
-      if (!supabase) throw new Error('Supabase is not configured. Check VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY (anon public).');
-
-      let lastErr: unknown = null;
-      for (const delayMs of [0, 600, 1500]) {
-        if (delayMs) await sleep(delayMs);
-
-        const { error: signInError } = await withTimeout(
-          supabase.auth.signInWithPassword({
-            email: credentials.email,
-            password: credentials.password,
-          }),
-          SIGN_IN_MS,
-          'Sign in',
-        );
-
-        if (!signInError) {
-          lastErr = null;
-          break;
-        }
-
-        lastErr = signInError;
-        if (!isRetryableAuthFetchError(signInError)) break;
+      const r = await skip.post<{ accessToken: string }>('/auth/login', credentials, false);
+      setAccessToken(r.accessToken);
+      const appUser = toAppUser(await skip.get<BackendUser>('/auth/me'));
+      if (options?.adminPortal && appUser.role !== 'admin') {
+        await skip.post('/auth/logout', {}, false).catch(() => undefined);
+        setAccessToken(null);
+        setUser(null);
+        const msg = 'Only admin accounts can sign in here.';
+        setError(msg);
+        throw new Error(msg);
       }
-
-      if (lastErr) throw lastErr;
-
-      const { data: sessionData } = await supabase.auth.getSession();
-      const sessionUser = sessionData.session?.user;
-      if (sessionUser) {
-        const appUser = await hydrateUser(sessionUser);
-        if (options?.adminPortal && appUser && appUser.role !== 'admin') {
-          await supabase.auth.signOut();
-          setUser(null);
-          const msg = 'Only admin accounts can sign in here.';
-          setError(msg);
-          throw new Error(msg);
-        }
-        return appUser;
-      }
-      return null;
+      setUser(appUser);
+      return appUser;
     } catch (e) {
-      setError(mapAuthFailureToUserMessage(e, 'login'));
+      setError(e instanceof Error && e.message === 'Only admin accounts can sign in here.' ? e.message : friendlyMessage(e, 'login'));
       throw e;
     } finally {
       setIsSubmitting(false);
     }
-  }, [hydrateUser]);
+  }, []);
 
   const register = useCallback(async (credentials: RegisterCredentials) => {
     setError(null);
     setIsSubmitting(true);
     try {
-      if (!supabase) throw new Error('Supabase is not configured. Check VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY (anon public).');
-      const fullName = `${credentials.firstName} ${credentials.lastName}`.trim();
-
-      // Supabase can sometimes return transient 504s; retry a couple times with backoff.
-      let lastErr: unknown = null;
-      let didCreateSession = false;
-      for (const delayMs of [0, 800, 2000]) {
-        if (delayMs) await sleep(delayMs);
-
-        const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+      const r = await skip.post<{ accessToken: string }>(
+        '/auth/register',
+        {
           email: credentials.email,
           password: credentials.password,
-          options: {
-            data: {
-              full_name: fullName,
-              firstName: credentials.firstName,
-              lastName: credentials.lastName,
-            },
-          },
-        });
-
-        if (!signUpError) {
-          lastErr = null;
-          didCreateSession = !!signUpData?.session?.user;
-          if (signUpData?.session?.user) {
-            await hydrateUser(signUpData.session.user);
-          }
-          break;
-        }
-
-        lastErr = signUpError;
-        if (!isRetryableAuthFetchError(signUpError)) break;
-      }
-
-      if (lastErr) throw lastErr;
-      // If email confirmations are enabled, signup may succeed without a session.
-      // In that case we keep the user logged out and let the UI redirect to login.
-      void didCreateSession;
+          name: `${credentials.firstName} ${credentials.lastName}`.trim(),
+        },
+        false,
+      );
+      setAccessToken(r.accessToken);
+      setUser(toAppUser(await skip.get<BackendUser>('/auth/me')));
     } catch (e) {
-      const msg = mapAuthFailureToUserMessage(e, 'register');
-      setError(msg);
+      setError(friendlyMessage(e, 'register'));
       throw e;
     } finally {
       setIsSubmitting(false);
     }
-  }, [hydrateUser]);
+  }, []);
 
   const logout = useCallback(async () => {
     setError(null);
     setIsSubmitting(true);
     try {
-      // Optimistic UI update: immediately clear local user state.
-      // We still attempt a Supabase signOut to invalidate the session.
-      setUser(null);
-
-      if (supabase) {
-        await supabase.auth.signOut();
-      }
+      setUser(null); // optimistic
+      await skip.post('/auth/logout', {}, false).catch(() => undefined);
+      setAccessToken(null);
     } finally {
       setIsSubmitting(false);
     }
   }, []);
 
   const value = useMemo<AuthContextValue>(
-    () => ({
-      user,
-      isAuthenticated: !!user,
-      isLoading,
-      isSubmitting,
-      error,
-      login,
-      register,
-      logout,
-      clearError,
-    }),
+    () => ({ user, isAuthenticated: !!user, isLoading, isSubmitting, error, login, register, logout, clearError }),
     [user, isLoading, isSubmitting, error, login, register, logout, clearError],
   );
 

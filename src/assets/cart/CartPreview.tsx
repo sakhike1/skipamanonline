@@ -1,7 +1,7 @@
 import React, { useRef, useEffect } from 'react';
 import { X, ShoppingBag, ArrowRight } from 'lucide-react';
 import { useCart } from '../../context/CartContext';
-import { getProductById } from '../../data/products';
+import { useProductData } from '../../context/ProductDataContext';
 import { Button } from '../../components/ui/Button';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -10,6 +10,7 @@ interface CartPreviewProps {
 }
 
 const CartPreview: React.FC<CartPreviewProps> = ({ onClose }) => {
+  const { getProductById } = useProductData();
   const { cart, removeFromCart, updateQuantity } = useCart();
   const cartPanelRef = useRef<HTMLDivElement>(null);
   

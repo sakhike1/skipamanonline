@@ -4,7 +4,7 @@ import { Search, TrendingUp, Sparkles, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSearchUI } from './hooks/useSearchUI';
 import { Product } from '../../../types';
-import { searchProducts } from '../../../data/products';
+import { useProductData } from '../../../context/ProductDataContext';
 
 interface HeaderSearchProps {
   isAuthenticated: boolean;
@@ -35,6 +35,7 @@ export const HeaderSearch: React.FC<HeaderSearchProps> = ({
     handleMouseMove,
     handleMouseLeave
   } = useSearchUI();
+  const { searchProducts } = useProductData();
   
   const [searchSuggestions, setSearchSuggestions] = useState<Product[]>([]);
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -47,7 +48,7 @@ export const HeaderSearch: React.FC<HeaderSearchProps> = ({
     
     // Get search results and limit to 5
     return searchProducts(searchQuery.trim()).slice(0, 5);
-  }, [searchQuery, hotProducts]);
+  }, [searchQuery, hotProducts, searchProducts]);
   
   // Update suggestions with debouncing
   useEffect(() => {

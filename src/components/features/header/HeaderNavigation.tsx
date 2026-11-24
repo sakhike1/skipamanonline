@@ -61,14 +61,15 @@ export const HeaderNavigation: React.FC<HeaderNavigationProps> = ({
               className={`
                 font-medium text-[10px] xl:text-xs 2xl:text-sm tracking-tight ${textColor} whitespace-nowrap
                 relative group [text-shadow:0px_0px_1px_rgba(255,255,255,0.5)]
-                hover:text-white transition-colors duration-300 block px-1
+                hover:text-[color:var(--vibe-accent,#f2ceff)] hover:-translate-y-0.5 motion-reduce:hover:translate-y-0
+                transition-[color,transform] duration-300 block px-1
               `}
               aria-label={item.ariaLabel}
               aria-current={location.pathname === item.path ? 'page' : undefined}
             >
               {item.name}
               <span 
-                className={`absolute left-0 -bottom-1 h-0.5 bg-white
+                className={`absolute left-0 -bottom-1 h-0.5 rounded-full bg-[color:var(--vibe-accent,#f2ceff)]
                 ${location.pathname === item.path ? 'w-full' : 'w-0 group-hover:w-full'} transition-all duration-300`}
               />
             </PrefetchLink>
@@ -92,14 +93,15 @@ export const HeaderNavigation: React.FC<HeaderNavigationProps> = ({
               className={`
                 font-medium text-[10px] xl:text-xs 2xl:text-sm tracking-tight ${textColor} whitespace-nowrap
                 relative group [text-shadow:0px_0px_1px_rgba(255,255,255,0.5)]
-                hover:text-white transition-colors duration-300 block px-1
+                hover:text-[color:var(--vibe-accent,#f2ceff)] hover:-translate-y-0.5 motion-reduce:hover:translate-y-0
+                transition-[color,transform] duration-300 block px-1
               `}
               aria-label="View my orders"
               aria-current={location.pathname === '/orders' ? 'page' : undefined}
             >
               Orders
               <span 
-                className={`absolute left-0 -bottom-1 h-0.5 bg-white
+                className={`absolute left-0 -bottom-1 h-0.5 rounded-full bg-[color:var(--vibe-accent,#f2ceff)]
                 ${location.pathname === '/orders' ? 'w-full' : 'w-0 group-hover:w-full'} transition-all duration-300`}
               />
             </Link>
@@ -117,14 +119,15 @@ export const HeaderNavigation: React.FC<HeaderNavigationProps> = ({
               className={`
                 font-medium text-[10px] xl:text-xs 2xl:text-sm tracking-tight ${textColor} whitespace-nowrap
                 relative group [text-shadow:0px_0px_1px_rgba(255,255,255,0.5)]
-                hover:text-white transition-colors duration-300 block px-1
+                hover:text-[color:var(--vibe-accent,#f2ceff)] hover:-translate-y-0.5 motion-reduce:hover:translate-y-0
+                transition-[color,transform] duration-300 block px-1
               `}
               aria-label="View my wishlist"
               aria-current={location.pathname === '/wishlist' ? 'page' : undefined}
             >
               Wishlist
               <span 
-                className={`absolute left-0 -bottom-1 h-0.5 bg-white
+                className={`absolute left-0 -bottom-1 h-0.5 rounded-full bg-[color:var(--vibe-accent,#f2ceff)]
                 ${location.pathname === '/wishlist' ? 'w-full' : 'w-0 group-hover:w-full'} transition-all duration-300`}
               />
             </Link>

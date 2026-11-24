@@ -635,3 +635,9 @@ details:not([open]) > *:not(summary) {
     animation: none;
   }
 }
+/* Skipaman Radio sets --vibe-accent while music plays; text selection picks it up */
+::selection {
+  background: var(--vibe-accent, #f2ceff);
+  color: #211527;
+}
+@keyframes radio-eq { 0%,100% { transform: scaleY(0.35); } 50% { transform: scaleY(1); } }

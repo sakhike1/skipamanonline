@@ -1,5 +1,6 @@
-import React, { useMemo, useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useEffect, useMemo, useState } from 'react';
+import AnimatedHeading from '../components/ui/AnimatedHeading';
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';
 import {
   Heart,
@@ -8,15 +9,17 @@ import {
   Grid,
   List,
   ArrowRight,
+  ArrowLeft,
   Star,
   Tag,
   X,
   Building2,
   Shirt,
+  Pause,
+  Play,
 } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { products } from '../data/products';
-import HeroAmbientEffects from '../components/ui/HeroAmbientEffects';
 export type LookbookFilter = 'All' | 'Retail collection' | 'Custom branding';
 
 interface LookbookItem {
@@ -61,8 +64,8 @@ const LOOKBOOK_SEEDS: StorySeed[] = [
     id: 'retail-signature',
     title: 'Skipaman signature',
     description:
-      'Our house tees and everyday fits—consistent trims, premium cotton, and the Skipaman mark. This is the retail line you can order online today.',
-    theme: 'Quiet confidence — everyday uniform for city heat and campus halls.',
+      'Our house tees and everyday fits, consistent trims, premium cotton, and the Skipaman mark. This is the retail line you can order online today.',
+    theme: 'Quiet confidence: everyday uniform for city heat and campus halls.',
     fabrics:
       'Mid-weight combed cotton with a soft hand; rib collars that recover instead of baconing after washes. Dark bases read cleaner under SA sun.',
     fitNotes:
@@ -78,8 +81,8 @@ const LOOKBOOK_SEEDS: StorySeed[] = [
     id: 'retail-graphic',
     title: 'Graphics & street',
     description:
-      'Bold prints, colour, and attitude—designed to stand out on the street while staying comfortable wash after wash.',
-    theme: 'Statement graphics — one hero tee carries the whole fit.',
+      'Bold prints, colour, and attitude, designed to stand out on the street while staying comfortable wash after wash.',
+    theme: 'Statement graphics: one hero tee carries the whole fit.',
     fabrics:
       'Screen-friendly ringspun bases; inks specified for stretch so chest prints don’t crack when you move. Colour runs chosen to stay vivid on black and garment-dye.',
     fitNotes:
@@ -95,8 +98,8 @@ const LOOKBOOK_SEEDS: StorySeed[] = [
     id: 'retail-layers',
     title: 'Layers & motion',
     description:
-      'Long sleeves, athletic cuts, and pieces that move with you—from campus to weekend runs.',
-    theme: 'Movement first — layers that breathe when you pick up pace.',
+      'Long sleeves, athletic cuts, and pieces that move with you, from campus to weekend runs.',
+    theme: 'Movement first: layers that breathe when you pick up pace.',
     fabrics:
       'Performance blends and lighter fleece where we need warmth without bulk; panels aligned so seams don’t ride on runs.',
     fitNotes:
@@ -112,8 +115,8 @@ const LOOKBOOK_SEEDS: StorySeed[] = [
     id: 'branding-schools',
     title: 'Schools & teams',
     description:
-      'House shirts, jerseys, and kit in your colours. We quote on size runs, delivery dates, and artwork—ideal for terms, tours, and sports seasons.',
-    theme: 'Pride of place — kit that reads sharp in photos and lasts the season.',
+      'House shirts, jerseys, and kit in your colours. We quote on size runs, delivery dates, and artwork, ideal for terms, tours, and sports seasons.',
+    theme: 'Pride of place: kit that reads sharp in photos and lasts the season.',
     fabrics:
       'Bulk-friendly jersey and interlock options; we match fabric weight to sport (breathable for court, hard-wearing for contact training).',
     fitNotes:
@@ -129,8 +132,8 @@ const LOOKBOOK_SEEDS: StorySeed[] = [
     id: 'branding-business',
     title: 'Business & events',
     description:
-      'Staff tees, polos, caps, and drinkware with your logo. Tell us quantities, colours, and deadlines—we handle the rest on our branding desk.',
-    theme: 'On-brand presence — from launch day to festival stalls.',
+      'Staff tees, polos, caps, and drinkware with your logo. Tell us quantities, colours, and deadlines, we handle the rest on our branding desk.',
+    theme: 'On-brand presence: from launch day to festival stalls.',
     fabrics:
       'Polos and tees chosen for embroidery stability and print opacity on corporate neutrals; we swatch before full runs.',
     fitNotes:
@@ -146,8 +149,8 @@ const LOOKBOOK_SEEDS: StorySeed[] = [
     id: 'branding-polos-uniform',
     title: 'Polos & uniform tops',
     description:
-      'Business polos, layered flannels, and athletic tops for crews on the move—ready for embroidery, screen print, or heat transfer in your palette.',
-    theme: 'Crew-ready layers — looks sharp under high-vis or on its own.',
+      'Business polos, layered flannels, and athletic tops for crews on the move, ready for embroidery, screen print, or heat transfer in your palette.',
+    theme: 'Crew-ready layers: looks sharp under high-vis or on its own.',
     fabrics:
       'Pique and jersey polos with collar resilience; flannel and overshirt weights balanced for SA winters without stiff cardboard feel.',
     fitNotes:
@@ -201,6 +204,12 @@ function buildLookbookItem(seed: StorySeed): LookbookItem {
   };
 }
 
+const lookbookSlides = [
+  { src: '/images/blue1.png', alt: 'Blue Skipaman tee', backdrop: '#413a36', imageStyle: '' },
+  { src: '/images/orange1.png', alt: 'Orange Skipaman top', backdrop: '#f5ceeb', imageStyle: 'scale-[1.13] mix-blend-multiply' },
+  { src: '/images/white1.png', alt: 'White Skipaman tee', backdrop: '#eeeeee', imageStyle: '' },
+] as const;
+
 const LookbookPage: React.FC = () => {
   const { addToCart } = useCart();
   const navigate = useNavigate();
@@ -211,17 +220,25 @@ const LookbookPage: React.FC = () => {
   const [selectedLookbook, setSelectedLookbook] = useState<LookbookItem | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  const reduceMotion = useReducedMotion();
+  const [activeSlide, setActiveSlide] = useState(0);
+  const [isPlaying, setIsPlaying] = useState(true);
+  const slide = lookbookSlides[activeSlide];
+
+  useEffect(() => {
+    if (reduceMotion || !isPlaying) return;
+    const timer = window.setInterval(() => {
+      setActiveSlide((index) => (index + 1) % lookbookSlides.length);
+    }, 3800);
+    return () => window.clearInterval(timer);
+  }, [isPlaying, reduceMotion]);
+
   const categories: LookbookFilter[] = ['All', 'Retail collection', 'Custom branding'];
 
   const filteredLookbooks =
     selectedCategory === 'All'
       ? lookbookData
       : lookbookData.filter((item) => item.category === selectedCategory);
-
-  const heroImageSrc = useMemo(
-    () => lookbookData[0]?.images?.[0] ?? '/images/4.jpg',
-    [lookbookData]
-  );
 
   const handleAddToCart = (productId: string) => {
     const product = products.find((p) => p.id === productId);
@@ -242,73 +259,130 @@ const LookbookPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-neutral-50">
-      {/* Hero — editorial, minimal CTAs; stories live in the grid below */}
-      <div className="relative overflow-hidden bg-black text-white">
-        <HeroAmbientEffects />
-        <div className="pointer-events-none absolute inset-x-0 top-0 z-[1] h-px bg-white/10" aria-hidden />
-        <div className="relative mx-auto max-w-7xl px-4 pb-20 pt-28 sm:px-6 sm:pt-32 md:pb-24 md:pt-36 lg:px-8 lg:pt-40">
-          <div className="grid items-center gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)] lg:gap-14 xl:gap-16">
-            <motion.div
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-              className="order-2 max-w-2xl lg:order-1"
-            >
-              <div className="inline-flex items-center gap-2.5">
-                <span
-                  className="h-1.5 w-1.5 shrink-0 rounded-full bg-white shadow-[0_0_10px_rgba(255,255,255,0.65)] animate-pulse"
-                  aria-hidden
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Outfit:wght@400;500;600&display=swap');
+        .lb-wide{font-family:'Syne','Outfit',system-ui,sans-serif;font-weight:800}
+        .lb-sans{font-family:'Outfit','Inter',system-ui,sans-serif}
+      `}</style>
+      <section
+        aria-labelledby="lookbook-hero-heading"
+        className="lb-sans relative flex flex-col justify-center overflow-hidden bg-[#f1f3f5] px-3 pb-8 pt-24 text-[#111] sm:px-6 md:h-[100svh] md:min-h-[38rem] md:pb-8 md:pt-24"
+      >
+        <div className="relative mx-auto w-full max-w-7xl">
+          {/* stacked sheet behind the card */}
+          <div aria-hidden className="absolute inset-x-3 -top-3 bottom-3 hidden rotate-[1.2deg] rounded-[2.5rem] bg-white/60 md:block" />
+          <div className="relative rounded-[1.75rem] bg-white px-5 pb-8 pt-8 shadow-[0_30px_60px_-40px_rgba(0,0,0,0.35)] sm:px-10 md:-rotate-[1.2deg] md:rounded-[2.5rem] md:px-14 md:pb-8 md:pt-8">
+            <div className="grid items-end gap-8 md:grid-cols-[minmax(0,1.25fr)_minmax(0,0.9fr)] md:gap-0">
+              <div className="relative z-10 min-w-0 md:pb-4">
+                <p className="text-sm font-medium text-[#111]/60">The Skipaman Lookbook</p>
+                <AnimatedHeading
+                  id="lookbook-hero-heading"
+                  variant="rise"
+                  className="lb-wide mt-3 text-[clamp(2.1rem,9.5vw,3.6rem)] leading-[1.02] tracking-[-0.03em] md:mt-[clamp(1.5rem,9svh,6rem)] md:text-[clamp(2.2rem,min(5.4vw,9.5svh),5.25rem)] md:-mr-24"
+                  lines={[{ text: 'Streetwear' }, { text: 'in focus.' }]}
                 />
-                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-neutral-500">Lookbook</p>
+                <p className="mt-6 max-w-md text-base leading-relaxed text-[#111]/70">
+                  Everyday streetwear, styled by Skipaman. Explore our fits and see what we make for schools, teams, and
+                  businesses.
+                </p>
+                <div className="mt-7 flex flex-wrap items-center gap-3">
+                  <a
+                    href="#lookbook-stories"
+                    className="inline-flex min-h-12 items-center gap-2 rounded-full bg-[#111] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[#333] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#111]"
+                  >
+                    Browse the stories
+                    <ArrowRight size={16} aria-hidden />
+                  </a>
+                  <Link
+                    to="/shop"
+                    className="inline-flex min-h-12 items-center rounded-full border border-[#111]/25 px-6 py-3 text-sm font-semibold transition hover:border-[#111] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#111]"
+                  >
+                    Shop retail
+                  </Link>
+                  <Link
+                    to="/virtual-stylist"
+                    className="inline-flex min-h-12 items-center px-2 text-sm font-semibold underline underline-offset-4 transition hover:text-[#4b2c83]"
+                  >
+                    Branding &amp; quotes
+                  </Link>
+                </div>
               </div>
-              <h1 className="mt-6 text-4xl font-black leading-[1.05] tracking-tight text-white sm:text-5xl lg:text-[3.25rem]">
-                Our clothes.{' '}
-                <span className="text-neutral-400">Your brand.</span>
-              </h1>
-              <p className="mt-5 max-w-xl text-base leading-relaxed text-neutral-400 sm:text-lg">
-                How we style Skipaman retail—and how we build custom branding for schools, teams, and businesses.
-              </p>
-              <div className="mt-10 flex flex-col items-start gap-5 sm:flex-row sm:items-center sm:gap-8">
-                <Link
-                  to="/shop"
-                  className="inline-flex items-center gap-2 rounded-full bg-white px-7 py-3.5 text-sm font-semibold text-neutral-950 transition hover:bg-neutral-100"
-                >
-                  Shop retail
-                  <ArrowRight className="h-4 w-4 shrink-0" aria-hidden />
-                </Link>
-                <Link
-                  to="/virtual-stylist"
-                  className="text-sm font-medium text-neutral-300 underline-offset-[6px] transition hover:text-white hover:underline"
-                >
-                  Branding & quotes
-                </Link>
-              </div>
-              <a
-                href="#lookbook-stories"
-                className="mt-12 inline-block text-[11px] font-semibold uppercase tracking-[0.22em] text-neutral-600 transition hover:text-neutral-400"
-              >
-                Browse stories below
-              </a>
-            </motion.div>
 
-            <motion.div
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.06, ease: [0.16, 1, 0.3, 1] }}
-              className="order-1 lg:order-2"
-            >
-              <div className="aspect-[3/5] w-full overflow-hidden rounded-2xl border border-white/10 bg-neutral-950 shadow-none md:aspect-auto md:h-[min(72vh,42rem)]">
-                <img
-                  src={heroImageSrc}
-                  alt="Skipaman lookbook — signature retail styling"
-                  className="h-full w-full object-cover object-center"
-                  loading="eager"
-                />
+              <div className="relative min-w-0 md:rotate-[1.5deg]" role="group" aria-label="Lookbook photos">
+                <div className="relative h-[clamp(22rem,52vw,38rem)] overflow-hidden md:h-[clamp(20rem,calc(100svh-13rem),40rem)] rounded-[1.5rem] bg-[#e4e7ea] md:rounded-[2rem]">
+                  <AnimatePresence initial={false}>
+                    <motion.div
+                      key={slide.src}
+                      initial={reduceMotion ? false : { x: '12%', opacity: 0 }}
+                      animate={{ x: 0, opacity: 1 }}
+                      exit={reduceMotion ? undefined : { x: '-12%', opacity: 0 }}
+                      transition={{ duration: reduceMotion ? 0 : 0.6, ease: [0.22, 1, 0.36, 1] }}
+                      style={{ backgroundColor: slide.backdrop }}
+                      className="absolute inset-0"
+                    >
+                      <img src={slide.src} alt={slide.alt} className="h-full w-full object-cover" />
+                    </motion.div>
+                  </AnimatePresence>
+
+                  <div className="absolute bottom-4 right-4 z-10 flex gap-2">
+                    {!reduceMotion && (
+                      <button
+                        type="button"
+                        aria-label={isPlaying ? 'Pause slideshow' : 'Play slideshow'}
+                        onClick={() => setIsPlaying((playing) => !playing)}
+                        className="grid h-11 w-11 place-items-center rounded-xl bg-white shadow-md transition hover:bg-[#f1f3f5] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#111]"
+                      >
+                        {isPlaying ? <Pause size={16} aria-hidden /> : <Play size={16} aria-hidden />}
+                      </button>
+                    )}
+                    <button
+                      type="button"
+                      aria-label="Previous look"
+                      onClick={() => {
+                        setIsPlaying(false);
+                        setActiveSlide((i) => (i - 1 + lookbookSlides.length) % lookbookSlides.length);
+                      }}
+                      className="grid h-11 w-11 place-items-center rounded-xl bg-white shadow-md transition hover:bg-[#f1f3f5] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#111]"
+                    >
+                      <ArrowLeft size={18} aria-hidden />
+                    </button>
+                    <button
+                      type="button"
+                      aria-label="Next look"
+                      onClick={() => {
+                        setIsPlaying(false);
+                        setActiveSlide((i) => (i + 1) % lookbookSlides.length);
+                      }}
+                      className="grid h-11 w-11 place-items-center rounded-xl bg-white shadow-md transition hover:bg-[#f1f3f5] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#111]"
+                    >
+                      <ArrowRight size={18} aria-hidden />
+                    </button>
+                  </div>
+                </div>
+
+                {/* floating glass card */}
+                <div className="absolute -left-2 top-6 z-20 flex max-w-[16.5rem] items-center gap-3 rounded-2xl border border-white/80 bg-white/75 p-2.5 pr-4 shadow-xl backdrop-blur-md sm:-left-10 md:top-14 md:-rotate-[5deg]">
+                  <div className="h-16 w-16 shrink-0 overflow-hidden rounded-xl" style={{ backgroundColor: slide.backdrop }}>
+                    <img src={slide.src} alt="" className="h-full w-full object-cover" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-semibold leading-tight">{slide.alt}</p>
+                    <p className="mt-0.5 text-xs text-[#111]/55">
+                      Look {activeSlide + 1} of {lookbookSlides.length}
+                    </p>
+                    <Link
+                      to="/shop"
+                      className="mt-1.5 inline-flex min-h-8 items-center rounded-lg bg-[#111] px-3 text-xs font-semibold text-white transition hover:bg-[#333] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#111]"
+                    >
+                      Shop this look
+                    </Link>
+                  </div>
+                </div>
               </div>
-            </motion.div>
+            </div>
           </div>
         </div>
-      </div>
+      </section>
 
       {/* Filters */}
       <div

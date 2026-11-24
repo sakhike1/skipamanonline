@@ -206,7 +206,7 @@ const AdminTicketsPage: React.FC = () => {
             </table>
           </div>
           {supportRows.length === 0 && (
-            <p className="px-4 py-10 text-center text-zinc-500 text-sm">No support tickets yet — share /support with customers.</p>
+            <p className="px-4 py-10 text-center text-zinc-500 text-sm">No support tickets yet. Share /support with customers.</p>
           )}
         </motion.div>
       )}
@@ -253,7 +253,7 @@ const AdminTicketsPage: React.FC = () => {
           </div>
           {designRows.length === 0 && (
             <p className="px-4 py-10 text-center text-zinc-500 text-sm">
-              No design briefs yet — customers can submit at /design-brief (signed in).
+              No design briefs yet. Customers can submit at /design-brief (signed in).
             </p>
           )}
         </motion.div>

@@ -102,33 +102,18 @@ const FeaturedProducts: React.FC<FeaturedProductsProps> = ({ onProductClick }) =
   }
 
   return (
-    <section className="py-16 md:py-24 bg-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        
-        {/* Header */}
-        <motion.div
-          className="text-center mb-12 md:mb-16"
-          initial={{ opacity: 0, y: 22 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.2 }}
-          transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-        >
-          <p className="text-sm font-medium text-gray-500 tracking-widest uppercase mb-4">
-            Curated Selection
-          </p>
-          <h2 className="mb-4 text-3xl font-black tracking-tight text-gray-900 sm:mb-6 sm:text-4xl md:text-5xl lg:text-6xl">
-            Featured Products
-          </h2>
-          <p className="mx-auto max-w-2xl text-base leading-relaxed text-gray-600 sm:text-lg">
-            Discover our handpicked collection of premium pieces, each crafted with exceptional quality and timeless design.
-          </p>
-        </motion.div>
+    <section aria-labelledby="featured-products-heading" className="skipaman-featured-section">
+      <div className="skipaman-product-shell">
+        <header className="skipaman-product-header">
+          <h2 id="featured-products-heading">Featured Products</h2>
+          <p>Skipaman picks for your everyday rotation.</p>
+        </header>
 
         {/* Products Grid — key remounts each page so stagger runs again; animate="visible" avoids whileInView leaving paginated rows invisible */}
         <motion.div
           key={currentPage}
           id="featured-products-grid"
-          className="grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-4 md:grid-cols-3 md:gap-6 lg:grid-cols-4 lg:gap-8"
+          className="skipaman-product-grid"
           variants={featuredGridContainer}
           initial="hidden"
           animate="visible"
@@ -151,7 +136,7 @@ const FeaturedProducts: React.FC<FeaturedProductsProps> = ({ onProductClick }) =
                   setTimeout(scrollFeaturedGridIntoView, 100);
                 }}
                 disabled={currentPage === 0}
-                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md border border-gray-200 text-gray-600 transition-colors hover:border-gray-400 hover:text-gray-900 disabled:cursor-not-allowed disabled:opacity-30"
+                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-gray-200 text-gray-600 transition-colors hover:border-gray-400 hover:text-gray-900 disabled:cursor-not-allowed disabled:opacity-30"
                 aria-label="Previous page"
               >
                 <ChevronLeft size={18} />
@@ -166,12 +151,13 @@ const FeaturedProducts: React.FC<FeaturedProductsProps> = ({ onProductClick }) =
                       handlePageClick(i);
                       setTimeout(scrollFeaturedGridIntoView, 100);
                     }}
-                    className={`h-10 min-w-[2.5rem] shrink-0 rounded-md px-2 text-sm font-medium transition-colors ${
+                    className={`h-11 min-w-[2.75rem] shrink-0 rounded-full px-2 text-sm font-medium transition-colors ${
                       currentPage === i
                         ? 'bg-black text-white'
                         : 'border border-gray-200 text-gray-600 hover:border-gray-400 hover:text-gray-900'
                     }`}
                     aria-label={`Go to page ${i + 1}`}
+                    aria-current={currentPage === i ? 'page' : undefined}
                   >
                     {i + 1}
                   </button>
@@ -185,7 +171,7 @@ const FeaturedProducts: React.FC<FeaturedProductsProps> = ({ onProductClick }) =
                   setTimeout(scrollFeaturedGridIntoView, 100);
                 }}
                 disabled={currentPage === totalPages - 1}
-                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md border border-gray-200 text-gray-600 transition-colors hover:border-gray-400 hover:text-gray-900 disabled:cursor-not-allowed disabled:opacity-30"
+                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-gray-200 text-gray-600 transition-colors hover:border-gray-400 hover:text-gray-900 disabled:cursor-not-allowed disabled:opacity-30"
                 aria-label="Next page"
               >
                 <ChevronRight size={18} />

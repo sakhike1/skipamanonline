@@ -28,7 +28,7 @@ const TEASERS: TeaserTemplate[] = [
     image: '/images/5.jpg',
     label: 'Monochrome Edit',
     title: 'Black & white essentials just landed',
-    subtitle: 'Basics | Graphic | Minimalist — see the full edit.',
+    subtitle: 'Basics | Graphic | Minimalist. See the full edit.',
     route: '/shop?tag=monochrome'
   },
   {

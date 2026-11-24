@@ -1,4 +1,5 @@
 import { Suspense, useEffect, memo } from 'react';
+import PageFade from './components/ui/PageFade';
 import {
   createBrowserRouter,
   createRoutesFromElements,
@@ -31,6 +32,7 @@ import HomePage from './pages/HomePage';
 import ShopPage from './pages/ShopPage';
 import ProductPage from './pages/ProductPage';
 import About from './pages/About';
+import DesignStudioPage from './pages/DesignStudioPage';
 import NewArrivalsPage from './pages/NewArrivalsPage';
 import SearchPage from './pages/SearchPage';
 import WishlistPage from './pages/WishlistPage';
@@ -99,7 +101,9 @@ const AppShell = () => (
     <RouteSeo />
     <Layout>
       <Suspense fallback={<PageLoader />}>
-        <Outlet />
+        <PageFade>
+          <Outlet />
+        </PageFade>
       </Suspense>
     </Layout>
   </>
@@ -133,6 +137,7 @@ const router = createBrowserRouter(
       <Route path="/custom-design" element={<Navigate to="/virtual-stylist" replace />} />
       <Route path="/virtual-stylist" element={<VirtualStylistPage />} />
       <Route path="/printing" element={<PrintingHubPage />} />
+      <Route path="/design-studio" element={<DesignStudioPage />} />
       <Route path="/locations/:slug" element={<PrintingLocationPage />} />
       <Route path="/services/:slug" element={<PrintingServicePage />} />
       <Route path="/support" element={<SupportPage />} />

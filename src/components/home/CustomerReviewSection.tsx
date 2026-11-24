@@ -1,233 +1,154 @@
 import { motion } from 'framer-motion';
-import { Star, CheckCircle, TrendingUp, Award, Users, ArrowRight } from 'lucide-react';
+import { Star, BadgeCheck, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { testimonials } from '../../data/testimonials';
 import { TRUST_INDICATORS } from '../../utils/constants';
 
 const summaryStats = [
-  {
-    value: TRUST_INDICATORS.AVERAGE_RATING,
-    label: 'Average rating',
-    hint: 'Across verified buyers',
-    icon: Star,
-    iconWrap: 'from-amber-400 to-orange-500 shadow-amber-500/25',
-  },
-  {
-    value: TRUST_INDICATORS.HAPPY_CUSTOMERS,
-    label: 'Happy customers',
-    hint: 'Growing Skipaman community',
-    icon: Users,
-    iconWrap: 'from-violet-500 to-fuchsia-600 shadow-fuchsia-500/25',
-  },
-  {
-    value: TRUST_INDICATORS.SATISFACTION_RATE,
-    label: 'Would recommend',
-    hint: 'Post-purchase surveys',
-    icon: TrendingUp,
-    iconWrap: 'from-sky-500 to-cyan-600 shadow-sky-500/25',
-  },
+  { value: TRUST_INDICATORS.AVERAGE_RATING, label: 'Average rating', hint: 'Across verified buyers' },
+  { value: TRUST_INDICATORS.HAPPY_CUSTOMERS, label: 'Happy customers', hint: 'Growing Skipaman community' },
+  { value: TRUST_INDICATORS.SATISFACTION_RATE, label: 'Would recommend', hint: 'Post-purchase surveys' },
 ] as const;
+
+const cardTones = ['bg-[#ffd4c4]', 'bg-[#fad0e1]', 'bg-[#f2ceff]'];
 
 const CustomerReviewSection: React.FC = () => {
   return (
-    <div className="relative bg-gradient-to-b from-slate-50 via-white to-slate-50 py-20 md:py-28 overflow-hidden">
-      <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute top-20 left-[10%] h-72 w-72 rounded-full bg-purple-200/40 blur-3xl" />
-        <div className="absolute bottom-24 right-[8%] h-80 w-80 rounded-full bg-blue-200/35 blur-3xl" />
-      </div>
+    <div className="relative bg-white py-16 md:py-24">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        {/* Header + numbers */}
+        <div className="grid gap-8 lg:grid-cols-[1.2fr_1fr] lg:items-end lg:gap-14">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            viewport={{ once: true, amount: 0.25 }}
+          >
+            <p className="flex items-center gap-3 text-[11px] font-semibold uppercase tracking-[0.28em] text-[#6b4a7a]">
+              <span aria-hidden className="h-px w-8 bg-[#6b4a7a]" />
+              Customer reviews
+            </p>
+            <h2 className="mt-4 text-[clamp(2.2rem,4.8vw,4.25rem)] font-black leading-[0.98] tracking-[-0.045em] text-[#211527]">
+              What our customers say
+            </h2>
+            <p className="mt-4 max-w-xl text-base leading-relaxed text-[#513a5c] md:text-lg">
+              Real stories from people who live in our tees, quality you can feel, service you can count on.
+            </p>
+          </motion.div>
 
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        {/* Header */}
-        <motion.div
-          className="mx-auto mb-14 max-w-3xl text-center md:mb-16"
-          initial={{ opacity: 0, y: 24 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
-          viewport={{ once: true, amount: 0.25 }}
-        >
-          <div className="mb-5 inline-flex items-center gap-2 rounded-md border border-purple-100 bg-gradient-to-r from-purple-50/90 to-pink-50/90 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-purple-800">
-            <Award className="h-4 w-4 text-purple-600" aria-hidden />
-            Customer reviews
-          </div>
-
-          <h2 className="text-4xl sm:text-5xl md:text-6xl font-black leading-[1.1] tracking-tight text-slate-900">
-            What our{' '}
-            <span className="bg-gradient-to-r from-purple-600 via-fuchsia-600 to-blue-600 bg-clip-text text-transparent">
-              customers say
-            </span>
-          </h2>
-          <p className="mt-5 text-lg text-slate-600 md:text-xl leading-relaxed">
-            Real stories from people who live in our tees—quality you can feel, service you can count on.
-          </p>
-        </motion.div>
-
-        {/* Trust strip */}
-        <motion.div
-          className="mx-auto mb-14 max-w-4xl md:mb-16"
-          initial={{ opacity: 0, y: 16 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.05 }}
-          viewport={{ once: true }}
-        >
-          <div className="grid grid-cols-1 divide-y divide-slate-200/80 rounded-2xl border border-slate-200/80 bg-white/90 shadow-sm shadow-slate-200/50 backdrop-blur-sm sm:grid-cols-3 sm:divide-x sm:divide-y-0">
-            {summaryStats.map(({ value, label, hint, icon: Icon, iconWrap }) => (
-              <div
-                key={label}
-                className="flex items-center gap-4 px-6 py-5 sm:px-5 sm:py-6"
-              >
-                <div
-                  className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br ${iconWrap} text-white shadow-lg`}
-                >
-                  <Icon className="h-6 w-6" strokeWidth={2} aria-hidden />
-                </div>
-                <div className="min-w-0 text-left">
-                  <p className="text-2xl font-black tabular-nums tracking-tight text-slate-900 sm:text-3xl">
-                    {value}
-                  </p>
-                  <p className="text-sm font-semibold text-slate-800">{label}</p>
-                  <p className="text-xs text-slate-500 leading-snug">{hint}</p>
-                </div>
-              </div>
+          <ul
+            aria-label="Review summary"
+            className="grid list-none grid-cols-3 gap-4 border-t border-[#211527]/10 p-0 pt-6 lg:border-t-0 lg:pt-0"
+          >
+            {summaryStats.map(({ value, label, hint }) => (
+              <li key={label} className="min-w-0">
+                <p className="text-3xl font-black leading-none tracking-tighter tabular-nums text-[#211527] sm:text-4xl">
+                  {value}
+                </p>
+                <p className="mt-2 text-sm font-semibold text-[#211527]">{label}</p>
+                <p className="mt-0.5 hidden text-xs leading-snug text-[#6b5a73] sm:block">{hint}</p>
+              </li>
             ))}
-          </div>
-        </motion.div>
+          </ul>
+        </div>
 
         {/* Testimonials */}
-        <div className="mb-16 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 lg:gap-8">
+        <div className="mt-12 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
           {testimonials.slice(0, 3).map((t, index) => (
             <motion.article
               key={t.id}
-              className="group flex h-full flex-col rounded-2xl border border-slate-200/90 bg-white p-7 shadow-[0_20px_50px_-32px_rgba(15,23,42,0.18)] transition-shadow duration-300 hover:border-slate-300 hover:shadow-[0_28px_70px_-36px_rgba(99,102,241,0.22)]"
-              initial={{ opacity: 0, y: 28 }}
+              className={`group flex h-full flex-col rounded-[1.75rem] p-7 text-[#211527] transition-transform duration-300 hover:-translate-y-1 motion-reduce:hover:translate-y-0 ${cardTones[index % cardTones.length]}`}
+              initial={{ opacity: 0, y: 24 }}
               whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.45, delay: index * 0.06, ease: [0.16, 1, 0.3, 1] }}
+              transition={{ duration: 0.45, delay: index * 0.07, ease: [0.16, 1, 0.3, 1] }}
               viewport={{ once: true, amount: 0.12 }}
             >
-              <div className="mb-5 flex items-start justify-between gap-3">
-                <div className="min-w-0">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <div className="flex items-center gap-0.5">
-                      {[...Array(5)].map((_, i) => (
-                        <Star
-                          key={i}
-                          className={`h-4 w-4 ${
-                            i < t.rating
-                              ? 'text-amber-400 fill-amber-400'
-                              : 'text-slate-200'
-                          }`}
-                          aria-hidden
-                        />
-                      ))}
-                    </div>
-                    <span className="text-sm font-semibold text-slate-500 tabular-nums">
-                      {t.rating.toFixed(1)}
-                    </span>
-                  </div>
-                  <p className="mt-2 inline-flex max-w-full truncate rounded-md border border-slate-200/80 bg-slate-50/80 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-widest text-slate-600">
-                    {t.purchase}
-                  </p>
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-1" role="img" aria-label={`${t.rating.toFixed(1)} out of 5 stars`}>
+                  {[...Array(5)].map((_, i) => (
+                    <Star
+                      key={i}
+                      className={`h-4 w-4 ${i < t.rating ? 'fill-[#211527] text-[#211527]' : 'text-[#211527]/25'}`}
+                      aria-hidden
+                    />
+                  ))}
                 </div>
-                <time className="shrink-0 rounded-md border border-slate-200/80 bg-white px-2.5 py-1 text-[10px] font-semibold uppercase tracking-widest text-slate-500">
-                  {t.date}
-                </time>
+                <time className="text-xs font-medium text-[#211527]/60">{t.date}</time>
               </div>
 
-              <blockquote className="relative flex-1 border-l-2 border-purple-200/80 pl-4">
-                <p className="text-[15px] leading-relaxed text-slate-700 line-clamp-6 md:line-clamp-5">
-                  {t.text}
-                </p>
-              </blockquote>
+              <p className="mt-4 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#211527]/60">{t.purchase}</p>
 
-              <div className="mt-5 border-t border-slate-100 pt-5">
-                <div className="flex flex-wrap items-center gap-3">
-                  <div className="flex min-w-0 flex-1 items-center gap-3">
-                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 text-sm font-bold text-white shadow-md">
-                      {t.avatar}
-                    </div>
-                    <div className="min-w-0">
-                      <div className="flex items-center gap-1.5">
-                        <span className="truncate font-semibold text-slate-900">{t.name}</span>
-                        {t.verified && (
-                          <CheckCircle className="h-4 w-4 shrink-0 text-emerald-500" aria-label="Verified buyer" />
-                        )}
-                      </div>
-                      <p className="truncate text-sm text-slate-500">{t.location}</p>
-                    </div>
-                  </div>
-                  {t.helpful != null && (
-                    <span className="rounded-md border border-slate-200 bg-slate-50 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-widest text-slate-500">
-                      {t.helpful}+ helpful
+              <p className="mt-3 flex-1 text-[15px] leading-relaxed text-[#211527]/85 line-clamp-6 md:line-clamp-5">
+                {t.text}
+              </p>
+
+              {t.tags && t.tags.length > 0 && (
+                <div className="mt-5 flex flex-wrap gap-2">
+                  {t.tags.slice(0, 3).map((tag, i) => (
+                    <span key={i} className="rounded-full bg-white/70 px-3 py-1 text-xs font-medium text-[#211527]">
+                      {tag}
                     </span>
-                  )}
+                  ))}
                 </div>
+              )}
 
-                {t.tags && t.tags.length > 0 && (
-                  <div className="mt-4 flex flex-wrap gap-2">
-                    {t.tags.slice(0, 3).map((tag, i) => (
-                      <span
-                        key={i}
-                        className="rounded-md border border-purple-100 bg-purple-50/90 px-2.5 py-1 text-xs font-medium text-purple-800"
-                      >
-                        {tag}
-                      </span>
-                    ))}
+              <div className="mt-5 flex items-center gap-3 border-t border-[#211527]/10 pt-5">
+                <span className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-[#211527] text-sm font-bold text-white">
+                  {t.avatar}
+                </span>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-1.5">
+                    <span className="truncate font-semibold">{t.name}</span>
+                    {t.verified && <BadgeCheck className="h-4 w-4 shrink-0" aria-label="Verified buyer" />}
                   </div>
+                  <p className="truncate text-sm text-[#211527]/65">{t.location}</p>
+                </div>
+                {t.helpful != null && (
+                  <span className="shrink-0 text-xs font-medium text-[#211527]/60">{t.helpful}+ helpful</span>
                 )}
               </div>
             </motion.article>
           ))}
         </div>
 
-        <p className="mb-10 text-center text-sm text-slate-500">
+        <p className="mt-6 text-center text-sm text-[#6b5a73]">
           Longer reviews are shortened here.{' '}
-          <Link to="/reviews" className="font-semibold text-purple-600 hover:text-purple-800">
+          <Link to="/reviews" className="font-semibold text-[#211527] underline underline-offset-4">
             Read all reviews
           </Link>
         </p>
 
-        {/* Closing CTA — no duplicate stat grid; one clear message + actions */}
+        {/* Closing banner */}
         <motion.div
-          className="relative overflow-hidden rounded-2xl border border-slate-200/90 bg-gradient-to-br from-white via-violet-50/50 to-sky-50/40 p-10 md:p-14 text-center shadow-[0_30px_80px_-50px_rgba(99,102,241,0.35)]"
-          initial={{ opacity: 0, y: 24 }}
+          className="mt-12 flex flex-col items-start justify-between gap-6 rounded-[2rem] bg-[#211527] p-8 text-white md:flex-row md:items-center md:p-12"
+          initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.55, delay: 0.08 }}
+          transition={{ duration: 0.5 }}
           viewport={{ once: true, amount: 0.2 }}
         >
-          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,_rgba(255,255,255,0.85),_transparent_60%)]" />
-
-          <div className="relative z-10 mx-auto flex max-w-3xl flex-col items-center gap-6">
-            <span className="rounded-md border border-purple-200/80 bg-white/80 px-4 py-1.5 text-[11px] font-semibold uppercase tracking-[0.22em] text-purple-700">
-              Your turn
-            </span>
-
-            <h3 className="text-3xl font-black leading-tight text-slate-900 sm:text-4xl md:text-[2.75rem]">
-              Wear tees built for{' '}
-              <span className="bg-gradient-to-r from-purple-600 via-fuchsia-600 to-blue-600 bg-clip-text text-transparent">
-                real life
-              </span>
+          <div className="max-w-xl">
+            <h3 className="text-[clamp(1.75rem,3.4vw,2.75rem)] font-black leading-[1.02] tracking-[-0.03em]">
+              Wear tees built for <span className="text-[#f2ceff]">real life</span>
             </h3>
-
-            <p className="text-lg text-slate-600 leading-relaxed">
-              Join{' '}
-              <span className="font-semibold text-slate-900">{TRUST_INDICATORS.HAPPY_CUSTOMERS}</span>{' '}
-              shoppers who chose Skipaman for fabric that lasts, fits that feel right, and support when you need it.
+            <p className="mt-3 text-sm leading-relaxed text-white/65 md:text-base">
+              Join <span className="font-semibold text-white">{TRUST_INDICATORS.HAPPY_CUSTOMERS}</span> shoppers who chose
+              Skipaman for fabric that lasts, fits that feel right, and support when you need it.
             </p>
-
-            <div className="flex w-full flex-col items-stretch justify-center gap-3 pt-2 sm:flex-row sm:items-center sm:justify-center">
-              <Link
-                to="/shop"
-                className="inline-flex items-center justify-center gap-2 rounded-md bg-gradient-to-r from-purple-600 via-fuchsia-600 to-blue-600 px-8 py-3.5 text-sm font-semibold text-white shadow-lg shadow-purple-500/25 transition hover:shadow-xl hover:shadow-purple-500/35"
-              >
-                Shop the collection
-                <ArrowRight className="h-4 w-4" aria-hidden />
-              </Link>
-              <Link
-                to="/reviews"
-                className="inline-flex items-center justify-center rounded-md border border-slate-300 bg-white/90 px-8 py-3.5 text-sm font-semibold text-slate-800 transition hover:border-slate-400 hover:bg-white"
-              >
-                More reviews
-              </Link>
-            </div>
+          </div>
+          <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
+            <Link
+              to="/shop"
+              className="inline-flex items-center justify-center gap-2 rounded-full bg-white px-7 py-3.5 text-sm font-semibold text-[#211527] transition hover:bg-[#f2ceff]"
+            >
+              Shop the collection
+              <ArrowRight className="h-4 w-4" aria-hidden />
+            </Link>
+            <Link
+              to="/reviews"
+              className="inline-flex items-center justify-center rounded-full px-7 py-3.5 text-sm font-semibold text-white ring-1 ring-white/30 transition hover:bg-white/10"
+            >
+              More reviews
+            </Link>
           </div>
         </motion.div>
       </div>

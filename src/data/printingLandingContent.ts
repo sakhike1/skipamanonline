@@ -33,7 +33,7 @@ export interface PrintingLandingBlock {
 export const printingHubSeo: PrintingSeoMeta = {
   title: 'Custom Printing South Africa | Screen, DTF, Embroidery & Uniforms | Skipaman',
   description:
-    'T-shirt printing in Centurion, Pretoria, and Johannesburg: bulk screen print, DTF, embroidery, school uniforms, and corporate wear. Min order, lead times, artwork help, and delivery—request a quote.',
+    'T-shirt printing in Centurion, Pretoria, and Johannesburg: bulk screen print, DTF, embroidery, school uniforms, and corporate wear. Min order, lead times, artwork help, and delivery, request a quote.',
 };
 
 const loc = (slug: string) => `/locations/${slug}`;
@@ -60,7 +60,7 @@ export const PRINTING_LOCATIONS: Record<string, PrintingLandingBlock> = {
     kind: 'location',
     seoTitle: 'T-Shirt Printing Centurion | DTF, Screen & Uniforms | Skipaman',
     seoDescription:
-      'Custom t-shirt printing in Centurion, Gauteng: DTF, screen print, vinyl, school & corporate uniforms. Min orders, turnaround, artwork specs, and collection or delivery—get a quote from Skipaman.',
+      'Custom t-shirt printing in Centurion, Gauteng: DTF, screen print, vinyl, school & corporate uniforms. Min orders, turnaround, artwork specs, and collection or delivery, get a quote from Skipaman.',
     h1: 'T-shirt printing in Centurion',
     heroSubtitle: 'Local production support, school & business runs, and nationwide delivery from our Centurion base.',
     heroImage: '/images/image1.jpg',
@@ -81,9 +81,9 @@ export const PRINTING_LOCATIONS: Record<string, PrintingLandingBlock> = {
       'Mugs and select promo items (enquire for current options)',
     ],
     minimums:
-      'Minimums depend on the process: DTF and vinyl are friendlier for small runs; traditional screen printing is typically priced from higher quantities. Share your quantity and deadline—we will match you to the most cost-effective method.',
+      'Minimums depend on the process: DTF and vinyl are friendlier for small runs; traditional screen printing is typically priced from higher quantities. Share your quantity and deadline, we will match you to the most cost-effective method.',
     leadTimes:
-      'Standard decorated orders often fall in the 7–14 business day range after artwork approval and stock arrival, but peak season (back-to-school, year-end events) can extend that. Rush may be possible for a fee when capacity allows—ask when you brief us.',
+      'Standard decorated orders often fall in the 7–14 business day range after artwork approval and stock arrival, but peak season (back-to-school, year-end events) can extend that. Rush may be possible for a fee when capacity allows, ask when you brief us.',
     artworkRequirements:
       'Vector art (AI, EPS, or high-quality PDF) is ideal for screen and embroidery. For DTF, a transparent PNG at 300 DPI at print size works well. We can help with simple redraws or text layout; complex design work may be quoted separately. Colours: specify Pantone where brand accuracy matters.',
     deliveryPickup:
@@ -99,7 +99,7 @@ export const PRINTING_LOCATIONS: Record<string, PrintingLandingBlock> = {
       {
         question: 'Can I see a sample or proof before the full run?',
         answer:
-          'For many jobs we can provide a digital mock-up. Physical samples or strike-offs may be available for larger or corporate orders and may be charged—ask when you request a quote.',
+          'For many jobs we can provide a digital mock-up. Physical samples or strike-offs may be available for larger or corporate orders and may be charged, ask when you request a quote.',
       },
       {
         question: 'What if my event is in two weeks?',
@@ -114,13 +114,13 @@ export const PRINTING_LOCATIONS: Record<string, PrintingLandingBlock> = {
     kind: 'location',
     seoTitle: 'T-Shirt Printing Pretoria | Schools, Clubs & Business | Skipaman',
     seoDescription:
-      'Custom printing for Pretoria: screen print, DTF, embroidery, uniforms, and corporate apparel. Minimums, lead times, artwork, and delivery across Pretoria and Gauteng—Skipaman.',
+      'Custom printing for Pretoria: screen print, DTF, embroidery, uniforms, and corporate apparel. Minimums, lead times, artwork, and delivery across Pretoria and Gauteng, Skipaman.',
     h1: 'T-shirt printing for Pretoria',
-    heroSubtitle: 'Northern Gauteng schools, government districts, and businesses—consistent branding from quote to delivery.',
+    heroSubtitle: 'Northern Gauteng schools, government districts, and businesses, consistent branding from quote to delivery.',
     heroImage: '/images/image6.jpg',
     intro: [
       'From Brooklyn and Hatfield to Montana and the East, Pretoria clients use Skipaman for repeatable uniform programmes, club kits, and branded staff wear. We understand procurement timelines and BOQ-style ordering where needed.',
-      'We serve the same print methods as our Centurion base—DTF for flexible short runs, screen for volume, embroidery for premium polos and headwear. Deliveries reach Pretoria metro via courier on agreed schedules.',
+      'We serve the same print methods as our Centurion base, DTF for flexible short runs, screen for volume, embroidery for premium polos and headwear. Deliveries reach Pretoria metro via courier on agreed schedules.',
     ],
     whoItsFor: [
       'Government departments and NGOs needing batches with consistent specs',
@@ -135,13 +135,13 @@ export const PRINTING_LOCATIONS: Record<string, PrintingLandingBlock> = {
       'Branded caps and selected accessories',
     ],
     minimums:
-      'Small runs suit DTF or heat-transfer methods; larger repeat programmes suit screen or embroidery. Minimum piece counts vary—send your list of sizes and colours for a banded quote.',
+      'Small runs suit DTF or heat-transfer methods; larger repeat programmes suit screen or embroidery. Minimum piece counts vary, send your list of sizes and colours for a banded quote.',
     leadTimes:
       'After artwork approval, most orders progress in roughly 7–14 business days. Institutional orders with multiple approval steps should budget extra time; we document milestones in writing.',
     artworkRequirements:
-      'Supply logo files in vector format where possible. Raster artwork should be print-resolution at final size. If you only have a JPG, we may be able to recreate or clean up—additional design time may apply.',
+      'Supply logo files in vector format where possible. Raster artwork should be print-resolution at final size. If you only have a JPG, we may be able to recreate or clean up, additional design time may apply.',
     deliveryPickup:
-      'Door-to-door courier to Pretoria addresses is standard. Scheduled deliveries for larger school or corporate drops can be arranged. Pickup from our Centurion workspace may suit northern Pretoria clients—confirm when quoting.',
+      'Door-to-door courier to Pretoria addresses is standard. Scheduled deliveries for larger school or corporate drops can be arranged. Pickup from our Centurion workspace may suit northern Pretoria clients, confirm when quoting.',
     pricingRange:
       'Small DTF orders might start from a few hundred rand per garment depending on size and placement. Volume screen programmes reduce price per unit. Embroidery is quoted by stitch count and quantity.',
     faqs: [
@@ -153,7 +153,7 @@ export const PRINTING_LOCATIONS: Record<string, PrintingLandingBlock> = {
       {
         question: 'Can you match an existing uniform supplier’s colours?',
         answer:
-          'We aim for the closest match using Pantone references and fabric swatches. Perfect dye-lot matches across different factories are not always guaranteed—we will be transparent before production.',
+          'We aim for the closest match using Pantone references and fabric swatches. Perfect dye-lot matches across different factories are not always guaranteed, we will be transparent before production.',
       },
     ],
   },
@@ -163,13 +163,13 @@ export const PRINTING_LOCATIONS: Record<string, PrintingLandingBlock> = {
     kind: 'location',
     seoTitle: 'T-Shirt Printing Johannesburg | Corporate & Events | Skipaman',
     seoDescription:
-      'Johannesburg t-shirt printing and branding: DTF, bulk screen print, embroidery, and corporate wear. Turnaround, minimums, artwork, and courier delivery—based in Gauteng, serving JHB.',
+      'Johannesburg t-shirt printing and branding: DTF, bulk screen print, embroidery, and corporate wear. Turnaround, minimums, artwork, and courier delivery, based in Gauteng, serving JHB.',
     h1: 'T-shirt printing for Johannesburg',
-    heroSubtitle: 'CBD corporates, Sandton teams, Soweto events, and East Rand logistics—fast coordination from Gauteng.',
+    heroSubtitle: 'CBD corporates, Sandton teams, Soweto events, and East Rand logistics, fast coordination from Gauteng.',
     heroImage: '/images/6.jpg',
     intro: [
       'Johannesburg remains South Africa’s busiest commercial hub. Skipaman supplies branded apparel for activations, retail staff uniforms, music and sport events, and corporate onboarding packs.',
-      'Courier networks from Gauteng mean regular JHB deliveries are straightforward. For tight activations, share your deadline immediately—we will advise if production and transit can meet your launch.',
+      'Courier networks from Gauteng mean regular JHB deliveries are straightforward. For tight activations, share your deadline immediately, we will advise if production and transit can meet your launch.',
     ],
     whoItsFor: [
       'Marketing and HR teams rolling out branded kits across branches',
@@ -188,9 +188,9 @@ export const PRINTING_LOCATIONS: Record<string, PrintingLandingBlock> = {
     leadTimes:
       'Typical decorated orders: about 7–14 business days after approval. Sandton and Rosebank rush requests are assessed case-by-case; weekend events need earlier locks on artwork.',
     artworkRequirements:
-      'Brand guidelines welcome—include safe zones, minimum logo sizes, and colour breakdowns. For multi-branch rollouts, one approved master file avoids rework.',
+      'Brand guidelines welcome, include safe zones, minimum logo sizes, and colour breakdowns. For multi-branch rollouts, one approved master file avoids rework.',
     deliveryPickup:
-      'Courier to Johannesburg addresses; tracking provided when available. Same-metro handoff can sometimes be arranged for urgent jobs—confirm when you book.',
+      'Courier to Johannesburg addresses; tracking provided when available. Same-metro handoff can sometimes be arranged for urgent jobs, confirm when you book.',
     pricingRange:
       'Promo-tier tees on volume screen runs can land at competitive per-unit pricing; premium blanks and embroidery increase cost. We quote inclusive of agreed decoration unless you supply garments.',
     faqs: [
@@ -214,12 +214,12 @@ export const PRINTING_SERVICES: Record<string, PrintingLandingBlock> = {
     kind: 'service',
     seoTitle: 'Bulk Screen Printing South Africa | High-Volume Tees & Uniforms | Skipaman',
     seoDescription:
-      'Bulk screen printing for schools, teams, and brands: plastisol water-based options, repeat programmes, minimums, lead times, artwork for separations, and nationwide delivery—Skipaman Gauteng.',
+      'Bulk screen printing for schools, teams, and brands: plastisol water-based options, repeat programmes, minimums, lead times, artwork for separations, and nationwide delivery, Skipaman Gauteng.',
     h1: 'Bulk screen printing',
     heroSubtitle: 'Economical per-unit pricing when your volume and design suit traditional screens.',
     heroImage: '/images/blacktFront.png',
     intro: [
-      'Screen printing remains the workhorse for medium-to-large runs with stable artwork and solid colours. Once screens are made, reorders of the same design are efficient—ideal for annual school batches, club kits, and promo tees.',
+      'Screen printing remains the workhorse for medium-to-large runs with stable artwork and solid colours. Once screens are made, reorders of the same design are efficient, ideal for annual school batches, club kits, and promo tees.',
       'We advise honest quantity bands: if your job is small or frequently changes artwork, DTF may save money and time. If you are ordering hundreds or thousands with a fixed design, screen usually wins on price.',
     ],
     whoItsFor: [
@@ -234,25 +234,25 @@ export const PRINTING_SERVICES: Record<string, PrintingLandingBlock> = {
       'Tote bags and flat panels where jigging allows',
     ],
     minimums:
-      'Economically viable screen jobs typically start from roughly two dozen pieces per design/colour split—exact thresholds depend on colours and garment choice. Below that, we usually recommend DTF or hybrid approaches.',
+      'Economically viable screen jobs typically start from roughly two dozen pieces per design/colour split, exact thresholds depend on colours and garment choice. Below that, we usually recommend DTF or hybrid approaches.',
     leadTimes:
-      'First-time jobs include screen prep and testing—often 10–15 business days after approval. Repeat orders using existing screens can be faster if stock is on hand.',
+      'First-time jobs include screen prep and testing, often 10–15 business days after approval. Repeat orders using existing screens can be faster if stock is on hand.',
     artworkRequirements:
-      'Vector artwork with colour-separated layers is best. Each ink colour generally means a screen—fewer colours reduces cost. Halftones are possible for gradients but need discussion at quoting stage.',
+      'Vector artwork with colour-separated layers is best. Each ink colour generally means a screen, fewer colours reduces cost. Halftones are possible for gradients but need discussion at quoting stage.',
     deliveryPickup:
       'Folded, bulk-packed cartons for freight or palletised loads on very large orders. Gauteng collection available; national courier quoted per carton.',
     pricingRange:
-      'At volume, printed tees can reach strong per-unit pricing depending on colours and garment tier. Setup and screen fees are typically amortised across the run—your quote shows line items clearly.',
+      'At volume, printed tees can reach strong per-unit pricing depending on colours and garment tier. Setup and screen fees are typically amortised across the run, your quote shows line items clearly.',
     faqs: [
       {
-        question: 'Water-based vs plastisol—what do you use?',
+        question: 'Water-based vs plastisol: what do you use?',
         answer:
           'Choice depends on fabric, hand-feel, and colour requirements. We recommend the best fit per job and explain trade-offs in your quote.',
       },
       {
         question: 'Can we mix sizes within one bulk order?',
         answer:
-          'Yes, within the same design and print placement. Very different garment types may need separate setups—we will flag that early.',
+          'Yes, within the same design and print placement. Very different garment types may need separate setups, we will flag that early.',
       },
     ],
   },
@@ -262,40 +262,40 @@ export const PRINTING_SERVICES: Record<string, PrintingLandingBlock> = {
     kind: 'service',
     seoTitle: 'DTF Printing South Africa | Short Runs & Full Colour | Skipaman',
     seoDescription:
-      'DTF (direct-to-film) printing for small batches, full colour, and detailed artwork—minimums, turnaround, file tips, and shipping. Skipaman custom apparel Gauteng.',
+      'DTF (direct-to-film) printing for small batches, full colour, and detailed artwork, minimums, turnaround, file tips, and shipping. Skipaman custom apparel Gauteng.',
     h1: 'DTF printing',
     heroSubtitle: 'Photographic detail and shorter runs without the screen setup overhead.',
     heroImage: '/images/blackTOne.png',
     intro: [
       'DTF transfers full-colour designs onto many cotton and blended garments with minimal setup compared to multi-colour screens. It suits prototypes, small merch drops, intricate artwork, and photos.',
-      'Durability is good for many use cases; for extreme industrial wash or heavy abrasion, we may suggest screen or embroidery instead—we advise per garment and use case.',
+      'Durability is good for many use cases; for extreme industrial wash or heavy abrasion, we may suggest screen or embroidery instead, we advise per garment and use case.',
     ],
     whoItsFor: [
       'Creators and brands testing designs before scaling',
-      'Events needing dozens—not hundreds—of pieces',
+      'Events needing dozens, not hundreds, of pieces',
       'Complex illustrations that would need excessive screens',
       'Teams wanting name personalisation alongside a shared graphic',
     ],
     whatWePrint: [
       'T-shirts, hoodies, and most cotton-rich blends',
       'Front, back, and sleeve placements within printable area limits',
-      'Some headwear and bags—confirm substrate before ordering',
+      'Some headwear and bags, confirm substrate before ordering',
     ],
     minimums:
       'Often from single pieces upwards; pricing per unit reflects film and press time. Bundling sizes optimises efficiency.',
     leadTimes:
       'Many DTF orders complete within roughly 5–10 business days after artwork sign-off, subject to queue and stock.',
     artworkRequirements:
-      'Transparent PNG at 300 DPI at intended print size is ideal. Outline fonts or supply working files. Avoid low-resolution social-media grabs—they rarely print sharply.',
+      'Transparent PNG at 300 DPI at intended print size is ideal. Outline fonts or supply working files. Avoid low-resolution social-media grabs, they rarely print sharply.',
     deliveryPickup:
-      'Packed per size or flat-folded—your preference when quoting. Courier nationwide.',
+      'Packed per size or flat-folded, your preference when quoting. Courier nationwide.',
     pricingRange:
       'Low tens to low hundreds of rand per position depending on size and garment tier; detailed quotes beat guessing from price lists.',
     faqs: [
       {
         question: 'Is DTF better than vinyl?',
         answer:
-          'DTF often handles full colour and gradients better than basic vinyl. Vinyl still has a place for specialty films—tell us the garment and artwork and we will recommend.',
+          'DTF often handles full colour and gradients better than basic vinyl. Vinyl still has a place for specialty films, tell us the garment and artwork and we will recommend.',
       },
       {
         question: 'Will DTF crack or peel?',
@@ -316,7 +316,7 @@ export const PRINTING_SERVICES: Record<string, PrintingLandingBlock> = {
     heroImage: '/images/blackPurpleTwo.png',
     intro: [
       'Embroidery elevates corporate polos, hospitality uniforms, and headwear with tactile, durable branding. Pricing scales with stitch count, colour changes, and quantity.',
-      'New logos usually require digitising—a one-off setup that converts artwork into stitch files. Reorders of the same file are faster and cheaper.',
+      'New logos usually require digitising, a one-off setup that converts artwork into stitch files. Reorders of the same file are faster and cheaper.',
     ],
     whoItsFor: [
       'Corporate and franchise networks standardising staff appearance',
@@ -327,7 +327,7 @@ export const PRINTING_SERVICES: Record<string, PrintingLandingBlock> = {
     whatWePrint: [
       'Left-chest and centre-front logos on polos and shirts',
       'Cap fronts and sides within hoop limits',
-      'Selected jacket backs and larger formats—hoop size permitting',
+      'Selected jacket backs and larger formats, hoop size permitting',
     ],
     minimums:
       'Often from around 6–12 pieces per design for sensible unit economics, but we evaluate small VIP orders case-by-case.',
@@ -336,9 +336,9 @@ export const PRINTING_SERVICES: Record<string, PrintingLandingBlock> = {
     artworkRequirements:
       'Clean vector logos preferred. Fine typography below 5 mm height may need simplification. We send a sew-out or simulation for approval before full production.',
     deliveryPickup:
-      'Individually folded or bulk—your choice. National courier.',
+      'Individually folded or bulk, your choice. National courier.',
     pricingRange:
-      'Digitising may be charged once; per-piece price drops as quantities rise. Cap embroidery often differs from flat garments—quoted separately.',
+      'Digitising may be charged once; per-piece price drops as quantities rise. Cap embroidery often differs from flat garments, quoted separately.',
     faqs: [
       {
         question: 'Can you match thread to our Pantone?',
@@ -348,7 +348,7 @@ export const PRINTING_SERVICES: Record<string, PrintingLandingBlock> = {
       {
         question: 'Do you embroider on customer-supplied garments?',
         answer:
-          'Sometimes, after a risk waiver—mistakes can damage supplied stock. We prefer sourcing blanks we know hoop well.',
+          'Sometimes, after a risk waiver, mistakes can damage supplied stock. We prefer sourcing blanks we know hoop well.',
       },
     ],
   },
@@ -360,7 +360,7 @@ export const PRINTING_SERVICES: Record<string, PrintingLandingBlock> = {
     seoDescription:
       'School uniforms and sport kits: screen print, DTF, embroidery, sizing programmes, minimums, term timelines, artwork compliance, and Gauteng delivery.',
     h1: 'School uniforms & kits',
-    heroSubtitle: 'Sports houses, cultural clubs, and class apparel—with realistic term-time planning.',
+    heroSubtitle: 'Sports houses, cultural clubs, and class apparel, with realistic term-time planning.',
     heroImage: '/images/blacktback.png',
     intro: [
       'School communities need reliable sizing, repeatability for sibling years, and clear communication with parents. Skipaman supports sports kits, house shirts, leavers’ merch, and staff identification.',
@@ -382,11 +382,11 @@ export const PRINTING_SERVICES: Record<string, PrintingLandingBlock> = {
     leadTimes:
       'Plan 4–6 weeks before needed handout for first-time programmes including samples. Reorders with locked specs are faster.',
     artworkRequirements:
-      'Official crest usage rules respected—supply written approval where the school does not own full IP. Name lists in spreadsheets reduce engraving errors.',
+      'Official crest usage rules respected, supply written approval where the school does not own full IP. Name lists in spreadsheets reduce engraving errors.',
     deliveryPickup:
-      'Bulk delivery to school or staggered parent pickup—logistics agreed in writing.',
+      'Bulk delivery to school or staggered parent pickup, logistics agreed in writing.',
     pricingRange:
-      'Budget tees for mass participation vs premium kits for first teams—both possible. Tiered quotes help committees decide democratically.',
+      'Budget tees for mass participation vs premium kits for first teams, both possible. Tiered quotes help committees decide democratically.',
     faqs: [
       {
         question: 'Can parents order directly?',
@@ -406,12 +406,12 @@ export const PRINTING_SERVICES: Record<string, PrintingLandingBlock> = {
     kind: 'service',
     seoTitle: 'Corporate Wear & Branded Uniforms South Africa | Skipaman',
     seoDescription:
-      'Corporate uniforms and branded workwear: polos, jackets, hospitality attire—embroidery, screen, DTF. Minimums, rollout timelines, brand guidelines, and delivery.',
+      'Corporate uniforms and branded workwear: polos, jackets, hospitality attire, embroidery, screen, DTF. Minimums, rollout timelines, brand guidelines, and delivery.',
     h1: 'Corporate wear',
     heroSubtitle: 'Consistent brand presentation from reception to warehouse.',
     heroImage: '/images/blacktFront.png',
     intro: [
-      'Corporate programmes balance appearance, durability, and procurement governance. Skipaman supplies layered quotes—basics through premium blanks—with decoration matched to fabric and wear pattern.',
+      'Corporate programmes balance appearance, durability, and procurement governance. Skipaman supplies layered quotes, basics through premium blanks, with decoration matched to fabric and wear pattern.',
       'We support onboarding packs for new hires, regional replenishment, and rebrands when logos update.',
     ],
     whoItsFor: [
@@ -432,7 +432,7 @@ export const PRINTING_SERVICES: Record<string, PrintingLandingBlock> = {
     artworkRequirements:
       'Brand manuals with primary and reversed logos, minimum sizes, and exclusion zones. Multi-branch approvals should nominate one signatory.',
     deliveryPickup:
-      'Dispatch to HQ or direct-to-branch—we quote split logistics separately.',
+      'Dispatch to HQ or direct-to-branch, we quote split logistics separately.',
     pricingRange:
       'Entry corporate polos differ massively by fabric and decoration; expect mid-hundreds per piece for premium layers with embroidery, lower for basic tees with single-colour print.',
     faqs: [
@@ -444,7 +444,7 @@ export const PRINTING_SERVICES: Record<string, PrintingLandingBlock> = {
       {
         question: 'Can invoices split by cost centre?',
         answer:
-          'We can line-item by department if your finance team needs it—brief us before the first order.',
+          'We can line-item by department if your finance team needs it, brief us before the first order.',
       },
     ],
   },

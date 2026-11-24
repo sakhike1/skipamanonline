@@ -1,6 +1,16 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { ArrowRight, ArrowUpRight } from 'lucide-react';
 import { useNewsletter } from '../../hooks/useNewsletter';
+
+const linkClass =
+  'group inline-flex items-center gap-1 text-sm text-white/65 transition-colors duration-200 hover:text-[color:var(--vibe-accent,#f2ceff)]';
+
+const FooterLink: React.FC<{ to: string; children: React.ReactNode }> = ({ to, children }) => (
+  <Link to={to} className={linkClass}>
+    <span className="transition-transform duration-200 group-hover:translate-x-1 motion-reduce:transform-none">{children}</span>
+  </Link>
+);
 
 const Footer: React.FC = () => {
   const { email, setEmail, isSubscribing, handleSubscribe, status, message, resetStatus } = useNewsletter(
@@ -14,178 +24,185 @@ const Footer: React.FC = () => {
     { name: 'New Arrivals', path: '/new-arrivals' },
     { name: 'Best Sellers', path: '/shop?filter=bestsellers' },
     { name: 'Sale', path: '/shop?filter=sale' },
-    { name: 'Branding', path: '/virtual-stylist' }
+    { name: 'Branding', path: '/virtual-stylist' },
+    { name: 'Design studio', path: '/design-studio' },
+  ];
+
+  const printingLinks = [
+    { name: 'Services & areas', path: '/printing' },
+    { name: 'Centurion', path: '/locations/centurion' },
+    { name: 'Pretoria', path: '/locations/pretoria' },
+    { name: 'Johannesburg', path: '/locations/johannesburg' },
+    { name: 'Request a quote', path: '/virtual-stylist' },
   ];
 
   const socialLinks = [
     { name: 'Facebook', href: 'https://facebook.com/skipaman' },
     { name: 'Instagram', href: 'https://instagram.com/skipaman' },
     { name: 'Twitter', href: 'https://twitter.com/skipaman' },
-    { name: 'YouTube', href: 'https://youtube.com/skipaman' }
+    { name: 'YouTube', href: 'https://youtube.com/skipaman' },
   ];
 
+  const headingClass = 'text-xs font-semibold uppercase tracking-[0.22em] text-white/40';
+
   return (
-    <footer id="footer" className="bg-black px-4 py-14 sm:px-6 lg:px-8">
-      <div className="mx-auto w-full max-w-7xl">
-        <div className="grid grid-cols-1 gap-10 md:grid-cols-2 md:gap-12 lg:grid-cols-6 lg:gap-8">
-          
-          {/* Brand Section */}
-          <div className="flex flex-col items-start text-left lg:col-span-1">
-            <Link to="/" className="inline-flex items-center gap-2">
-              <span className="text-2xl font-black tracking-tight text-white">SKIPAMAN</span>
+    <footer id="footer" className="relative overflow-hidden bg-black px-4 pb-8 pt-14 sm:px-6 lg:px-8">
+      <div className="relative mx-auto w-full max-w-7xl">
+        {/* Newsletter card */}
+        <style>{`
+          .footer-news {
+            background-image: linear-gradient(115deg, #ffd4c4, #fad0e1, #f2ceff, #cfdcff, #c9f0e4, #ffd4c4);
+            background-size: 300% 300%;
+            animation: footer-news-shift 14s ease-in-out infinite;
+          }
+          @keyframes footer-news-shift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+          }
+          @media (prefers-reduced-motion: reduce) { .footer-news { animation: none; } }
+        `}</style>
+        <section
+          aria-labelledby="footer-newsletter-heading"
+          className="footer-news grid gap-8 rounded-[2rem] p-7 text-[#211527] sm:p-10 lg:grid-cols-[1.1fr_1fr] lg:items-center lg:gap-12"
+        >
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[#6b4a7a]">Newsletter</p>
+            <h2
+              id="footer-newsletter-heading"
+              className="mt-3 text-[clamp(1.9rem,4vw,3.25rem)] font-black leading-[0.98] tracking-[-0.04em]"
+            >
+              Never miss a drop.
+            </h2>
+            <p className="mt-3 max-w-md text-sm leading-relaxed text-[#513a5c]">
+              New drops, restocks, and offers. One short email.
+            </p>
+          </div>
+
+          <form onSubmit={handleSubscribe} className="w-full min-w-0" noValidate>
+            <label className="sr-only" htmlFor="footer-newsletter-email">
+              Email address
+            </label>
+            <div className="flex w-full min-w-0 flex-col gap-2 rounded-[1.75rem] bg-white p-1.5 shadow-[0_18px_40px_-24px_rgba(33,21,39,0.55)] sm:flex-row sm:rounded-full">
+              <input
+                id="footer-newsletter-email"
+                type="email"
+                value={email}
+                onChange={(e) => {
+                  if (message) resetStatus();
+                  setEmail(e.target.value);
+                }}
+                placeholder="Enter your email"
+                className="box-border h-12 w-full min-w-0 flex-1 rounded-full bg-transparent px-5 text-sm text-[#211527] placeholder:text-[#211527]/45 outline-none"
+                autoComplete="email"
+                disabled={isSubscribing}
+                required
+              />
+              <button
+                type="submit"
+                disabled={isSubscribing}
+                className="inline-flex h-12 shrink-0 items-center justify-center gap-2 rounded-full bg-[#211527] px-6 text-sm font-semibold text-white transition hover:bg-[#33203f] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {isSubscribing ? 'Subscribing…' : 'Subscribe'}
+                {!isSubscribing && <ArrowRight size={16} aria-hidden />}
+              </button>
+            </div>
+            {message && (
+              <p
+                className={`mt-3 px-2 text-sm font-medium ${status === 'success' ? 'text-green-800' : 'text-red-800'}`}
+                aria-live="polite"
+              >
+                {message}
+              </p>
+            )}
+          </form>
+        </section>
+
+        {/* Links */}
+        <div className="mt-14 grid grid-cols-2 gap-x-6 gap-y-10 md:grid-cols-3 lg:grid-cols-[1.5fr_1fr_1fr_1fr_1fr] lg:gap-8">
+          {/* Brand */}
+          <div className="col-span-2 md:col-span-3 lg:col-span-1">
+            <Link to="/" className="inline-flex items-center">
+              <span className="text-3xl font-black tracking-tight text-white">SKIPAMAN</span>
             </Link>
-            <div className="mt-6 h-px w-full max-w-52 bg-gradient-to-r from-transparent via-white/25 to-transparent" />
-            <p className="mt-5 max-w-sm text-sm leading-relaxed text-white/60">
+            <p className="mt-4 max-w-xs text-sm leading-relaxed text-white/60">
               Elevating your style with premium quality fashion. Sustainable, modern, and made for you.
             </p>
-            <div className="mt-5 flex flex-col gap-2">
-              <a href="tel:0744702010" className="text-sm text-white/60 transition-colors hover:text-white">
+            <div className="mt-5 flex flex-col items-start gap-2">
+              <a href="tel:0744702010" className={linkClass}>
                 0744702010
               </a>
-              <a
-                href="mailto:admin@skipaman.co.za"
-                className="text-sm text-white/60 transition-colors hover:text-white"
-              >
+              <a href="mailto:admin@skipaman.co.za" className={linkClass}>
                 admin@skipaman.co.za
               </a>
-              <a
-                href="mailto:sales@skipaman.co.za"
-                className="text-sm text-white/60 transition-colors hover:text-white"
-              >
+              <a href="mailto:sales@skipaman.co.za" className={linkClass}>
                 sales@skipaman.co.za
               </a>
             </div>
           </div>
 
-          {/* Shop Links */}
-          <div className="flex flex-col items-start text-left">
-            <h3 className="text-sm font-semibold tracking-wide text-white">Shop</h3>
-            <div className="mt-5 flex flex-col gap-2">
-              {shopLinks.map((link, index) => (
-                <Link 
-                  key={index}
-                  to={link.path} 
-                  className="text-sm text-white/60 transition-colors hover:text-white"
-                >
+          <nav aria-label="Shop">
+            <h3 className={headingClass}>Shop</h3>
+            <div className="mt-5 flex flex-col items-start gap-2.5">
+              {shopLinks.map((link) => (
+                <FooterLink key={link.name} to={link.path}>
                   {link.name}
-                </Link>
+                </FooterLink>
               ))}
             </div>
-          </div>
+          </nav>
 
-          {/* Help */}
-          <div className="flex flex-col items-start text-left">
-            <h3 className="text-sm font-semibold tracking-wide text-white">Help</h3>
-            <div className="mt-5 flex flex-col gap-2">
-              <Link to="/support" className="text-sm text-white/60 transition-colors hover:text-white">
-                Support / tickets
-              </Link>
-              <Link to="/design-brief" className="text-sm text-white/60 transition-colors hover:text-white">
-                Design brief
-              </Link>
+          <nav aria-label="Help">
+            <h3 className={headingClass}>Help</h3>
+            <div className="mt-5 flex flex-col items-start gap-2.5">
+              <FooterLink to="/support">Support / tickets</FooterLink>
+              <FooterLink to="/design-brief">Design brief</FooterLink>
             </div>
-          </div>
+          </nav>
 
-          {/* Printing / local SEO */}
-          <div className="flex flex-col items-start text-left">
-            <h3 className="text-sm font-semibold tracking-wide text-white">Printing</h3>
-            <div className="mt-5 flex flex-col gap-2">
-              <Link to="/printing" className="text-sm text-white/60 transition-colors hover:text-white">
-                Services &amp; areas
-              </Link>
-              <Link to="/locations/centurion" className="text-sm text-white/60 transition-colors hover:text-white">
-                Centurion
-              </Link>
-              <Link to="/locations/pretoria" className="text-sm text-white/60 transition-colors hover:text-white">
-                Pretoria
-              </Link>
-              <Link to="/locations/johannesburg" className="text-sm text-white/60 transition-colors hover:text-white">
-                Johannesburg
-              </Link>
-              <Link to="/virtual-stylist" className="text-sm text-white/60 transition-colors hover:text-white">
-                Request a quote
-              </Link>
+          <nav aria-label="Printing">
+            <h3 className={headingClass}>Printing</h3>
+            <div className="mt-5 flex flex-col items-start gap-2.5">
+              {printingLinks.map((link) => (
+                <FooterLink key={link.name} to={link.path}>
+                  {link.name}
+                </FooterLink>
+              ))}
             </div>
-          </div>
+          </nav>
 
-          {/* Social Links */}
-          <div className="flex flex-col items-start text-left">
-            <h3 className="text-sm font-semibold tracking-wide text-white">Follow</h3>
-            <div className="mt-5 flex flex-col gap-2">
-              {socialLinks.map((link, index) => (
-                <a 
-                  key={index}
+          <div>
+            <h3 className={headingClass}>Follow</h3>
+            <div className="mt-5 flex flex-wrap gap-2 lg:flex-col lg:items-start">
+              {socialLinks.map((link) => (
+                <a
+                  key={link.name}
                   href={link.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-sm text-white/60 transition-colors hover:text-white"
+                  className="group inline-flex items-center gap-1.5 rounded-full border border-white/15 px-3.5 py-1.5 text-sm text-white/75 transition-colors duration-200 hover:border-[color:var(--vibe-accent,#f2ceff)] hover:bg-[color:var(--vibe-accent,#f2ceff)] hover:text-[#211527]"
                 >
                   {link.name}
+                  <ArrowUpRight
+                    size={14}
+                    className="transition-transform duration-200 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 motion-reduce:transform-none"
+                    aria-hidden
+                  />
                 </a>
               ))}
             </div>
           </div>
-
-          {/* Newsletter Section */}
-          <div className="flex flex-col items-start text-left">
-            <h3 className="text-sm font-semibold tracking-wide text-white">Newsletter</h3>
-            <p className="mt-3 text-sm leading-relaxed text-white/60">
-              New drops, restocks, and offers—one short email.
-            </p>
-            <form onSubmit={handleSubscribe} className="mt-5 w-full min-w-0 max-w-sm" noValidate>
-              <div className="flex flex-col gap-2.5">
-                <label className="sr-only" htmlFor="footer-newsletter-email">
-                  Email address
-                </label>
-                <div className="w-full min-w-0 rounded-full border border-white/15 bg-white/[0.03] px-1 py-1">
-                  <input
-                    id="footer-newsletter-email"
-                    type="email"
-                    value={email}
-                    onChange={(e) => {
-                      if (message) resetStatus();
-                      setEmail(e.target.value);
-                    }}
-                    placeholder="Enter your email"
-                    className="box-border h-11 w-full min-w-0 rounded-full bg-transparent px-4 text-sm text-white placeholder:text-white/55 placeholder:text-sm outline-none"
-                    autoComplete="email"
-                    disabled={isSubscribing}
-                    required
-                  />
-                </div>
-                <button
-                  type="submit"
-                  disabled={isSubscribing}
-                  className="h-11 w-full shrink-0 rounded-full bg-white px-5 text-sm font-semibold text-neutral-950 transition hover:bg-neutral-100 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
-                >
-                  {isSubscribing ? 'Subscribing…' : 'Subscribe'}
-                </button>
-              </div>
-              {message && (
-                <p
-                  className={`mt-3 text-sm ${
-                    status === 'success' ? 'text-green-400' : 'text-red-300'
-                  }`}
-                  aria-live="polite"
-                >
-                  {message}
-                </p>
-              )}
-            </form>
-          </div>
-
         </div>
 
-        <div className="my-10 h-px w-full bg-gradient-to-r from-transparent via-white/20 to-transparent" />
-
-        <div className="flex flex-col items-start justify-between gap-4 text-left sm:flex-row sm:items-center">
-          <p className="text-xs text-white/60">© 2025 SKIPAMAN</p>
+        {/* Bottom bar */}
+        <div className="mt-14 flex flex-col items-start justify-between gap-4 border-t border-white/10 pt-6 sm:flex-row sm:items-center sm:pr-20">
+          <p className="text-xs text-white/50">© {new Date().getFullYear()} SKIPAMAN</p>
           <div className="flex items-center gap-6">
-            <Link to="/terms" className="text-xs text-white/60 transition-colors hover:text-white">
-              Terms & Conditions
+            <Link to="/terms" className="text-xs text-white/50 transition-colors hover:text-[color:var(--vibe-accent,#f2ceff)]">
+              Terms &amp; Conditions
             </Link>
             <div className="h-4 w-px bg-white/20" />
-            <Link to="/privacy" className="text-xs text-white/60 transition-colors hover:text-white">
+            <Link to="/privacy" className="text-xs text-white/50 transition-colors hover:text-[color:var(--vibe-accent,#f2ceff)]">
               Privacy Policy
             </Link>
           </div>

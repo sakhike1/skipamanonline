@@ -3,10 +3,11 @@ import { useSearchParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import SearchBar from '../components/ui/SearchBar';
 import ProductGrid from '../components/product/ProductGrid';
-import { searchProducts, products } from '../data/products';
+import { useProductData } from '../context/ProductDataContext';
 import { Product } from '../types';
 
 const SearchPage: React.FC = () => {
+  const { products, searchProducts, loading: catalogLoading } = useProductData();
   const [searchParams, setSearchParams] = useSearchParams();
   const [isSearching, setIsSearching] = useState(false);
   const query = searchParams.get('q') || '';
@@ -16,6 +17,13 @@ const SearchPage: React.FC = () => {
   const [searchResults, setSearchResults] = useState<Product[]>(
     query ? searchProducts(query) : products.filter(p => p.isActive)
   );
+
+  // Re-run the current search once the catalogue has loaded or changed
+  useEffect(() => {
+    if (catalogLoading) return;
+    setSearchResults(query.trim() ? searchProducts(query.trim()) : products.filter((p) => p.isActive));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [products, catalogLoading]);
 
   // Perform search with improved algorithm
   const performSearch = useCallback((searchQuery: string) => {
@@ -65,7 +73,7 @@ const SearchPage: React.FC = () => {
     const tags = products.flatMap(p => p.tags);
     const popularTags = [...new Set(tags)].slice(0, 4);
     return [...categories.slice(0, 2), ...popularTags.slice(0, 2)];
-  }, []);
+  }, [products]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white">

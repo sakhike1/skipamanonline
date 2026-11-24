@@ -12,7 +12,7 @@ interface SEOHeadProps {
 }
 
 export const SEOHead: React.FC<SEOHeadProps> = ({
-  title = 'Skipaman Store | Custom printing, school uniforms & branded merch — South Africa',
+  title = 'Skipaman Store | Custom printing, school uniforms & branded merch in South Africa',
   description =
     'Skipaman retail tees and streetwear, plus custom printing for schools, teams, and businesses: uniforms, branded shirts, caps, and drinkware. Delivery across South Africa.',
   keywords = [

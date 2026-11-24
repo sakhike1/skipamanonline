@@ -120,7 +120,7 @@ const ProductQuickView: React.FC<ProductQuickViewProps> = ({ product, isOpen, on
                   <div className="relative mx-auto aspect-[4/5] max-h-[42vh] w-full sm:max-h-[48vh] md:aspect-square md:max-h-none md:rounded-none">
                     <img
                       src={product.images[currentImageIndex]}
-                      alt={`${product.name} — photo ${currentImageIndex + 1}`}
+                      alt={`${product.name}, photo ${currentImageIndex + 1}`}
                       className="h-full w-full object-cover md:rounded-none"
                     />
                     {hasMultipleImages && (

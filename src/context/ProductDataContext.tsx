@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useMemo, useCallback, useEffect, useState } from 'react';
 import type { Color, Product, Size } from '../types';
 import { products as fallbackProducts } from '../data/products';
-import { supabase } from '../lib/supabase';
+import { skip } from '../lib/skipApi';
 
 interface ProductDataContextValue {
   products: Product[];
@@ -11,77 +11,101 @@ interface ProductDataContextValue {
   refetch: () => void;
   getProductById: (id: string) => Product | undefined;
   isUsingBackendData: boolean;
+  searchProducts: (query: string) => Product[];
 }
 
 const ProductDataContext = createContext<ProductDataContextValue | undefined>(undefined);
 
-function mapSupabaseProduct(row: Record<string, unknown>): Product {
-  const cat = row.categories as { name?: string; slug?: string } | null | undefined;
-  const categoryName = typeof cat?.name === 'string' && cat.name ? cat.name : 'general';
-  const rawSizes = row.sizes as string[] | null | undefined;
-  const sizes = (Array.isArray(rawSizes) && rawSizes.length > 0
-    ? rawSizes
-    : ['S', 'M', 'L', 'XL']) as Size[];
+const COLOR_HEX: Record<string, string> = {
+  black: '#000000', white: '#FFFFFF', gray: '#808080', grey: '#808080', navy: '#000080', blue: '#1E40AF',
+  red: '#B91C1C', maroon: '#800000', green: '#15803D', yellow: '#FACC15', orange: '#EA580C', pink: '#EC4899',
+  purple: '#7E22CE', brown: '#78350F', beige: '#D6C7A1', cream: '#F5F0E1',
+};
 
-  const colourStrings = row.colours as string[] | null | undefined;
-  const colors: Color[] =
-    Array.isArray(colourStrings) && colourStrings.length > 0
-      ? colourStrings.map((c) => ({ name: c, value: '#111111' }))
-      : [{ name: 'Default', value: '#000000' }];
+type BackendProduct = {
+  id: string; slug: string; name: string; description: string; category: string; priceCents: number;
+  imageUrls: string[]; active: boolean; featured?: boolean;
+  variants: Array<{ id: string; size: string; color: string; stock: number }>;
+  priceBreaks?: Array<{ minQty: number; percentOff: number }>;
+};
 
-  const imageUrls = row.image_urls as string[] | null | undefined;
-  const images = Array.isArray(imageUrls) && imageUrls.length > 0 ? imageUrls : ['/images/grey1.png'];
+const SIZE_ORDER = ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL'];
+const bySize = (a: string, b: string) => {
+  const ia = SIZE_ORDER.indexOf(a), ib = SIZE_ORDER.indexOf(b);
+  if (ia >= 0 && ib >= 0) return ia - ib;
+  if (ia >= 0) return -1;
+  if (ib >= 0) return 1;
+  return a.localeCompare(b, undefined, { numeric: true });
+};
 
-  const priceRand = Number(row.price ?? 0);
-
+function mapBackendProduct(row: BackendProduct): Product {
+  const sizes = [...new Set(row.variants.map((v) => v.size))].sort(bySize) as Size[];
+  const colorNames = [...new Set(row.variants.map((v) => v.color))];
+  const colors: Color[] = colorNames.length
+    ? colorNames.map((name) => ({ name, value: COLOR_HEX[name.toLowerCase()] ?? '#111111' }))
+    : [{ name: 'Default', value: '#000000' }];
   return {
-    id: String(row.id ?? ''),
-    name: String(row.name ?? ''),
-    description: String(row.description ?? ''),
-    price: Math.round(priceRand * 100),
-    images,
-    sizes,
+    id: row.id,
+    name: row.name,
+    description: row.description,
+    price: row.priceCents,
+    images: row.imageUrls.length ? row.imageUrls : ['/images/grey1.png'],
+    sizes: sizes.length ? sizes : (['S', 'M', 'L', 'XL'] as Size[]),
     colors,
-    category: categoryName,
-    featured: Boolean(row.is_featured),
-    rating: 4.5,
+    category: row.category || 'general',
+    featured: Boolean(row.featured),
+    rating: 0,
     reviewCount: 0,
-    stock: Number(row.stock_quantity ?? 0),
-    sku: String(row.id ?? '').slice(0, 8),
+    stock: row.variants.reduce((n, v) => n + v.stock, 0),
+    sku: row.slug,
     weight: 200,
     dimensions: { length: 70, width: 50, height: 1 },
     tags: [],
-    isActive: row.is_active !== false,
+    isActive: row.active,
+    variants: row.variants,
+    priceBreaks: row.priceBreaks ?? [],
   };
+}
+
+function scoreSearch(list: Product[], query: string): Product[] {
+  const active = list.filter((p) => p.isActive);
+  const terms = query.toLowerCase().trim().split(/\s+/).filter(Boolean);
+  if (terms.length === 0) return active;
+  const scored: Array<{ p: Product; score: number }> = [];
+  for (const p of active) {
+    const name = p.name.toLowerCase();
+    const desc = p.description.toLowerCase();
+    const cat = p.category.toLowerCase();
+    const tags = (p.tags ?? []).map((t) => t.toLowerCase());
+    const colors = p.colors.map((c) => c.name.toLowerCase());
+    let score = 0;
+    for (const t of terms) {
+      if (name === t) score += 100;
+      else if (name.startsWith(t)) score += 50;
+      else if (name.includes(t)) score += 30;
+      if (cat.includes(t)) score += 20;
+      for (const tag of tags) score += tag === t ? 25 : tag.includes(t) ? 15 : 0;
+      if (colors.some((c) => c.includes(t))) score += 10;
+      if (desc.includes(t)) score += 5;
+    }
+    if (score > 0) scored.push({ p, score });
+  }
+  return scored.sort((a, b) => b.score - a.score).map((x) => x.p);
 }
 
 export const ProductDataProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [remoteProducts, setRemoteProducts] = useState<Product[] | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   const fetchProducts = useCallback(async () => {
-    if (!supabase) {
-      setRemoteProducts(null);
-      return;
-    }
-
     setLoading(true);
     setError(null);
     try {
-      const { data, error: qErr } = await supabase
-        .from('products')
-        .select('*, categories(name, slug)')
-        .eq('is_active', true)
-        .order('created_at', { ascending: false });
-
-      if (qErr) throw qErr;
-
-      const rows = (data ?? []) as Record<string, unknown>[];
-      setRemoteProducts(rows.map(mapSupabaseProduct));
+      const rows = await skip.get<BackendProduct[]>('/products', undefined, false);
+      setRemoteProducts(rows.map(mapBackendProduct));
     } catch (e) {
-      const message = e instanceof Error ? e.message : 'Failed to load products';
-      setError(message);
+      setError(e instanceof Error ? e.message : 'Failed to load products');
       setRemoteProducts(null);
     } finally {
       setLoading(false);
@@ -105,6 +129,7 @@ export const ProductDataProvider: React.FC<{ children: React.ReactNode }> = ({ c
       refetch: fetchProducts,
       isUsingBackendData: hasRemote,
       getProductById: (id: string) => mergedProducts.find((product) => product.id === id),
+      searchProducts: (query: string) => scoreSearch(mergedProducts, query),
     };
   }, [remoteProducts, loading, error, fetchProducts]);
 

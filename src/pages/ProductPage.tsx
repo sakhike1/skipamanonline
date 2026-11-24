@@ -1,7 +1,7 @@
 import React, { useEffect, useState, Suspense } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getProductById } from '../data/products';
+import { useProductData } from '../context/ProductDataContext';
 import { reviewService, computeReviewStats } from '../services/reviewService';
 import { supabase } from '../lib/supabase';
 import ProductDetail from '../components/product/ProductDetail';
@@ -13,6 +13,7 @@ import { Product, Review, ReviewStats } from '../types';
 
 const ProductPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
+  const { getProductById, loading: catalogLoading } = useProductData();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(true);
   const [product, setProduct] = useState<Product | null>(null);
@@ -25,12 +26,15 @@ const ProductPage: React.FC = () => {
     const loadProduct = async () => {
       if (!id) return;
 
+      const foundProduct = getProductById(id);
+      // Still fetching the catalogue and the product is not in hand yet: keep showing the skeleton
+      if (!foundProduct && catalogLoading) return;
+
       setIsLoading(true);
 
       try {
-        const foundProduct = getProductById(id);
+        setProduct(foundProduct ?? null);
         if (foundProduct && isMounted) {
-          setProduct(foundProduct);
 
           if (supabase) {
             const productReviews = await reviewService.getProductReviews(id);
@@ -59,7 +63,7 @@ const ProductPage: React.FC = () => {
     return () => {
       isMounted = false;
     };
-  }, [id]);
+  }, [id, getProductById, catalogLoading]);
 
   // Scroll to top instantly when component mounts or product ID changes
   useEffect(() => {
@@ -70,7 +74,7 @@ const ProductPage: React.FC = () => {
     navigate('/shop');
   };
   
-  if (isLoading) {
+  if (isLoading || (!product && catalogLoading)) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 pt-20">
         <div className="container mx-auto px-4 py-8">

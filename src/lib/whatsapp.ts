@@ -35,7 +35,7 @@ export type WhatsAppHandoffContext = {
 /** Customer → business support. Avoid "Hi Skipaman" alone (reads like self-chat when testing on the store number). */
 export function buildSupportWhatsAppMessage(ctx: WhatsAppHandoffContext = {}): string {
   const lines = [
-    'Hello — I’m contacting *Skipaman Support* from the website.',
+    'Hello, I’m contacting *Skipaman Support* from the website.',
     '',
   ];
   if (ctx.userName) lines.push(`Name: ${ctx.userName}`);

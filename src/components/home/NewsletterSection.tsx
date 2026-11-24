@@ -59,7 +59,7 @@ export const NewsletterSection: React.FC<NewsletterSectionProps> = ({
           </h2>
 
           <p className="mt-5 text-lg leading-relaxed text-neutral-400 md:text-xl">
-            Get drops, restocks, and subscriber-only offers—one short email. No spam.
+            Get drops, restocks, and subscriber-only offers. One short email. No spam.
           </p>
         </motion.div>
 

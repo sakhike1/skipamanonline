@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/useAuth';
-import { supabase } from '../lib/supabase';
+import { displayStatus, listOrders, mapItem, orderRef } from '../services/shopApi';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Package, 
@@ -56,99 +56,56 @@ const OrdersPage: React.FC = () => {
   const [showNotifications, setShowNotifications] = useState(false);
   const [hoveredOrder, setHoveredOrder] = useState<string | null>(null);
 
-  const loadOrders = async () => {
+  const lastStatuses = React.useRef<Map<string, string>>(new Map());
+
+  const loadOrders = async (silent = false) => {
     try {
-      setLoading(true);
-      if (!supabase || !user?.id) {
+      if (!silent) setLoading(true);
+      if (!user?.id) {
         setOrders([]);
         return;
       }
-      const { data, error } = await supabase
-        .from('orders')
-        .select(
-          `
-          id,
-          status,
-          total_amount,
-          created_at,
-          order_number,
-          order_items (
-            quantity,
-            products ( name, image_urls )
-          )
-        `,
-        )
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false })
-        .limit(50);
-      if (error) throw error;
+      const rows = await listOrders();
+      const mapped: DisplayOrder[] = rows.map((o) => ({
+        id: o.id,
+        orderNumber: orderRef(o),
+        status: displayStatus(o.status),
+        total: o.totalCents / 100,
+        createdAt: o.createdAt,
+        items: o.items.map((i) => {
+          const m = mapItem(i);
+          return { productName: m.productName, productImage: m.productImage, quantity: m.quantity };
+        }),
+      }));
 
-      const mapped: DisplayOrder[] = (data ?? []).map((row: Record<string, unknown>) => {
-        const id = String(row.id);
-        const itemsRaw = row.order_items as
-          | Array<{
-              quantity: number;
-              products: { name?: string; image_urls?: string[] | null } | null;
-            }>
-          | null;
-        const items = (itemsRaw ?? []).map((oi) => ({
-          productName: oi.products?.name ?? 'Product',
-          productImage: oi.products?.image_urls?.[0] ?? '/images/grey1.png',
-          quantity: oi.quantity,
-        }));
-
-        const ref = row.order_number as string | null | undefined;
-        return {
-          id,
-          orderNumber: (ref && String(ref).trim()) || id.replace(/-/g, '').slice(0, 12).toUpperCase(),
-          status: String(row.status ?? 'pending'),
-          total: Number(row.total_amount ?? 0),
-          createdAt: String(row.created_at ?? new Date().toISOString()),
-          items,
-        };
-      });
-
+      // Tell the customer when an order moved to a new status since the last refresh
+      const prev = lastStatuses.current;
+      if (prev.size > 0) {
+        const changed = mapped.filter((o) => prev.has(o.id) && prev.get(o.id) !== o.status);
+        if (changed.length > 0) {
+          setRealtimeUpdates((cur) =>
+            [...changed.map((o) => ({ title: 'Orders', message: o.orderNumber + ': ' + o.status.replace(/_/g, ' '), timestamp: new Date().toISOString() })), ...cur].slice(0, 10),
+          );
+          setShowNotifications(true);
+          setTimeout(() => setShowNotifications(false), 5000);
+        }
+      }
+      lastStatuses.current = new Map(mapped.map((o) => [o.id, o.status]));
       setOrders(mapped);
     } catch (error) {
       console.error('Failed to load orders:', error);
-      setOrders([]);
+      if (!silent) setOrders([]);
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   };
 
   useEffect(() => {
-    if (user) {
-      void loadOrders();
-    }
-
-    if (!supabase || !user?.id) return () => {};
-    const sb = supabase;
-    const channel = sb
-      .channel(`orders:${user.id}`)
-      .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'orders', filter: `user_id=eq.${user.id}` },
-        (payload) => {
-          const row = payload.new as { status?: string; id?: string } | null;
-          const msg = row?.status
-            ? `Status: ${row.status}`
-            : payload.eventType === 'INSERT'
-              ? 'New order recorded'
-              : 'Order updated';
-          setRealtimeUpdates((prev) =>
-            [{ title: 'Orders', message: msg, timestamp: new Date().toISOString() }, ...prev].slice(0, 10),
-          );
-          setShowNotifications(true);
-          setTimeout(() => setShowNotifications(false), 5000);
-          void loadOrders();
-        },
-      )
-      .subscribe();
-
-    return () => {
-      void sb.removeChannel(channel);
-    };
+    if (!user) return () => {};
+    void loadOrders();
+    const timer = window.setInterval(() => void loadOrders(true), 20000);
+    return () => window.clearInterval(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
   const getStatusIcon = (status: string) => {
